@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { createTask, deleteTask } from "../api/tasks.api";
+import { createTask, deleteTask, updateTask, getTask } from "../api/tasks.api";
 import { useNavigate, useParams } from "react-router-dom";
 
 export function TaskFormPage() {
@@ -7,21 +8,31 @@ export function TaskFormPage() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm();
   const navigate = useNavigate(); // Si piensas usar navigate después de la creación
   const params = useParams();
 
   const onSubmit = handleSubmit(async (data) => {
-    try {
+    if (params.id) {
+      await updateTask(params.id, data);
+    } else {
       await createTask(data);
-
-      // Si necesitas redirigir después de la creación exitosa
-      navigate("/tasks");
-    } catch (error) {
-      console.error("Failed to create task:", error);
     }
+    navigate("/tasks");
   });
-
+  useEffect(() => {
+    async function loadTask() {
+      if (params.id) {
+        const {
+          data: { title, description },
+        } = await getTask(params.id);
+        setValue("title", title);
+        setValue("description", description);
+      }
+    }
+    loadTask();
+  }, []);
   return (
     <div>
       <form onSubmit={onSubmit}>

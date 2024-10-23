@@ -31,6 +31,11 @@ function LoginPage() {
     }
   };
 
+  const handleRegisterRedirect = () => {
+    // Redirigir a la página de registro
+    navigate("/register");
+  };
+
   return (
     <div className="login-page">
       <h2>Login</h2>
@@ -38,6 +43,7 @@ function LoginPage() {
         <div>
           <label>Username:</label>
           <input
+            className="bg-transparent rounded-md shadow-sm ring-1 ring-inset ring-white-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md"
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -47,6 +53,7 @@ function LoginPage() {
         <div>
           <label>Password:</label>
           <input
+            className="bg-transparent rounded-md shadow-sm ring-1 ring-inset ring-white-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -54,7 +61,19 @@ function LoginPage() {
           />
         </div>
         {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">Login</button>
+        <button
+          className="mt-4 mr-10 text-black bg-indigo-500 px-3 pl-2 rounded-lg "
+          type="submit"
+        >
+          Login
+        </button>
+        <button
+          className="mt-4 mr-10 text-black bg-gray-300 px-3 pl-2 rounded-lg "
+          type="button" // Cambiado a "button" para evitar enviar el formulario
+          onClick={handleRegisterRedirect}
+        >
+          Register
+        </button>
       </form>
     </div>
   );

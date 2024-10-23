@@ -4,7 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import { TaskFormPage } from "./pages/TaskFormPage";
 import { Navigation } from "./components/Navigation";
 import { Toaster } from "react-hot-toast";
-//import LoginPage from "./pages/LoginPage";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 import RegisterPage from "./pages/RegisterPage";
 
@@ -14,7 +14,7 @@ function App() {
       <div className="container mx-auto">
         <Navigation />
         <Routes>
-          <Route path="tasks/api/v1/register" element={<RegisterPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route
             path="/tasks"
@@ -25,7 +25,7 @@ function App() {
             }
           />
           <Route path="/" element={<Navigate to="/tasks" />} />
-          <Route path="/tasks" element={<TasksPage />} />
+
           <Route path="/tasks-create" element={<TaskFormPage />} />
           <Route path="/tasks/:id" element={<TaskFormPage />} />
         </Routes>

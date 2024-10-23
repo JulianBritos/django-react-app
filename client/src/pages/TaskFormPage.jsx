@@ -51,20 +51,20 @@ export function TaskFormPage() {
   return (
     <div>
       <form onSubmit={onSubmit}>
-        <div class="space-y-12">
-          <div class="border-b border-white-900/10 pb-12">
-            <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-              <div class="sm:col-span-4">
+        <div className="space-y-12">
+          <div className="border-b border-white-900/10 pb-12">
+            <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+              <div className="sm:col-span-4">
                 <label
                   for="username"
-                  class="block text-sm font-medium leading-6 text-white-900"
+                  className="block text-sm font-medium leading-6 text-white-900"
                 >
                   Task title
                 </label>
-                <div class="mt-2">
-                  <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-white-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                <div className="mt-2">
+                  <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-white-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                     <input
-                      class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-white-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                      className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-white-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                       type="text"
                       placeholder="Write your task here"
                       {...register("title", { required: true })}
@@ -75,16 +75,16 @@ export function TaskFormPage() {
               </div>
             </div>
 
-            <div class="col-span-full">
+            <div className="col-span-full">
               <label
                 for="about"
-                class="block mt-4 text-sm font-medium leading-6 text-white-900"
+                className="block mt-4 text-sm font-medium leading-6 text-white-900"
               >
                 Description
               </label>
-              <div class="mt-2">
+              <div className="mt-2">
                 <textarea
-                  class="block pl-1 w-full rounded-md border-0 bg-transparent py-1.5 text-gray-100 shadow-sm ring-1 ring-inset focus-within:ring-indigo-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 "
+                  className="block pl-1 w-full rounded-md border-0 bg-transparent py-1.5 text-gray-100 shadow-sm ring-1 ring-inset focus-within:ring-indigo-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 "
                   rows="3"
                   placeholder="Description"
                   {...register("description", { required: true })}

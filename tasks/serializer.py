@@ -20,7 +20,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['id', 'user', 'title', 'description', 'done', 'createdat']
+        fields = ['id', 'user', 'title', 'description', 'done']
         read_only_fields = ['user']
         
         

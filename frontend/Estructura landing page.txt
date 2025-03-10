@@ -1,0 +1,98 @@
+Estructura sugerida para tu landing page (basada en la referencia de Figma)
+
+1. Hero Section (Encabezado Principal)
+Texto sugerido:
+Descubrí un mundo de juegos y juguetes sensoriales para cada necesidad.
+Apoyamos a profesionales, familias y personas que buscan herramientas para el bienestar, la concentración y la calma.
+Botón:
+🛍️ Ver Productos
+2. Sección: ¿Para quiénes son nuestros productos?
+Texto sugerido:
+Nuestros juguetes y juegos están pensados para:
+✅ Niñas, niños y adultos neurodivergentes.
+✅ Profesionales de salud (terapeutas ocupacionales, psicólogos, psicopedagogos).
+✅ Familias que buscan opciones sensoriales y antiestrés.
+✅ Personas que disfrutan los fidgets y juguetes de relajación.
+3. Sección: Beneficios de nuestros productos
+Texto sugerido (pueden ir en cards o bloques con íconos):
+🔵 Estimulación Sensorial: Colores, texturas y sonidos diseñados para brindar experiencias únicas.
+🟠 Herramientas Terapéuticas: Apoyo para sesiones de terapia ocupacional, psicopedagógica y psicológica.
+🟣 Regulación Emocional: Juguetes antiestrés ideales para momentos de ansiedad o sobrecarga sensorial.
+🟢 Inclusión y Diversión: Productos que todos pueden disfrutar, adaptados a diferentes necesidades.
+4. Sección de Productos Destacados
+Texto sugerido:
+🎁 Conocé nuestra colección destacada
+Juguetes, juegos y herramientas recomendadas por profesionales para estimular, relajar y concentrarse.
+✅ Fidgets sensoriales
+✅ Juegos de motricidad fina
+✅ Kits de calma
+✅ Juguetes para TDAH, TEA y ansiedad
+(Botón: Ver Catálogo Completo)
+5. Sección: ¿Por qué elegirnos?
+Texto sugerido:
+🌟 Somos más que una tienda:
+Trabajamos junto a especialistas para seleccionar cada producto.
+Promovemos el juego como una herramienta de bienestar.
+Nos importa la inclusión y la diversidad sensorial.
+6. Testimonios (si querés sumar)
+Ejemplo de texto:
+“Los fidgets que compré son excelentes para mis sesiones de terapia. Mis pacientes adoran la variedad de texturas y colores.”
+— Lic. María González, Terapista Ocupacional
+7. Newsletter / Comunidad
+Texto sugerido:
+💌 Unite a nuestra comunidad
+Recibí tips, recursos y novedades sobre juguetes y herramientas sensoriales.
+(Campo de suscripción al newsletter)
+8. Footer (pie de página)
+Productos
+Sobre nosotros
+Contacto
+Políticas de cambio y devolución
+Redes sociales
+
+
+
+
+
+
+Diseño (basado en el Figma)
+
+Me imagino algo similar al diseño de Figma, pero adaptado así:
+Grillas de 2 o 3 columnas para productos.
+Encabezados grandes con tipografía amigable, legible (Open Sans, Poppins o similar).
+Botones redondeados y de buen tamaño (accesibles para personas con dificultades motoras).
+Uso de iconografía simple y descriptiva.
+Espacios amplios (no sobrecargar visualmente).
+Posibilidad de activar un modo de alto contraste para mejor accesibilidad.
+
+
+
+
+
+
+Nueva propuesta simplificada (inspirada en el Figma)
+✅ Hero Section (Primera Sección)
+Fondo: Blanco o un tono muy claro (pastel suave)
+Título grande: "Cosmo Play - Juegos que acompañan y estimulan"
+Subtítulo: "Juguetes y herramientas diseñadas para profesionales de la salud, pacientes y personas que buscan bienestar."
+Botón destacado: "Ver productos"
+Imagen a un lado o centrada (puede ser un juguete fidget o alguna ilustración minimalista).
+✅ Sección de Beneficios (3 columnas)
+Título: "¿Por qué elegirnos?"
+3 íconos simples con títulos:
+"Acompañamiento profesional" - Productos validados por terapeutas.
+"Diseño inclusivo" - Pensado para distintas necesidades sensoriales.
+"Calidad y diversión" - Productos duraderos que generan bienestar.
+✅ Sección de Productos Destacados (Grid limpio de 3x2 o carrusel)
+Título: "Nuestros favoritos"
+6 productos destacados con foto, nombre y botón "Ver más"
+Espaciado amplio, fondos claros y sin recargar.
+✅ Testimonios (1 o 2, en slider)
+Título: "Lo que dicen nuestros clientes"
+Ejemplo:
+"Cosmo Play me ayudó a encontrar juguetes que realmente captaron la atención de mis pacientes. ¡Son un gran recurso!" - Lic. Ana Pérez, Terapista Ocupacional
+"Compré algunos fidgets para mi hijo y ahora son sus favoritos. Gracias por pensar en cada detalle." - Martín, papá de Tomás
+✅ Footer minimalista
+Logo Cosmo Play
+Links rápidos: Inicio | Productos | Contacto
+Redes sociales

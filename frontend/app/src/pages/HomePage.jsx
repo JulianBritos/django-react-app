@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { getProducts } from "../api/products.api";
-import ProductList from "../components/ProductList";
 import HeroSection from "../components/HeroSection";
 
 const HomePage = () => {
@@ -26,10 +25,10 @@ const HomePage = () => {
             {/* Texto y botón */}
             <div className="w-full md:w-1/3 mb-6 md:mb-0">
               <h2 className="text-3xl font-bold text-black">
-                Best Selling Plants
+                Best Selling Products
               </h2>
               <p className="text-gray-500 mt-2">
-                Easiest way to healthy life by buying your favorite plants
+                Easiest way to healthy life by buying your favorite toys
               </p>
               <a
                 href="/products"

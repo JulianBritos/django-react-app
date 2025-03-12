@@ -25,12 +25,10 @@ function App() {
           <Route path="/products" element={<ProductsSection />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/adminDashboard" element={<UserManagementPage />} />
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/draft" element={<FirstDraft />} />
         </Route>
-
-        {/* Ruta para el AdminPanel fuera de Layout (podría tener su propio layout si querés) */}
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/adminDashboard" element={<UserManagementPage />} />
-        <Route path="/draft" element={<FirstDraft />} />
       </Routes>
     </Router>
   );

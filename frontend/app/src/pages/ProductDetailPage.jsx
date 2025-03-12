@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getProducts } from "../api/products.api";
+import { getProductById } from "../api/products.api"; // ✅ Corrección aquí
 import { useCart } from "../hooks/useCart";
 
 const ProductDetailPage = () => {
@@ -11,13 +11,15 @@ const ProductDetailPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const data = await getProducts(id);
-        setProduct(data);
+        const productData = await getProductById(id); // ✅ Ahora usa la API correcta
+        setProduct(productData);
       } catch (error) {
-        console.error("Error al obtener producto", error);
+        console.error("Error al obtener producto:", error);
+        setProduct(null); // Evitar que falle si hay un error
       }
     };
-    fetchProduct();
+
+    if (id) fetchProduct();
   }, [id]);
 
   if (!product) {
@@ -37,7 +39,7 @@ const ProductDetailPage = () => {
           <p className="text-gray-700 mb-4">{product.description}</p>
           <p className="text-xl font-bold text-green-600">${product.price}</p>
           <button
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
             onClick={() => addToCart(product)}
           >
             Agregar al Carrito

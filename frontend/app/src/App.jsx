@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AdminPanel from "./pages/AdminPanel";
-import FirstDraft from "./FirstDraft";
+
 import HomePage from "./pages/HomePage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
@@ -27,7 +27,6 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/adminDashboard" element={<UserManagementPage />} />
           <Route path="/admin" element={<AdminPanel />} />
-          <Route path="/draft" element={<FirstDraft />} />
         </Route>
       </Routes>
     </Router>

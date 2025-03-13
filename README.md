@@ -2,6 +2,7 @@ How to deploy in local for dummys
 
 Steps
 Backend
+
 1- Open a terminal un root folder
 2- Activate virtual enviroment with:
     "source ./venv/bin/activate"

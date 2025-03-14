@@ -4,12 +4,12 @@ const HeroSection = () => {
   const [showMore, setShowMore] = useState(false);
 
   return (
-    <section className="w-full max-w-7xl mx-auto mt-6 p-6 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-2xl flex flex-col lg:flex-row items-center justify-center text-center lg:text-left">
+    <section className="w-full max-w-7xl mx-auto shadow-xl mt-6 p-6 bg-gradient-to-r from-blue-400 to-purple-300 text-black rounded-2xl flex flex-col lg:flex-row items-center justify-center text-center lg:text-left">
       <div className="max-w-3xl">
-        <h1 className="text-4xl lg:text-6xl font-bold leading-tight mb-4">
+        <h1 className="text-4xl text-blue-950 lg:text-6xl font-bold leading-tight mb-4">
           Cosmo Play
         </h1>
-        <p className="text-lg lg:text-xl mb-6">
+        <p className="text-lg text-blue-900 lg:text-xl mb-6">
           Juegos y juguetes diseñados para estimular, relajar y acompañar a
           personas con TDAH, TEA y ansiedad. Herramientas ideales para
           profesionales de la salud y familias.

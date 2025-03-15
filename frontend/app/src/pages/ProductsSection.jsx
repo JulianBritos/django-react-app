@@ -18,11 +18,11 @@ const ProductsSection = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Título de la página */}
+
+      {/* Grid de productos */}
       <h1 className="text-3xl font-bold text-gray-800 mb-6">
         Nuestros Productos
       </h1>
-
-      {/* Grid de productos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map((product) => (
           <div

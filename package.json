@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "swiper": "^11.2.5",
     "toast": "^0.5.4"
   }
 }

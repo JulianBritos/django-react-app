@@ -7,7 +7,7 @@ function Header() {
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-purple-50 shadow-sm">
       <div className="container mx-auto flex justify-between items-center px-4 py-4">
         {/* Logo + Menú Desktop */}
         <div className="flex items-center space-x-6">
@@ -51,7 +51,7 @@ function Header() {
           {/* Botón Iniciar Sesión (Desktop) */}
           <a
             href="/login"
-            className="hidden md:inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="hidden md:inline-block shadow-md shadow-purple-300 bg-white text-purple-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
           >
             Iniciar Sesión
           </a>

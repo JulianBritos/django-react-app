@@ -36,8 +36,8 @@ const LoginForm = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-white">
-      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg shadow-blue-200 w-full max-w-sm mx-4">
-        <h1 className="text-xl sm:text-2xl text-center font-bold py-2 mb-4">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg shadow-blue-200 w-full max-w-lg lg:max-w-2xl lg:h-[400px] xl:h-[500px] mx-4">
+        <h1 className="text-xl sm:text-2xl lg:text-4xl text-center font-bold py-2 mb-4 md:mb-16 ">
           Iniciar Sesión
         </h1>
 
@@ -75,7 +75,7 @@ const LoginForm = () => {
           >
             ¿Aún no tienes una cuenta? Regístrate
           </a>
-          <a href="#" class="text-blue-700 hover:text-gray-950 text-sm sm:text-base text-center block pt-1">¿Olvidaste tu contraseña?</a>
+          <a href="#" className="text-blue-700 hover:text-gray-950 text-sm sm:text-base text-center block pt-1">¿Olvidaste tu contraseña?</a>
         </form>
       </div>
     </div>

@@ -5,14 +5,22 @@ import toast from "react-hot-toast";
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
+
+  const [errors, setErrors] = useState({ username: false, password: false });
+
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrors({ username: false, password: false });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setErrors({ username: false, password: false });
+    
     try {
       const data = await loginUser(formData);
       localStorage.setItem("token", data.access);
@@ -20,6 +28,9 @@ const LoginForm = () => {
       navigate("/dashboard"); // O a donde quieras redirigir después de login
     } catch (error) {
       toast.error("Credenciales inválidas");
+
+      setErrors({ username: true, password: true });
+
     }
   };
 
@@ -35,7 +46,10 @@ const LoginForm = () => {
             type="text"
             name="username"
             placeholder="Usuario"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 mb-4"
+
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 mb-4 
+            ${errors.username ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-green-500"}`}
+
             onChange={handleChange}
             required
           />
@@ -43,10 +57,12 @@ const LoginForm = () => {
             type="password"
             name="password"
             placeholder="Contraseña"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 mb-4"
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 mb-4 
+              ${errors.username ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-green-500"}`}
             onChange={handleChange}
             required
           />
+          
           <button
             type="submit"
             className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition mb-4"
@@ -59,6 +75,7 @@ const LoginForm = () => {
           >
             ¿Aún no tienes una cuenta? Regístrate
           </a>
+          <a href="#" class="text-blue-700 hover:text-gray-950 text-sm sm:text-base text-center block pt-1">¿Olvidaste tu contraseña?</a>
         </form>
       </div>
     </div>

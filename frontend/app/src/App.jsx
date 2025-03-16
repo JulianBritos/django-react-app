@@ -11,8 +11,11 @@ import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import ProductsSection from "./pages/ProductsSection";
 
+
+
 function App() {
   return (
+
     <Router>
       <Routes>
         {/* Rutas públicas envueltas en Layout */}

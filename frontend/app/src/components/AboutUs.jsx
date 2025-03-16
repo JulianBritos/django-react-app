@@ -6,7 +6,7 @@ const AboutUs = () => {
       <h2 className="text-3xl font-bold mb-6">Sobre nosotros</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="p-7 flex flex-col items-center text-center">
-          <div className="flex items-center justify-center w-16 h-16 bg-purple-300 rounded-full m-2">
+          <div className="flex items-center justify-center w-16 h-16 bg-purple-300 shadow-md shadow-purple-400 rounded-full m-2">
             <LucideHandshake size={30} />
           </div>
           <h3 className="font-semibold">El mejor asesoramiento</h3>

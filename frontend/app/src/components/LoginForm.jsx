@@ -79,7 +79,7 @@ const LoginForm = () => {
           >
             ¿Aún no tienes una cuenta? Regístrate
           </a>
-          <a href="#" class="text-blue-700 hover:text-gray-950 text-sm sm:text-base text-center block pt-1">¿Olvidaste tu contraseña?</a>
+          <a href="#" className="text-blue-700 hover:text-gray-950 text-sm sm:text-base text-center block pt-1">¿Olvidaste tu contraseña?</a>
         </form>
       </div>
     </div>

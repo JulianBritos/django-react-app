@@ -86,14 +86,14 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-         'default': {
+        
         'ENGINE': env("DB_ENGINE", default="django.db.backends.sqlite3"),
         'NAME': env("DB_NAME", default=BASE_DIR / "db.sqlite3"),
         'USER': env("DB_USER", default=""),
         'PASSWORD': env("DB_PASSWORD", default=""),
         'HOST': env("DB_HOST", default=""),
         'PORT': env("DB_PORT", default=""),
-    }
+    
     }
 }
 
@@ -155,7 +155,9 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-      'ACCESS_TOKEN_LIFETIME': timedelta(days=int(env("ACCESS_TOKEN_LIFETIME_DAYS", default=1))),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=int(env("ACCESS_TOKEN_LIFETIME_DAYS", default=1))),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=int(env("REFRESH_TOKEN_LIFETIME_DAYS", default=7))),
     'AUTH_HEADER_TYPES': (env("AUTH_HEADER_TYPES", default="Bearer"),),
 }
+
+MERCADOPAGO_ACCESS_TOKEN = env("MERCADOPAGO_ACCESS_TOKEN")

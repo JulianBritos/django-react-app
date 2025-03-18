@@ -15,7 +15,7 @@ import mercadopago
 import environ
 env = environ.Env()
 environ.Env.read_env()
-sdk = mercadopago.SDK(env("TEST_TOKEN"))
+sdk = mercadopago.SDK(env("MERCADOPAGO_ACCESS_TOKEN"))
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -176,7 +176,7 @@ def recibirNotificacion(request):
     url = datos_recibidos["resource"]
 
     #Ejemplo de como funciona esta request en el archivo "sendRequest.py"
-    recibo = request.get(url, headers={"Authorization": "Bearer " + env("TEST_TOKEN")}) #Reemplazo el test token por el production token
+    recibo = request.get(url, headers={"Authorization": "Bearer " + env("MERCADOPAGO_ACCESS_TOKEN")}) #Reemplazo el test token por el production token
     recibo = recibo.text
     status_details = recibo["status_details"]
     if status_details == "Accredited":

@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
+import environ
+env = environ.Env()
+environ.Env.read_env()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-m7-rmt8+o1)bppi$+ed7c5wyq#%s**2x)9&wjytd#cp^v&rgtx'
+SECRET_KEY = env("DJANGO_TOKEN")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -83,8 +86,14 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+         'default': {
+        'ENGINE': env("DB_ENGINE", default="django.db.backends.sqlite3"),
+        'NAME': env("DB_NAME", default=BASE_DIR / "db.sqlite3"),
+        'USER': env("DB_USER", default=""),
+        'PASSWORD': env("DB_PASSWORD", default=""),
+        'HOST': env("DB_HOST", default=""),
+        'PORT': env("DB_PORT", default=""),
+    }
     }
 }
 
@@ -130,7 +139,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True 
+CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=True)
+#CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[]) cuando pasemos etapa de test descomentar esto y agregar los origenes en el archivo .env
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -144,7 +155,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'AUTH_HEADER_TYPES': ('Bearer',),
+      'ACCESS_TOKEN_LIFETIME': timedelta(days=int(env("ACCESS_TOKEN_LIFETIME_DAYS", default=1))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(env("REFRESH_TOKEN_LIFETIME_DAYS", default=7))),
+    'AUTH_HEADER_TYPES': (env("AUTH_HEADER_TYPES", default="Bearer"),),
 }

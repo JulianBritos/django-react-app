@@ -3,13 +3,17 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, viewsets
-from .models import Product, Category
+from .models import Product, Category, Order, Purchase
 from .serializer import ProductSerializer, CategorySerializer, UserSerializer, RegisterSerializer
 from django.shortcuts import render
 from datetime import datetime, timedelta
-from .preferencias import preferencias
+
+from django.http import JsonResponse
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 import requests
+import json
 import mercadopago
 
 import environ
@@ -66,124 +70,104 @@ class UserManagementViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminUser]  # Solo admins pueden gestionar usuarios
 
 #mercado pago
-ejemploPropio = [
-        {
-                    "id": 1,
-                    "title": "Deuda 1",
-                    "currency_id": "ARS",
-                    "description": "7/2022",
-                    "quantity": 1,
-                    "unit_price": 1
-        }, 
-        {
-                    "id": 2,
-                    "title": "Deuda 2",
-                    "currency_id": "ARS",
-                    "description": "8/2022",
-                    "quantity": 2,
-                    "unit_price": 5
-        }
-    ]
+@api_view(["POST"]) 
+def create_preference(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            sdk = mercadopago.SDK(env("MERCADOPAGO_ACCESS_TOKEN"))
 
-def unaPreferenciaPorCadaCuota(lista):
-    cantidadDeCuotas = len(lista)
-    todasLasRequests = []
-    if (cantidadDeCuotas >= 1):
-
-        #Un elemento en la lista con las preferencias incluidas por cada cuota.
-        for i in range(0, len(lista) + 1):
-
-            todasLasRequests.append([])
-            cuota = lista[i]
-
-            todasLasRequests[i] = {
-                "items" : [ {
-                    "id": cuota["id"], #Requerido
-                    "title": cuota["title"], #Requerido
-                    "quantity": 1, #Requerido
-                    "unit_price": cuota["unit_price"], #Requerido
-                    "description": cuota["description"],
-                    "currency_id": "ARS", } ],
-            }
-
-            todasLasRequests[i].update(preferencias)
-
-            #Se define el tiempo, el actual es facil pero al futuro hay que cambiarlo bastante, quitarle los MS y cambiar la T 
-            now = datetime.now() 
-            actual = now.astimezone().strftime("%Y-%m-%dT%H:%M:%S.000-03:00")
-
-            futuro = now + \
-                timedelta(days = 3)
-            futuro = (str(futuro).split("."))[0] + ".000-03:00"
-            futuro = futuro.replace(" ", "T")
-
-            todasLasRequests[i]["expiration_date_from"] = actual
-            todasLasRequests[i]["expiration_date_to"] = futuro
-        
-        return (todasLasRequests)
-
-def unaPreferenciaPorVariasCuotas(lista):
-    cantidadDeCuotas = len(lista)
-    preferenciasCompletas = preferencias
-    preferenciasCompletas["items"] = []
-
-    if (cantidadDeCuotas >= 1):
-
-        #Un elemento en la lista con las preferencias incluidas por cada cuota.
-        for cuota in lista:
-
-            preferenciasCompletas["items"].append(
-                    {
-                    "quantity": 1, #Requerido
-                    "id": cuota["id"], #Requerido
-                    "title": cuota["title"], #Requerido
-                    "unit_price": cuota["unit_price"], #Requerido
-                    "description": cuota["description"],
-                    "currency_id": "ARS",
-                    }
+            # Crear un registro en la base de datos
+            order = Order.objects.create(
+                product_id=data["id"],
+                product_title=data["title"],
+                quantity=data["quantity"],
+                unit_price=data["unit_price"],
+                total_price=data["quantity"] * data["unit_price"],
+                buyer_email=data["payer"]["email"],
+                external_reference=f"pedido_{data['id']}"
             )
 
-            #Se define el tiempo, el actual es facil pero al futuro hay que cambiarlo bastante, quitarle los MS y cambiar la T 
-            now = datetime.now() 
-            actual = now.astimezone().strftime("%Y-%m-%dT%H:%M:%S.000-03:00")
+            # Datos para MercadoPago
+            preference_data = {
+                "items": [
+                    {
+                        "id": order.product_id,
+                        "title": order.product_title,
+                        "currency_id": "BRL",
+                        "quantity": order.quantity,
+                        "unit_price": order.unit_price
+                    }
+                ],
+                "payer": {
+                    "email": order.buyer_email,
+                },
+                "back_urls": data["back_urls"],
+                "auto_return": "approved",
+                "notification_url": "https://www.tusitio.com/webhook-mercadopago",
+                "external_reference": order.external_reference,
+                "expires": True
+            }
 
-            futuro = now + \
-                timedelta(days = 3)
-            futuro = (str(futuro).split("."))[0] + ".000-03:00"
-            futuro = futuro.replace(" ", "T")
+            preference_response = sdk.preference().create(preference_data)
+            preference = preference_response["response"]
 
-            preferenciasCompletas["expiration_date_from"] = actual
-            preferenciasCompletas["expiration_date_to"] = futuro
-        
-        return (preferenciasCompletas)
+            return JsonResponse({"init_point": preference["init_point"], "order_id": order.id})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
 
-@api_view(['GET'])
-def enviarRequestAMP(request):
-    
-    listaAEnviar = unaPreferenciaPorVariasCuotas(ejemploPropio)
-    listaDeDatosRecibidos = []
-
-    preference_response = sdk.preference().create(listaAEnviar)
-    preference = preference_response["response"]
-    listaDeDatosRecibidos.append(preference)
-
-    return Response({"loRecibido": listaDeDatosRecibidos})
-
-@api_view(['POST'])
-def recibirNotificacion(request):
-    datos_recibidos = request.data
-
-    url = datos_recibidos["resource"]
-
-    #Ejemplo de como funciona esta request en el archivo "sendRequest.py"
-    recibo = request.get(url, headers={"Authorization": "Bearer " + env("MERCADOPAGO_ACCESS_TOKEN")}) #Reemplazo el test token por el production token
-    recibo = recibo.text
-    status_details = recibo["status_details"]
-    if status_details == "Accredited":
-        print(status_details) #Registro en la DB que fué exitoso
-    else:
-        print(status_details) #Registro en la DB que NO fué exitoso
+    return JsonResponse({"error": "Método no permitido"}, status=405)
 
 
-def frontEndIntegration(request):
-    return render(request, "api/index.html")
+def webhook_mercadopago(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            external_reference = data.get("external_reference")
+            payment_status = data.get("status")  # "approved", "pending", "rejected"
+
+            # Buscar el pedido en la base de datos y actualizar su estado
+            try:
+                order = Order.objects.get(external_reference=external_reference)
+                order.payment_status = payment_status
+                order.save()
+            except Order.DoesNotExist:
+                return JsonResponse({"error": "Pedido no encontrado"}, status=404)
+
+            return JsonResponse({"message": "Pago actualizado correctamente"})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"error": "Método no permitido"}, status=405)
+
+@csrf_exempt
+def payment_notification(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            payment_id = data.get("data", {}).get("id")
+
+            # Simulación de obtención de datos de MercadoPago (debes hacer una petición real aquí)
+            payment_info = {
+                "id": payment_id,
+                "status": "approved",
+                "payer_email": "cliente@email.com",
+                "items": [{"title": "Producto A", "quantity": 2, "unit_price": 50.0}],
+                "total_amount": 100.0
+            }
+
+            # Guardar la compra en la base de datos
+            Purchase.objects.create(
+                payment_id=payment_info["id"],
+                status=payment_info["status"],
+                email=payment_info["payer_email"],
+                items=payment_info["items"],
+                total_amount=payment_info["total_amount"]
+            )
+
+            return JsonResponse({"message": "Compra guardada exitosamente"}, status=201)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"error": "Método no permitido"}, status=405)

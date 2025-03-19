@@ -63,20 +63,35 @@ class PaymentMethod(models.Model):
 
 
 class Order(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
-    created_at = models.DateTimeField(auto_now_add=True)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_method = models.ForeignKey(PaymentMethod, on_delete=models.SET_NULL, null=True, related_name="orders")
-    installments = models.PositiveIntegerField(default=1)  # Número de cuotas
-    final_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Total con interés
+    STATUS_CHOICES = [
+        ("pending", "Pendiente"),
+        ("approved", "Aprobado"),
+        ("rejected", "Rechazado"),
+    ]
 
-    def save(self, *args, **kwargs):
-        """Calcula el total con intereses si el método de pago tiene interés y hay cuotas"""
-        if self.payment_method and self.installments > 1:
-            self.final_amount = self.total * (1 + (self.payment_method.interest_rate / 100))
-        else:
-            self.final_amount = self.total
-        super().save(*args, **kwargs)
+    product_id = models.CharField(max_length=100, null=True, blank=True)  # Permite valores nulos
+    product_title = models.CharField(max_length=255, null=True, blank=True)
+    quantity = models.IntegerField(null=True, blank=True)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    buyer_email = models.EmailField(null=True, blank=True)
+    payment_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    external_reference = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Pedido {self.id} - {self.user.username} ({self.installments} cuotas)"
+        return f"Pedido {self.external_reference} - {self.payment_status}"
+    
+
+class Purchase(models.Model):
+    payment_id = models.CharField(max_length=100, unique=True)
+    status = models.CharField(max_length=50)
+    email = models.EmailField()
+    items = models.JSONField()
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Compra {self.payment_id} - {self.status}"
+    
+

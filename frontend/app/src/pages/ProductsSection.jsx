@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { getProducts } from "../api/products.api"; // Solo necesitas obtener productos
+import ScrollableNavBar from "../components/ScrollableNavVar"
+
 
 const ProductsSection = () => {
   const [products, setProducts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("Nuestros Productos"); // ESTADO PARA ALMACENAR LA CATEGORÍA SELECCIONADA
 
   // Cargar los productos al montar el componente
   useEffect(() => {
@@ -15,14 +18,29 @@ const ProductsSection = () => {
     setProducts(data);
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {/* Título de la página */}
+   // Lista de categorías de prueba (esto será reemplazado con datos del backend)
+   const categories = ["Nuestros Productos", "Categoria 1", "Categoria 2", "Categoria 3", "Categoria 4", "Categoria 5", "Categoria 1", "Categoria 2", "Categoria 3", "Categoria 4", "Categoria 5", "Categoria 1", "Categoria 2", "Categoria 3", "Categoria 4", "Categoria 5", "Categoria 1", "Categoria 2", "Categoria 3", "Categoria 4", "Categoria 5","Categoria 1", "Categoria 2", "Categoria 3", "Categoria 4", "Categoria 5", "Categoria 1", "Categoria 2", "Categoria 3", "Categoria 4", "Categoria 5", "Categoria 1", "Categoria 2", "Categoria 3", "Categoria 4", "Categoria 5"]; // Test: Lista de categorías de prueba
 
-      {/* Grid de productos */}
+   const handleCategoryClick = (category) => {
+    setSelectedCategory(category); // ACTUALIZA EL ESTADO CON LA CATEGORÍA SELECCIONADA
+  };
+
+  return (
+
+    <div>
+      
+       <ScrollableNavBar categories={categories} onCategoryClick={handleCategoryClick} />
+
+      <div className="min-h-screen bg-gray-50 p-6">
+      
+      {/* Implementación de ScrollableNavbar para mostrar categorías */}
+     
+      {/* Título de la página */}
       <h1 className="text-3xl font-bold text-gray-800 mb-6">
-        Nuestros Productos
-      </h1>
+      {selectedCategory} {/* SE MUESTRA LA CATEGORÍA SELECCIONADA */}
+            </h1>
+      {/* Grid de productos */}
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map((product) => (
           <div
@@ -55,6 +73,9 @@ const ProductsSection = () => {
         ))}
       </div>
     </div>
+
+    </div>
+    
   );
 };
 

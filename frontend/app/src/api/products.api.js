@@ -36,5 +36,3 @@ export const createProduct = async (productData) => {
 export const deleteProduct = async (productId) => {
   await axios.delete(`${API_URL}${productId}/`);
 };
-
-// Editar producto (similar a create pero usa PATCH o PUT)

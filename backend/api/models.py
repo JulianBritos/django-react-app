@@ -19,6 +19,14 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+class ProductImages(models.Model):
+    Product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='uploaded_images')
+    ProductImages = models.ImageField(upload_to='product_images/')
+
+    def __str__(self):
+        return self.name
+
     
 class UserRole(models.Model):
     name = models.CharField(max_length=50, unique=True)

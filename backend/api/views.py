@@ -1,8 +1,9 @@
 from django.contrib.auth import authenticate, login, get_user_model
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, viewsets
+from django.shortcuts import get_object_or_404
 from .models import Product, Category, Order, Purchase
 from .serializer import ProductSerializer, CategorySerializer, UserSerializer, RegisterSerializer
 from django.shortcuts import render
@@ -38,6 +39,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+
 
 User = get_user_model()
 @api_view(['POST'])

@@ -35,3 +35,8 @@ FrontEnd
     "docker run -d -p 3000:3000 frontend"
 
 
+5- Run frontend in explorer with 
+
+    "localhost:3000"
+
+

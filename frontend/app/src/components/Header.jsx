@@ -42,7 +42,6 @@ function Header() {
               </a>
               {dropdownOpen && (
                 <div className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10"> {/* MODIFICADO: Estilos del menú desplegable */}
-                  <a href="/products" className="block px-4 py-2 text-black font-semibold hover:bg-gray-100">Todos los productos</a> {/* MODIFICADO: Nuevo botón de todos los productos */}
                   <a href="/products/category1" className="block px-4 py-2 text-black hover:bg-gray-100">Categoría 1</a>
                   <a href="/products/category2" className="block px-4 py-2 text-black hover:bg-gray-100">Categoría 2</a>
                   <a href="/products/category3" className="block px-4 py-2 text-black hover:bg-gray-100">Categoría 3</a>
@@ -81,7 +80,6 @@ function Header() {
             </button>
             {dropdownOpen && (
               <div className="pl-4 mt-2 space-y-2"> {/* MODIFICADO: Menú desplegable en móvil */}
-                <a href="/products" className="block text-black font-semibold hover:text-gray-600">Todos los productos</a> {/* MODIFICADO: Nuevo botón de todos los productos en móvil */}
                 <a href="/products/category1" className="block text-black hover:text-gray-600">Categoría 1</a>
                 <a href="/products/category2" className="block text-black hover:text-gray-600">Categoría 2</a>
                 <a href="/products/category3" className="block text-black hover:text-gray-600">Categoría 3</a>

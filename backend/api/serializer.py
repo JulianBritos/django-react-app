@@ -20,11 +20,20 @@ class ProductSerializer(serializers.ModelSerializer):
         source='category',  # Guarda en el campo 'category'
         write_only=True     # Solo al crear/editar
     )
-
+    uploaded_images = ProductImagesSerializer(many=True, read_only=True)
     class Meta:
         model = Product
         fields = '__all__'
+    
+    def create(self, validated_data):
+        uploaded_images = validated_data.pop('uploaded_images', [])  # Extraer imágenes
+        product = super().create(validated_data)  # Crear producto
 
+        # Guardar imágenes en ProductImages
+        for image in uploaded_images:
+            ProductImages.objects.create(product=product, image=image)
+
+        return product
 
 
 User = get_user_model()

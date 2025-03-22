@@ -56,10 +56,15 @@ const AdminPanel = () => {
               className="bg-white shadow rounded-lg overflow-hidden relative"
             >
               <img
-                src={product.image}
+                src={
+                  product.uploaded_images.length > 0
+                    ? product.uploaded_images[0].image
+                    : "/placeholder.jpg"
+                }
                 alt={product.name}
                 className="w-full h-64 object-cover"
               />
+
               <div className="p-4">
                 <h3 className="text-lg font-semibold text-gray-800">
                   {product.name}

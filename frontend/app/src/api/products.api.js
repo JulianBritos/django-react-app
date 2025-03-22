@@ -21,8 +21,11 @@ export const createProduct = async (productData) => {
   formData.append("description", productData.description);
   formData.append("price", productData.price);
   formData.append("category_id", productData.category_id);
-  if (productData.image) {
-    formData.append("image", productData.image);
+
+  if (productData.images && productData.images.length > 0) {
+    productData.images.forEach((image) => {
+      formData.append("uploaded_images", image); // 🔥 Usa la clave correcta
+    });
   }
 
   const response = await axios.post(API_URL, formData, {

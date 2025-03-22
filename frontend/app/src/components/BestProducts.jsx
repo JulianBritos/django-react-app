@@ -13,7 +13,7 @@ const BestProducts = () => {
   }, []);
 
   return (
-    <section className="text-center">
+    <section className="w-full max-w-7xl mx-auto mt-6 p-6 rounded-2xl flex flex-col">
       <div className="py-2">
         {" "}
         <div className="flex flex-col md:flex-row items-center md:items-center justify-between">

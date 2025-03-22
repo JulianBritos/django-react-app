@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Product, Category, ProductImages
+from .models import Product, Category, ProductImages, UserRole
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,6 +58,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        role = UserRole.objects.get_or_create(name="client")[0]
         user = User.objects.create_user(
             username=validated_data['username'],
             password=validated_data['password'],
@@ -69,7 +70,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             address=validated_data.get('address', ''),
             city=validated_data.get('city', ''),
             country=validated_data.get('country', ''),
-            role='Cliente'  # Siempre cliente por defecto al registrarse
+            role=role # Siempre cliente por defecto al registrarse
         )
         return user
 

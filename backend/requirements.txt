@@ -1,12 +1,13 @@
 asgiref
-Django
+django
 django-cors-headers
+django-db
+django-environ
 djangorestframework
 djangorestframework-simplejwt
+mercadopago
 PyJWT
 pytz
 sqlparse
-psycopg2
 psycopg2-binary
-python-dotenv
 Pillow

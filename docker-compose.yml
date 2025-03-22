@@ -1,15 +1,40 @@
 services:
-  postgres:
-    image: postgres
-    container_name: db_postgresql
+  db:
+    image: postgres:14
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: ecommerce
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: .
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    environment:
+      DB_ENGINE: django.db.backends.postgresql
+      DB_NAME: ecommerce
+      DB_USER: admin
+      DB_PASSWORD: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db  # Aseguramos que 'backend' se inicie después de 'db'
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
 
 volumes:
   postgres_data:
+    driver: local

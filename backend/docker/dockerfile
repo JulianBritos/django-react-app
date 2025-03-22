@@ -4,6 +4,14 @@ FROM python:3.11
 # Establece el directorio de trabajo en el contenedor
 WORKDIR /app
 
+# Dependencias python
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+
 # Copia el archivo de dependencias y lo instala
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

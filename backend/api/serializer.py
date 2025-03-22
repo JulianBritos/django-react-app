@@ -1,14 +1,17 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Product, Category
-
-
-
+from .models import Product, Category, ProductImages
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name']
+
+class ProductImagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImages
+        fields = "__all__"
+
 
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)  # Para mostrar el nombre de la categoría
@@ -17,10 +20,20 @@ class ProductSerializer(serializers.ModelSerializer):
         source='category',  # Guarda en el campo 'category'
         write_only=True     # Solo al crear/editar
     )
-
+    uploaded_images = ProductImagesSerializer(many=True, read_only=True)
     class Meta:
         model = Product
         fields = '__all__'
+    
+    def create(self, validated_data):
+        uploaded_images = validated_data.pop('uploaded_images', [])  # Extraer imágenes
+        product = super().create(validated_data)  # Crear producto
+
+        # Guardar imágenes en ProductImages
+        for image in uploaded_images:
+            ProductImages.objects.create(product=product, image=image)
+
+        return product
 
 
 User = get_user_model()

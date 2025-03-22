@@ -13,7 +13,7 @@ const HomePage = () => {
           <HeroSection />
         </div>
       </div>
-      <div className="py-4 bg-purple-50">
+      <div className="py-4 ">
         <div className="m-4">
           <BestProducts />
         </div>
@@ -23,7 +23,7 @@ const HomePage = () => {
           <Categories />
         </div>
       </div>
-      <div className="py-4  bg-purple-50">
+      <div className="py-4  ">
         <div className="m-4">
           <AboutUs />
         </div>
@@ -33,7 +33,7 @@ const HomePage = () => {
           <Testimonials />
         </div>
       </div>
-      <div className="py-4  bg-purple-50">
+      <div className="py-4 ">
         <div className="m-4">
           <ContactForm />
         </div>

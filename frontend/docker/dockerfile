@@ -1,0 +1,21 @@
+FROM node:20-alpine3.20 AS build
+
+WORKDIR /app
+
+COPY ./app .
+COPY /app/package*.json .
+
+RUN cd /app/ 
+
+RUN npm ci
+RUN npm run build
+
+CMD ["npm", "run", "dev", "--", "--host"]
+
+FROM nginx:alpine AS prod
+
+COPY --from=build /app/dist /usr/share/nginx/html
+
+EXPOSE 3000
+
+CMD ["nginx", "-g", "daemon off;"]

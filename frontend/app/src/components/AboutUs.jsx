@@ -2,7 +2,7 @@ import { Truck, LucideHandshake, Headset } from "lucide-react";
 
 const AboutUs = () => {
   return (
-    <section className="py-5 text-center">
+    <section className="py-5 text-center w-full max-w-7xl mx-auto mt-6 p-6 rounded-2xl flex flex-col">
       <h2 className="text-3xl font-bold mb-6">Sobre nosotros</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="p-7 flex flex-col items-center text-center">

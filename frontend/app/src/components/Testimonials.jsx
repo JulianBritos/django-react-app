@@ -34,7 +34,7 @@ const testimonials = [
 
 const Testimonials = () => {
   return (
-    <section className="py-2 px-4">
+    <section className="py-2 px-2 w-full max-w-7xl mx-auto mt-6 p-6">
       <h2 className="text-3xl font-bold text-center mb-8">
         Lo que dicen nuestros clientes
       </h2>
@@ -52,7 +52,7 @@ const Testimonials = () => {
       >
         {testimonials.map((testimonial) => (
           <SwiperSlide className="py-10" key={testimonial.id}>
-            <div className="bg-purple-100 p-6 rounded-lg shadow-lg shadow-purple-300 flex flex-col items-start text-left">
+            <div className="bg-purple-100 p-6 mx-3 rounded-lg shadow-lg shadow-purple-300 flex flex-col items-start text-left">
               <p className="text-gray-700 mb-4">"{testimonial.text}"</p>
               <div className="flex items-center mt-4">
                 <img

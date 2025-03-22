@@ -24,10 +24,19 @@ FrontEnd
 1- Open a new terminal in root
 2- Navigate to app folder with 
 
-    "cd frontend/app/"
-    
-3- Start the proyect with:
+    "cd frontend/"
 
-    "yarn dev"
+3- Create docker image: 
+
+    "sudo docker build -f docker/dockerfile -t frontend ."
+    
+4- Start the proyect with:
+
+    "docker run -d -p 3000:3000 frontend"
+
+
+5- Run frontend in explorer with 
+
+    "localhost:3000"
 
 

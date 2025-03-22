@@ -4,7 +4,7 @@ const HeroSection = () => {
   const [showMore, setShowMore] = useState(false);
 
   return (
-    <section className="w-full max-w-7xl mx-auto shadow-xl mt-6 p-6 bg-gradient-to-r from-blue-400 to-purple-300 text-black rounded-2xl flex flex-col lg:flex-row items-center justify-center text-center lg:text-left">
+    <section className="w-full max-w-7xl mx-auto shadow-xl mt-6 p-6 bg-gradient-to-r from-blue-400 to-purple-300 text-black rounded-2xl flex flex-col lg:flex-row  items-center justify-center text-center lg:text-left">
       <div className="max-w-3xl">
         <h1 className="text-4xl text-blue-950 lg:text-6xl font-bold leading-tight mb-4">
           Cosmo Play

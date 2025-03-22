@@ -6,7 +6,7 @@ const ProductForm = ({ onSave }) => {
     description: "",
     price: "",
     category_id: "",
-    image: null,
+    image: [],
   });
 
   const handleChange = (e) => {
@@ -15,7 +15,12 @@ const ProductForm = ({ onSave }) => {
   };
 
   const handleFileChange = (e) => {
-    setProduct({ ...product, image: e.target.files[0] });
+    const files = Array.from(e.target.files); // ✅ Convierte FileList en array
+
+    setProduct((prevProduct) => ({
+      ...prevProduct,
+      images: files, // ✅ Guarda todas las imágenes
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -69,7 +74,7 @@ const ProductForm = ({ onSave }) => {
 
       <div>
         <label>Imagen:</label>
-        <input type="file" onChange={handleFileChange} />
+        <input type="file" multiple onChange={handleFileChange} />
       </div>
 
       <button type="submit">Guardar Producto</button>

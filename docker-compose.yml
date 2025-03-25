@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:14
+    image: postgres:17
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: postgres
@@ -13,21 +13,16 @@ services:
       - "5432:5432"
 
   backend:
-    build: .
-    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-    environment:
-      DB_ENGINE: django.db.backends.postgresql
-      DB_NAME: ecommerce
-      DB_USER: admin
-      DB_PASSWORD: postgres
-      DB_HOST: db
-      DB_PORT: 5432
+    build:
+      context: ./backend
+      dockerfile: docker/dockerfile
     volumes:
-      - .:/app
+      - ./backend:/app
     ports:
       - "8000:8000"
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     depends_on:
-      - db  # Aseguramos que 'backend' se inicie después de 'db'
+      - db
     networks:
       - backend-network
 

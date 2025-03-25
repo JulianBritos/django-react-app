@@ -1,19 +1,11 @@
 # Usa una imagen oficial de Python
-FROM python:3.11
+FROM python:3.10.16-alpine3.21
 
 # Establece el directorio de trabajo en el contenedor
 WORKDIR /app
 
-# Dependencias python
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    python3-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-
 # Copia el archivo de dependencias y lo instala
-COPY requirements.txt .
+COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copia el código de la aplicación

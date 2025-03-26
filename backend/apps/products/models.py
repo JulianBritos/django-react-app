@@ -14,7 +14,7 @@ class Variant(models.Model):
 
 
 class VariantOption(models.Model):
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name="options")
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, null=True, related_name="options")
     value = models.CharField(max_length=100)  # Ejemplo: "Rojo", "M", "L"
 
     def __str__(self):
@@ -32,7 +32,7 @@ class Product(models.Model):
         return self.name
     
 class ProductVariant(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_variants')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, related_name='product_variants')
     sku = models.CharField(max_length=50, unique=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)  # Precio específico (opcional)
     stock = models.PositiveIntegerField(default=0)

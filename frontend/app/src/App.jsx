@@ -26,8 +26,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/adminDashboard" element={<UserManagementPage />} />
-          <Route path="/admin" element={<AdminPanel />} />
         </Route>
+        <Route path="/admin" element={<AdminPanel />} />
       </Routes>
     </Router>
   );

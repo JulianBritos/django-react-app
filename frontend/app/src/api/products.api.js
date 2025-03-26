@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8000/api/products/"; // Ajustá si usás otro puerto
+const API_URL = "http://localhost:8000/apps/products/products/"; // Ajustá si usás otro puerto
 
 // Obtener lista de productos
 export const getProducts = async () => {
@@ -22,9 +22,24 @@ export const createProduct = async (productData) => {
   formData.append("price", productData.price);
   formData.append("category_id", productData.category_id);
 
+  if (productData.variant_ids) {
+    productData.variant_ids.forEach((id) => formData.append("variant_ids", id));
+  }
+
   if (productData.images && productData.images.length > 0) {
     productData.images.forEach((image) => {
       formData.append("uploaded_images", image); // 🔥 Usa la clave correcta
+    });
+  }
+
+  if (productData.product_variants) {
+    productData.product_variants.forEach((variant, index) => {
+      formData.append(`product_variants[${index}][sku]`, variant.sku);
+      formData.append(`product_variants[${index}][price]`, variant.price);
+      formData.append(`product_variants[${index}][stock]`, variant.stock);
+      variant.option_ids.forEach((optId) =>
+        formData.append(`product_variants[${index}][option_ids]`, optId)
+      );
     });
   }
 

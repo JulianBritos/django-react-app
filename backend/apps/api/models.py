@@ -44,17 +44,17 @@ class User(AbstractUser):
     city = models.CharField(max_length=100, blank=True, null=True)
     country = models.CharField(max_length=100, blank=True, null=True)
 
-    role = models.ForeignKey(UserRole, on_delete=models.SET_NULL, null=True, related_name="users")
+    role = models.ForeignKey(UserRole, on_delete=models.SET_NULL, null=True, related_name="usersold")
 
     # Solución para evitar conflictos con la clase AbstractUser
     groups = models.ManyToManyField(
         'auth.Group',
-        related_name='custom_user_set',
+        related_name='custom_user_set_old',
         blank=True
     )
     user_permissions = models.ManyToManyField(
         'auth.Permission',
-        related_name='custom_user_permissions_set',
+        related_name='custom_user_permissions_set_old',
         blank=True
     )
 

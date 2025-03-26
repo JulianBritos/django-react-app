@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Para redirigir
 import { registerUser } from "../api/auth.api"; // Función para hacer la petición
-import toast from "react-hot-toast"; // Importamos toast
+import toast, { Toaster } from "react-hot-toast"; // Importamos toast
 
 const RegisterForm = () => {
   const navigate = useNavigate(); // Hook de navegación
@@ -43,6 +43,7 @@ const RegisterForm = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-white">
+      <Toaster position="top-right" reverseOrder={false} />
       <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg shadow-blue-200 w-full max-w-sm mx-4">
         <h2 className="text-xl sm:text-2xl font-bold text-center mb-6">
           Registro

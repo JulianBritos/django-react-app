@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8000/api"; // Ajusta según corresponda
+const API_URL = "http://localhost:8000/apps/user"; // Ajusta según corresponda
 
 export const loginUser = async (credentials) => {
   const response = await axios.post(`${API_URL}/token/`, credentials);
@@ -8,5 +8,14 @@ export const loginUser = async (credentials) => {
 };
 
 export const registerUser = async (userData) => {
-  await axios.post(`${API_URL}/register/`, userData);
+  try {
+    const response = await axios.post(`${API_URL}/register/`, userData);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error en el registro:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
 };

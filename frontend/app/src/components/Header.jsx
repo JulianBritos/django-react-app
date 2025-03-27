@@ -1,13 +1,24 @@
-import { useState } from "react";
-import { Menu, X, ShoppingCart, User, ChevronDown } from "lucide-react"; // MODIFICADO: Se agregó ChevronDown para la flecha
+import { useState, useEffect } from "react";
+import { Menu, X, ShoppingCart, User, ChevronDown } from "lucide-react"; // Para iconos
+import { getCategories } from "../api/categorys.api"; // Para obtener las categorías
+import { Link } from "react-router-dom"; // Asegúrate de importar Link
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false); // MODIFICADO: Se agregó estado para controlar el desplegable
-  let dropdownTimeout;
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    const data = await getCategories();
+    setCategories(data);
+  };
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
-  const toggleDropdown = () => setDropdownOpen(!dropdownOpen); // MODIFICADO: Función para abrir/cerrar el menú desplegable
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   return (
     <header className="bg-purple-50 shadow-sm">
@@ -22,73 +33,129 @@ function Header() {
             <h1 className="text-xl font-bold tracking-wide">Cosmo Play</h1>
           </div>
 
-          {/* Menú Desktop (cerca del logo) */}
+          {/* Menú Desktop */}
           <nav className="hidden md:flex space-x-6">
-            <a href="/" className="text-black font-medium hover:text-gray-600">Inicio</a>
+            <Link to="/" className="text-black font-medium hover:text-gray-600">
+              Inicio
+            </Link>
 
-            <div 
-              className="relative" 
+            <div
+              className="relative"
               onMouseEnter={() => {
-                clearTimeout(dropdownTimeout);
                 setDropdownOpen(true);
-              }} 
-              onMouseLeave={() => {
-                dropdownTimeout = setTimeout(() => setDropdownOpen(false), 300);
               }}
-            > {/* MODIFICADO: Contenedor para menú desplegable con retraso al cerrar */}
-              <a href="/products" className="text-black font-medium hover:text-gray-600 flex items-center" onClick={toggleDropdown}> {/* MODIFICADO: Agregado flex y evento de click */}
+              onMouseLeave={() => {
+                setDropdownOpen(false);
+              }}
+            >
+              <Link
+                to="/products/allproducts"
+                className="text-black font-medium hover:text-gray-600 flex items-center"
+              >
                 Productos
-                <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${dropdownOpen ? "rotate-180" : "rotate-0"}`} /> {/* MODIFICADO: Flecha dinámica */}
-              </a>
+                <ChevronDown
+                  className={`w-4 h-4 ml-1 transition-transform ${dropdownOpen ? "rotate-180" : "rotate-0"}`}
+                />
+              </Link>
               {dropdownOpen && (
-                <div className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10"> {/* MODIFICADO: Estilos del menú desplegable */}
-                  <a href="/products/category1" className="block px-4 py-2 text-black hover:bg-gray-100">Categoría 1</a>
-                  <a href="/products/category2" className="block px-4 py-2 text-black hover:bg-gray-100">Categoría 2</a>
-                  <a href="/products/category3" className="block px-4 py-2 text-black hover:bg-gray-100">Categoría 3</a>
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10">
+                  {categories.map((category, index) => (
+                    <Link
+                      key={index}
+                      to={`/products/${category.name}`}
+                      className="block px-4 py-2 text-black hover:bg-gray-100"
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
 
-            <a href="/contact" className="text-black font-medium hover:text-gray-600">Contacto</a>
+            <Link to="/contact" className="text-black font-medium hover:text-gray-600">
+              Contacto
+            </Link>
           </nav>
         </div>
 
         {/* Iconos e Iniciar Sesión */}
         <div className="flex items-center space-x-6">
-          <a href="/cart" className="text-black"><ShoppingCart className="w-6 h-6 cursor-pointer" /></a>
-          <a href="/profile" className="text-black"><User className="w-6 h-6 cursor-pointer" /></a>
+          <Link to="/cart" className="text-black">
+            <ShoppingCart className="w-6 h-6 cursor-pointer" />
+          </Link>
+          <Link to="/profile" className="text-black">
+            <User className="w-6 h-6 cursor-pointer" />
+          </Link>
 
-          {/* Botón Iniciar Sesión (Desktop) */}
-          <a href="/login" className="hidden md:inline-block shadow-md shadow-purple-300 bg-white text-purple-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition">Iniciar Sesión</a>
+          <Link
+            to="/login"
+            className="hidden md:inline-block shadow-md shadow-purple-300 bg-white text-purple-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+          >
+            Iniciar Sesión
+          </Link>
 
-          {/* Menú Hamburguesa (Mobile) */}
-          <button className="md:hidden text-black focus:outline-none" onClick={toggleMenu}>{menuOpen ? <X size={28} /> : <Menu size={28} />}</button>
+          <button className="md:hidden text-black focus:outline-none" onClick={toggleMenu}>
+            {menuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
       </div>
 
-      {/* Menú Móvil (slide desde la derecha) */}
-      <div className={`fixed top-0 right-0 h-full bg-white text-black w-64 shadow-lg transform transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"} md:hidden`}>
+      {/* Menú Móvil */}
+      <div
+        className={`fixed top-0 right-0 h-full bg-white text-black w-64 shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        } md:hidden`}
+      >
         <div className="p-4 flex justify-end">
-          <button onClick={toggleMenu} className="text-black"><X size={28} /></button>
+          <button onClick={toggleMenu} className="text-black">
+            <X size={28} />
+          </button>
         </div>
         <nav className="flex flex-col space-y-4 p-4">
-          <a href="/" className="text-black hover:text-gray-600" onClick={toggleMenu}>Inicio</a>
+          <Link to="/" className="text-black hover:text-gray-600" onClick={toggleMenu}>
+            Inicio
+          </Link>
           <div>
-            <button className="text-black hover:text-gray-600 flex items-center w-full text-left" onClick={toggleDropdown}> {/* MODIFICADO: Botón en móvil */}
+            <button
+              className="text-black hover:text-gray-600 flex items-center w-full text-left"
+              onClick={toggleDropdown}
+            >
               Productos
-              <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${dropdownOpen ? "rotate-180" : "rotate-0"}`} /> {/* MODIFICADO: Flecha en móvil */}
+              <ChevronDown
+                className={`w-4 h-4 ml-1 transition-transform ${dropdownOpen ? "rotate-180" : "rotate-0"}`}
+              />
             </button>
             {dropdownOpen && (
-              <div className="pl-4 mt-2 space-y-2"> {/* MODIFICADO: Menú desplegable en móvil */}
-                <a href="/products/category1" className="block text-black hover:text-gray-600">Categoría 1</a>
-                <a href="/products/category2" className="block text-black hover:text-gray-600">Categoría 2</a>
-                <a href="/products/category3" className="block text-black hover:text-gray-600">Categoría 3</a>
+              <div className="pl-4 mt-2 space-y-2">
+                <Link
+                  to="/products/allproducts"
+                  className="block text-black hover:text-gray-600"
+                  onClick={toggleMenu}
+                >
+                  Todos los productos
+                </Link>
+                {categories.map((category, index) => (
+                  <Link
+                    key={index}
+                    to={`/products/${category.name}`}
+                    className="block text-black hover:text-gray-600"
+                    onClick={toggleMenu}
+                  >
+                    {category.name}
+                  </Link>
+                ))}
               </div>
             )}
           </div>
-          <a href="/contact" className="text-black hover:text-gray-600" onClick={toggleMenu}>Contacto</a>
-          <a href="/cart" className="text-black hover:text-gray-600" onClick={toggleMenu}>Carrito</a>
-          <a href="/login" className="text-blue-600 font-medium hover:text-blue-800" onClick={toggleMenu}>Iniciar Sesión</a>
+          <Link to="/contact" className="text-black hover:text-gray-600" onClick={toggleMenu}>
+            Contacto
+          </Link>
+          <Link to="/cart" className="text-black hover:text-gray-600" onClick={toggleMenu}>
+            Carrito
+          </Link>
+          <Link to="/login" className="text-blue-600 font-medium hover:text-blue-800" onClick={toggleMenu}>
+            Iniciar Sesión
+          </Link>
         </nav>
       </div>
     </header>

@@ -244,14 +244,14 @@ const ProductForm = ({ onSave, initialVariants, initialVariantOptions }) => {
               isMulti
               options={variantOptionsData.map((option) => ({
                 value: option.id,
-                label: `${option.variant.name}: ${option.value}`,
+                label: `${option.value}`,
               }))}
               onChange={handleOptionSelect}
               value={variantOptionsData
                 .filter((opt) => currentCombination.option_ids.includes(opt.id))
                 .map((opt) => ({
                   value: opt.id,
-                  label: `${opt.variant.name}: ${opt.value}`,
+                  label: `${opt.value}`,
                 }))}
               className="basic-multi-select"
               classNamePrefix="select"

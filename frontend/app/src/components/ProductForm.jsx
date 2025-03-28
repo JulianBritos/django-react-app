@@ -1,320 +1,152 @@
-import { useState, useEffect } from "react";
-import Select from "react-select";
-import { getVariants, getVariantOptions } from "../api/variants.api";
+import { useState } from "react";
+import { createProduct } from "../api/products.api";
+import { toast } from "react-hot-toast";
+import { Upload, Trash2 } from "lucide-react";
 
-const ProductForm = ({ onSave, initialVariants, initialVariantOptions }) => {
+const ProductForm = () => {
   const [product, setProduct] = useState({
     name: "",
     description: "",
-    price: "", // Precio base
+    base_price: "",
     category_id: "",
-    images: [],
-    variant_ids: [], // IDs de variantes genéricas
-    product_variants: [], // Combinaciones específicas
-  });
-
-  const [variantsData, setVariantsData] = useState([]); // Renombrado
-  const [variantOptionsData, setVariantOptionsData] = useState([]); // Renombrado
-  const [currentCombination, setCurrentCombination] = useState({
-    sku: "",
-    price: "",
     stock: "",
-    option_ids: [],
+    images: [],
   });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const variantsResponse = await getVariants();
-      setVariantsData(variantsResponse.data);
-
-      const optionsResponse = await getVariantOptions();
-      setVariantOptionsData(optionsResponse.data);
-    };
-    fetchData();
-  }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProduct({ ...product, [name]: value });
+    setProduct({ ...product, [e.target.name]: e.target.value });
   };
 
-  const handleFileChange = (e) => {
-    setProduct({
-      ...product,
-      images: Array.from(e.target.files),
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setProduct({ ...product, images: [...product.images, ...files] });
+  };
+
+  const handleRemoveImage = (index) => {
+    const updatedImages = [...product.images];
+    updatedImages.splice(index, 1);
+    setProduct({ ...product, images: updatedImages });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+
+    Object.keys(product).forEach((key) => {
+      if (key !== "images") {
+        formData.append(key, product[key]);
+      }
     });
-  };
 
-  const handleVariantChange = (selectedOptions) => {
-    setProduct({
-      ...product,
-      variant_ids: selectedOptions.map((opt) => opt.value),
+    product.images.forEach((image) => {
+      formData.append("images", image);
     });
-  };
 
-  const handleCombinationChange = (e) => {
-    const { name, value } = e.target;
-    setCurrentCombination({
-      ...currentCombination,
-      [name]: value,
-    });
-  };
-
-  const handleOptionSelect = (selectedOptions) => {
-    setCurrentCombination({
-      ...currentCombination,
-      option_ids: selectedOptions.map((opt) => opt.value),
-    });
-  };
-
-  const addCombination = () => {
-    if (
-      currentCombination.sku &&
-      currentCombination.price &&
-      currentCombination.stock &&
-      currentCombination.option_ids.length > 0
-    ) {
+    try {
+      await createProduct(formData);
+      toast.success("Producto creado con éxito!");
       setProduct({
-        ...product,
-        product_variants: [
-          ...product.product_variants,
-          {
-            sku: currentCombination.sku,
-            price: parseFloat(currentCombination.price),
-            stock: parseInt(currentCombination.stock),
-            option_ids: currentCombination.option_ids,
-          },
-        ],
-      });
-      setCurrentCombination({
-        sku: "",
+        name: "",
+        description: "",
         price: "",
         stock: "",
-        option_ids: [],
+        images: [],
       });
+    } catch (error) {
+      toast.error("Error al crear el producto.");
     }
   };
 
-  const removeCombination = (index) => {
-    const updated = [...product.product_variants];
-    updated.splice(index, 1);
-    setProduct({ ...product, product_variants: updated });
-  };
-
-  const generateSKU = () => {
-    const prefix = product.name.substring(0, 3).toUpperCase();
-    const optionsStr = currentCombination.option_ids
-      .map((optId) => {
-        const opt = variantOptionsData.find((o) => o.id == optId);
-        return opt.value.substring(0, 3).toUpperCase();
-      })
-      .join("-");
-    setCurrentCombination({
-      ...currentCombination,
-      sku: `${prefix}-${optionsStr}`,
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(product);
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4">
-      {/* Sección de información básica */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block mb-1 font-medium">Nombre:</label>
-          <input
-            type="text"
-            name="name"
-            value={product.name}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Precio Base:</label>
-          <input
-            type="number"
-            name="price"
-            value={product.price}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            step="0.01"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block mb-1 font-medium">Descripción:</label>
+    <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-bold mb-4">Crear Producto</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="text"
+          name="name"
+          placeholder="Nombre del producto"
+          value={product.name}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          required
+        />
         <textarea
           name="description"
+          placeholder="Descripción"
           value={product.description}
           onChange={handleChange}
           className="w-full p-2 border rounded"
-          rows={3}
+          required
         />
-      </div>
-
-      <div>
-        <label className="block mb-1 font-medium">Categoría ID:</label>
         <input
           type="number"
-          name="category_id"
+          name="price"
+          placeholder="Precio"
+          value={product.base_price}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <input
+          type="number"
+          name="category"
+          placeholder="Category"
           value={product.category_id}
           onChange={handleChange}
           className="w-full p-2 border rounded"
+          required
         />
-      </div>
-
-      {/* Sección de variantes genéricas */}
-      <div className="border-t pt-4">
-        <h3 className="font-bold mb-2">Variantes Disponibles</h3>
-        <Select
-          isMulti
-          options={variantsData.map((variant) => ({
-            value: variant.id,
-            label: variant.name,
-          }))}
-          onChange={handleVariantChange}
-          value={variantsData
-            .filter((v) => product.variant_ids.includes(v.id))
-            .map((v) => ({ value: v.id, label: v.name }))}
-          className="basic-multi-select"
-          classNamePrefix="select"
+        <input
+          type="number"
+          name="stock"
+          placeholder="Stock"
+          value={product.stock}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          required
         />
-      </div>
 
-      {/* Sección de combinaciones específicas */}
-      <div className="border-t pt-4">
-        <h3 className="font-bold mb-2">Combinaciones de Variantes</h3>
-
-        <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label className="block mb-1">SKU:</label>
-              <input
-                type="text"
-                name="sku"
-                value={currentCombination.sku}
-                onChange={handleCombinationChange}
-                className="w-full p-2 border rounded"
-                placeholder="Ej: CAM-ROJO-M"
-              />
-              <button
-                type="button"
-                onClick={generateSKU}
-                className="mt-1 text-sm text-blue-600"
-              >
-                Generar SKU
-              </button>
-            </div>
-
-            <div>
-              <label className="block mb-1">Precio:</label>
-              <input
-                type="number"
-                name="price"
-                value={currentCombination.price}
-                onChange={handleCombinationChange}
-                className="w-full p-2 border rounded"
-                step="0.01"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1">Stock:</label>
-              <input
-                type="number"
-                name="stock"
-                value={currentCombination.stock}
-                onChange={handleCombinationChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block mb-1">Opciones:</label>
-            <Select
-              isMulti
-              options={variantOptionsData.map((option) => ({
-                value: option.id,
-                label: `${option.value}`,
-              }))}
-              onChange={handleOptionSelect}
-              value={variantOptionsData
-                .filter((opt) => currentCombination.option_ids.includes(opt.id))
-                .map((opt) => ({
-                  value: opt.id,
-                  label: `${opt.value}`,
-                }))}
-              className="basic-multi-select"
-              classNamePrefix="select"
+        {/* Sección de imágenes */}
+        <div className="border p-3 rounded-md">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <Upload className="w-5 h-5" />
+            <span>Subir imágenes</span>
+            <input
+              type="file"
+              multiple
+              onChange={handleImageChange}
+              className="hidden"
+              accept="image/*"
             />
+          </label>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {product.images.map((image, index) => (
+              <div key={index} className="relative w-16 h-16">
+                <img
+                  src={URL.createObjectURL(image)}
+                  alt="Preview"
+                  className="w-full h-full object-cover rounded"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(index)}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
           </div>
-
-          <button
-            type="button"
-            onClick={addCombination}
-            className="bg-purple-500 text-white px-4 py-2 rounded"
-          >
-            Añadir Combinación
-          </button>
         </div>
 
-        {/* Lista de combinaciones añadidas */}
-        {product.product_variants.length > 0 && (
-          <div className="mt-4">
-            <h4 className="font-bold mb-2">Combinaciones Añadidas</h4>
-            <ul className="space-y-2">
-              {product.product_variants.map((pv, index) => (
-                <li
-                  key={index}
-                  className="flex justify-between items-center bg-gray-100 p-2 rounded"
-                >
-                  <div>
-                    <span className="font-medium">{pv.sku}</span> - ${pv.price}{" "}
-                    - Stock: {pv.stock}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeCombination(index)}
-                    className="text-red-500"
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-
-      {/* Sección de imágenes */}
-      <div className="border-t pt-4">
-        <label className="block mb-1 font-medium">Imágenes:</label>
-        <input
-          type="file"
-          multiple
-          onChange={handleFileChange}
-          className="w-full p-2 border rounded"
-        />
-      </div>
-
-      <div className="border-t pt-4">
         <button
           type="submit"
-          className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700"
+          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
         >
           Guardar Producto
         </button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 

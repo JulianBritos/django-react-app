@@ -1,76 +1,58 @@
 from rest_framework import serializers
-from .models import Product, Category, ProductImages, Variant, VariantOption, ProductVariant
+from .models import Product, Category, ProductImages, ProductVariant, Attribute, AttributeOption, ProductAttribute
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name']
+        fields = "__all__"
 
 class ProductImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImages
         fields = "__all__"
 
-class VariantOptionSerializer(serializers.ModelSerializer):
+class AttributeOptionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = VariantOption
+        model = AttributeOption
+        fields = '__all__'
+
+class AttributeSerializer(serializers.ModelSerializer):
+    options = AttributeOptionSerializer(many=True, read_only=True)  # Lista las opciones del atributo
+
+    class Meta:
+        model = Attribute
         fields = '__all__'
 
 
-class VariantSerializer(serializers.ModelSerializer):
-    options = VariantOptionSerializer(many=True, read_only=True)
+class ProductAttributeSerializer(serializers.ModelSerializer):
+    attribute = AttributeSerializer(read_only=True)  # Detalle del atributo
+    attribute_id = serializers.PrimaryKeyRelatedField(
+        queryset=Attribute.objects.all(), source="attribute", write_only=True
+    )  # Para creación/edición
 
     class Meta:
-        model = Variant
-        fields = '__all__'
+        model = ProductAttribute
+        fields = ['id', 'product', 'attribute', 'attribute_id']
 
-class ProductVariantSerializer(serializers.ModelSerializer):
-    options = VariantOptionSerializer(many=True, read_only=True)
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
-
-    option_ids = serializers.PrimaryKeyRelatedField(
-        queryset=VariantOption.objects.all(),
-        source='options',
-        many=True,
-        write_only=True
-    )
-    
-    class Meta:
-        model = ProductVariant
-        fields = '__all__'
-    
-    def create(self, validated_data):
-        options_data = validated_data.pop('options', [])  # Ahora funciona gracias a option_ids
-        variant = ProductVariant.objects.create(**validated_data)
-        variant.options.set(options_data)
-        return variant
 
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)  # Para mostrar el nombre de la categoría
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(),
-        source='category',  # Guarda en el campo 'category'
+        source="category",  # Guarda en el campo 'category'
         write_only=True     # Solo al crear/editar
     )
+    attributes = ProductAttributeSerializer(many=True, read_only=True)  # Lista atributos
     uploaded_images = ProductImagesSerializer(many=True, read_only=True)
 
-    product_variants = ProductVariantSerializer(many=True, read_only=True)
-    variant_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Variant.objects.all(),
-        source='variants',
-        many=True,
-        write_only=True
-    )
     class Meta:
         model = Product
         fields = '__all__'
     
     def create(self, validated_data):
-        uploaded_images = validated_data.pop('uploaded_images', [])  # Extraer imágenes
-        variants = validated_data.pop('variants', [])  # Extraer variantes
-        product = super().create(validated_data)  # Crear producto
-        variants = validated_data.pop('variants', [])
-        product.variants.set(variants)
+        request = self.context.get('request')
+        uploaded_images = request.FILES.getlist('uploaded_images')  # Extraer imágenes
+        product = Product.objects.create(**validated_data)   # Crear producto
 
         # Guardar imágenes en ProductImages
         for image in uploaded_images:
@@ -78,3 +60,16 @@ class ProductSerializer(serializers.ModelSerializer):
 
         return product
 
+class ProductVariantSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)  # Muestra detalles del producto
+    product_id = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), source="product", write_only=True
+    )  # Para creación/edición
+    options = AttributeOptionSerializer(many=True, read_only=True)  # Lista opciones seleccionadas
+    options_ids = serializers.PrimaryKeyRelatedField(
+        queryset=AttributeOption.objects.all(), source="options", many=True, write_only=True
+    )  # Para crear variantes con opciones
+
+    class Meta:
+        model = ProductVariant
+        fields = ['id', 'product', 'product_id', 'options', 'options_ids', 'price', 'stock', 'sku']

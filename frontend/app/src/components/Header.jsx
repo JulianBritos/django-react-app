@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { Menu, X, ShoppingCart, User, ChevronDown } from "lucide-react"; // Para iconos
-import { getCategories } from "../api/categorys.api"; // Para obtener las categorías
-import { Link } from "react-router-dom"; // Asegúrate de importar Link
+import { Menu, X, ShoppingCart, User, ChevronDown, Shield } from "lucide-react";
+import { getCategories } from "../api/categorys.api";
+import { Link } from "react-router-dom";
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [categories, setCategories] = useState([]);
+
+  // Simulación de sesión de admin (esto luego se reemplazará por autenticación real)
+  const [isAdmin] = useState(true);
 
   useEffect(() => {
     loadCategories();
@@ -25,7 +28,6 @@ function Header() {
       <div className="container mx-auto flex justify-between items-center px-4 py-4">
         {/* Logo + Menú Desktop */}
         <div className="flex items-center space-x-6">
-          {/* Logo */}
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-lg">C</span>
@@ -33,7 +35,6 @@ function Header() {
             <h1 className="text-xl font-bold tracking-wide">Cosmo Play</h1>
           </div>
 
-          {/* Menú Desktop */}
           <nav className="hidden md:flex space-x-6">
             <Link to="/" className="text-black font-medium hover:text-gray-600">
               Inicio
@@ -41,12 +42,8 @@ function Header() {
 
             <div
               className="relative"
-              onMouseEnter={() => {
-                setDropdownOpen(true);
-              }}
-              onMouseLeave={() => {
-                setDropdownOpen(false);
-              }}
+              onMouseEnter={() => setDropdownOpen(true)}
+              onMouseLeave={() => setDropdownOpen(false)}
             >
               <Link
                 to="/products/allproducts"
@@ -80,6 +77,15 @@ function Header() {
 
         {/* Iconos e Iniciar Sesión */}
         <div className="flex items-center space-x-6">
+          {isAdmin && (
+            <Link
+              to="/owner" // TODO: cambiar a "/admin" cuando la vista esté lista
+              className="hidden md:flex items-center bg-green-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-green-700 shadow-md transition text-base"
+            >
+              <Shield className="w-5 h-5 mr-2" /> Admin Panel
+            </Link>
+          )}
+
           <Link to="/cart" className="text-black">
             <ShoppingCart className="w-6 h-6 cursor-pointer" />
           </Link>
@@ -156,6 +162,15 @@ function Header() {
           <Link to="/login" className="text-blue-600 font-medium hover:text-blue-800" onClick={toggleMenu}>
             Iniciar Sesión
           </Link>
+          {isAdmin && (
+            <Link
+              to="/owner" // TODO: cambiar a "/admin" cuando la vista esté lista
+              className="bg-green-600 text-white px-5 py-2 rounded-md text-center font-bold hover:bg-green-700 transition text-base"
+              onClick={toggleMenu}
+            >
+              <Shield className="inline-block w-5 h-5 mr-2" /> Admin Panel
+            </Link>
+          )}
         </nav>
       </div>
     </header>
@@ -163,3 +178,4 @@ function Header() {
 }
 
 export default Header;
+

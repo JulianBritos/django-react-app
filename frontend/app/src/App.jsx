@@ -12,7 +12,6 @@ import LoginPage from "./pages/LoginPage";
 import ProductsSection from "./pages/ProductsSection";
 import CategoryPage from "./components/CategoryPage";
 
-
 function App() {
   return (
     <Router>

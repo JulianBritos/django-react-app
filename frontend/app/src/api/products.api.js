@@ -1,80 +1,54 @@
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000/apps/products/products/";
+const API_URL = "http://127.0.0.1:8000/apps/products/";
 
-// Crear un producto con imágenes
-export const createProduct = async (formData) => {
-  try {
-    const response = await axios.post(API_URL, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Error al crear el producto:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
-};
-
-// Obtener todos los productos
 export const getProducts = async () => {
-  try {
-    const response = await axios.get(API_URL);
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Error al obtener los productos:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
+  const response = await axios.get(`${API_URL}products/`);
+  return response.data;
 };
 
-// Obtener un producto por ID
 export const getProductById = async (id) => {
-  try {
-    const response = await axios.get(`${API_URL}${id}/`);
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Error al obtener el producto:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
+  const response = await axios.get(`${API_URL}products/${id}/`);
+  return response.data;
 };
 
-// Actualizar un producto
-export const updateProduct = async (id, formData) => {
-  try {
-    const response = await axios.put(`${API_URL}${id}/`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Error al actualizar el producto:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
+export const createProduct = async (productData) => {
+  const response = await axios.post(`${API_URL}products/`, productData);
+  return response.data;
 };
 
-// Eliminar un producto
+export const updateProduct = async (id, productData) => {
+  const response = await axios.put(`${API_URL}products/${id}/`, productData);
+  return response.data;
+};
+
 export const deleteProduct = async (id) => {
-  try {
-    await axios.delete(`${API_URL}${id}/`);
-  } catch (error) {
-    console.error(
-      "Error al eliminar el producto:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
+  const response = await axios.delete(`${API_URL}products/${id}/`);
+  return response.data;
+};
+
+export const getProductAttributes = async () => {
+  const response = await axios.get(`${API_URL}productattributes/`);
+  return response.data;
+};
+
+export const createProductAttribute = async (productAttributeData) => {
+  const response = await axios.post(
+    `${API_URL}productattributes/`,
+    productAttributeData
+  );
+  return response.data;
+};
+
+export const updateProductAttribute = async (id, productAttributeData) => {
+  const response = await axios.put(
+    `${API_URL}productattributes/${id}/`,
+    productAttributeData
+  );
+  return response.data;
+};
+
+export const deleteProductAttribute = async (id) => {
+  const response = await axios.delete(`${API_URL}productattributes/${id}/`);
+  return response.data;
 };

@@ -1,75 +1,86 @@
 from rest_framework import serializers
-from .models import Product, Category, ProductImages, ProductVariant, Attribute, AttributeOption, ProductAttribute
+from .models import Product, Category, ProductImages, Attribute, AttributeOption, ProductAttribute
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = "__all__"
 
+class AttributeOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeOption
+        fields = "__all__"
+
+class AttributeSerializer(serializers.ModelSerializer):
+    attributeoption_set = AttributeOptionSerializer(many=True, read_only=True)
+    class Meta:
+        model = Attribute
+        fields = "__all__"
 class ProductImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImages
         fields = "__all__"
 
-class AttributeOptionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AttributeOption
-        fields = '__all__'
-
-class AttributeSerializer(serializers.ModelSerializer):
-    options = AttributeOptionSerializer(many=True, read_only=True)  # Lista las opciones del atributo
-
-    class Meta:
-        model = Attribute
-        fields = '__all__'
-
-
-class ProductAttributeSerializer(serializers.ModelSerializer):
-    attribute = AttributeSerializer(read_only=True)  # Detalle del atributo
-    attribute_id = serializers.PrimaryKeyRelatedField(
-        queryset=Attribute.objects.all(), source="attribute", write_only=True
-    )  # Para creación/edición
-
-    class Meta:
-        model = ProductAttribute
-        fields = ['id', 'product', 'attribute', 'attribute_id']
-
-
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)  # Para mostrar el nombre de la categoría
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(),
-        source="category",  # Guarda en el campo 'category'
+        source='category',  # Guarda en el campo 'category'
         write_only=True     # Solo al crear/editar
     )
-    attributes = ProductAttributeSerializer(many=True, read_only=True)  # Lista atributos
     uploaded_images = ProductImagesSerializer(many=True, read_only=True)
-
     class Meta:
         model = Product
         fields = '__all__'
     
     def create(self, validated_data):
-        request = self.context.get('request')
-        uploaded_images = request.FILES.getlist('uploaded_images')  # Extraer imágenes
-        product = Product.objects.create(**validated_data)   # Crear producto
+        uploaded_images = validated_data.pop('uploaded_images', [])
 
-        # Guardar imágenes en ProductImages
+        product = super().create(validated_data)
+
         for image in uploaded_images:
             ProductImages.objects.create(product=product, image=image)
 
         return product
 
-class ProductVariantSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)  # Muestra detalles del producto
-    product_id = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(), source="product", write_only=True
-    )  # Para creación/edición
-    options = AttributeOptionSerializer(many=True, read_only=True)  # Lista opciones seleccionadas
-    options_ids = serializers.PrimaryKeyRelatedField(
-        queryset=AttributeOption.objects.all(), source="options", many=True, write_only=True
-    )  # Para crear variantes con opciones
-
+class ProductAttributeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProductVariant
-        fields = ['id', 'product', 'product_id', 'options', 'options_ids', 'price', 'stock', 'sku']
+        model = ProductAttribute
+        fields = '__all__'
+    
+    def validate(self, data):
+ 
+        attributes = set(data.get('attribute', []))  # Convertir en conjunto para acceso rápido
+        attribute_options = data.get('attributeoption', [])
+
+        # Crear un diccionario {id_atributo: set(opciones_permitidas)}
+        valid_options = {}
+        for attribute in attributes:
+            valid_options[attribute.id] = set(
+                AttributeOption.objects.filter(attribute=attribute).values_list('id', flat=True)
+            )
+
+        # Verificar que cada opción seleccionada pertenezca a su atributo
+        for option in attribute_options:
+            if option.attribute_id not in valid_options or option.id not in valid_options[option.attribute_id]:
+                raise serializers.ValidationError(
+                    f"La opción de atributo '{option.name}' no pertenece a los atributos seleccionados."
+            )
+
+        return data
+
+
+    def create(self, validated_data):
+
+        attributes = validated_data.pop('attribute', None)  # Extraer atributo
+        attribute_options = validated_data.pop('attributeoption', [])  # Extraer opciones de atributo
+
+        product_attribute = ProductAttribute.objects.create(**validated_data)
+
+        if attributes:
+            product_attribute.attribute.set(attributes)  # Asignar atributo
+
+        if attribute_options:
+            product_attribute.attributeoption.set(attribute_options) 
+
+        return product_attribute

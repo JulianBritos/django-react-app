@@ -1,320 +1,382 @@
-import { useState, useEffect } from "react";
-import Select from "react-select";
-import { getVariants, getVariantOptions } from "../api/variants.api";
+import React, { useState, useEffect } from "react";
+import { X, Plus, Trash2, Save, AlertCircle } from "lucide-react";
+import { getCategories } from "../api/categorys.api";
+import {
+  getAttributes,
+  getAttributeOptions,
+  createAttribute,
+  createAttributeOption,
+} from "../api/attributes.api";
+import {
+  createProduct,
+  updateProduct,
+  createProductAttribute,
+} from "../api/products.api";
 
-const ProductForm = ({ onSave, initialVariants, initialVariantOptions }) => {
-  const [product, setProduct] = useState({
-    name: "",
-    description: "",
-    price: "", // Precio base
-    category_id: "",
-    images: [],
-    variant_ids: [], // IDs de variantes genéricas
-    product_variants: [], // Combinaciones específicas
+const ProductForm = ({ product, onSave, onCancel }) => {
+  // Estados del formulario
+  const [formData, setFormData] = useState({
+    name: product?.name || "",
+    description: product?.description || "",
+    price: product?.price || 0,
+    category: product?.category || "",
+    image: null,
   });
+  const [attributes, setAttributes] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [productAttributes, setProductAttributes] = useState(
+    product?.attributes || []
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [variantsData, setVariantsData] = useState([]); // Renombrado
-  const [variantOptionsData, setVariantOptionsData] = useState([]); // Renombrado
-  const [currentCombination, setCurrentCombination] = useState({
-    sku: "",
-    price: "",
-    stock: "",
-    option_ids: [],
-  });
-
+  // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
-      const variantsResponse = await getVariants();
-      setVariantsData(variantsResponse.data);
-
-      const optionsResponse = await getVariantOptions();
-      setVariantOptionsData(optionsResponse.data);
+      try {
+        const [cats, attrs] = await Promise.all([
+          getCategories(),
+          getAttributes(),
+        ]);
+        setCategories(cats);
+        setAttributes(attrs);
+      } catch (err) {
+        setError("Error al cargar datos iniciales");
+      }
     };
     fetchData();
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProduct({ ...product, [name]: value });
-  };
-
-  const handleFileChange = (e) => {
-    setProduct({
-      ...product,
-      images: Array.from(e.target.files),
-    });
-  };
-
-  const handleVariantChange = (selectedOptions) => {
-    setProduct({
-      ...product,
-      variant_ids: selectedOptions.map((opt) => opt.value),
-    });
-  };
-
-  const handleCombinationChange = (e) => {
-    const { name, value } = e.target;
-    setCurrentCombination({
-      ...currentCombination,
-      [name]: value,
-    });
-  };
-
-  const handleOptionSelect = (selectedOptions) => {
-    setCurrentCombination({
-      ...currentCombination,
-      option_ids: selectedOptions.map((opt) => opt.value),
-    });
-  };
-
-  const addCombination = () => {
-    if (
-      currentCombination.sku &&
-      currentCombination.price &&
-      currentCombination.stock &&
-      currentCombination.option_ids.length > 0
-    ) {
-      setProduct({
-        ...product,
-        product_variants: [
-          ...product.product_variants,
-          {
-            sku: currentCombination.sku,
-            price: parseFloat(currentCombination.price),
-            stock: parseInt(currentCombination.stock),
-            option_ids: currentCombination.option_ids,
-          },
-        ],
-      });
-      setCurrentCombination({
-        sku: "",
-        price: "",
-        stock: "",
-        option_ids: [],
-      });
+    const { name, value, files } = e.target;
+    if (name === "image") {
+      setFormData({ ...formData, image: files[0] });
+    } else {
+      setFormData({ ...formData, [name]: value });
     }
   };
 
-  const removeCombination = (index) => {
-    const updated = [...product.product_variants];
-    updated.splice(index, 1);
-    setProduct({ ...product, product_variants: updated });
+  const handleAddAttribute = async () => {
+    try {
+      const newAttr = await createAttribute({
+        name: `Nuevo Atributo ${attributes.length + 1}`,
+      });
+      const newOption = await createAttributeOption({
+        attribute: newAttr.id,
+        name: "Opción 1",
+      });
+
+      setAttributes([...attributes, newAttr]);
+      setProductAttributes([
+        ...productAttributes,
+        {
+          attribute: newAttr.id,
+          options: [newOption],
+          stocks: [{ option: newOption.id, stock: 0, price: 0 }],
+        },
+      ]);
+    } catch (err) {
+      setError("Error al crear atributo");
+    }
   };
 
-  const generateSKU = () => {
-    const prefix = product.name.substring(0, 3).toUpperCase();
-    const optionsStr = currentCombination.option_ids
-      .map((optId) => {
-        const opt = variantOptionsData.find((o) => o.id == optId);
-        return opt.value.substring(0, 3).toUpperCase();
-      })
-      .join("-");
-    setCurrentCombination({
-      ...currentCombination,
-      sku: `${prefix}-${optionsStr}`,
-    });
-  };
+  const handleSave = async () => {
+    if (!formData.name || !formData.category) {
+      setError("Nombre y categoría son requeridos");
+      return;
+    }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(product);
+    if (window.confirm("¿Guardar producto?")) {
+      setIsLoading(true);
+      try {
+        // 1. Crear/Actualizar producto
+        const productData = new FormData();
+        productData.append("name", formData.name);
+        productData.append("description", formData.description);
+        productData.append("price", formData.price);
+        productData.append("category", formData.category);
+        if (formData.image) productData.append("image", formData.image);
+
+        const savedProduct = product?.id
+          ? await updateProduct(product.id, productData)
+          : await createProduct(productData);
+
+        // 2. Guardar atributos del producto
+        for (const pa of productAttributes) {
+          await createProductAttribute({
+            product: savedProduct.id,
+            attribute: pa.attribute,
+            options: pa.options.map((opt) => opt.id),
+          });
+        }
+
+        onSave(savedProduct);
+      } catch (err) {
+        setError("Error al guardar el producto");
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4">
-      {/* Sección de información básica */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block mb-1 font-medium">Nombre:</label>
-          <input
-            type="text"
-            name="name"
-            value={product.name}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Precio Base:</label>
-          <input
-            type="number"
-            name="price"
-            value={product.price}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            step="0.01"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block mb-1 font-medium">Descripción:</label>
-        <textarea
-          name="description"
-          value={product.description}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          rows={3}
-        />
-      </div>
-
-      <div>
-        <label className="block mb-1 font-medium">Categoría ID:</label>
-        <input
-          type="number"
-          name="category_id"
-          value={product.category_id}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        />
-      </div>
-
-      {/* Sección de variantes genéricas */}
-      <div className="border-t pt-4">
-        <h3 className="font-bold mb-2">Variantes Disponibles</h3>
-        <Select
-          isMulti
-          options={variantsData.map((variant) => ({
-            value: variant.id,
-            label: variant.name,
-          }))}
-          onChange={handleVariantChange}
-          value={variantsData
-            .filter((v) => product.variant_ids.includes(v.id))
-            .map((v) => ({ value: v.id, label: v.name }))}
-          className="basic-multi-select"
-          classNamePrefix="select"
-        />
-      </div>
-
-      {/* Sección de combinaciones específicas */}
-      <div className="border-t pt-4">
-        <h3 className="font-bold mb-2">Combinaciones de Variantes</h3>
-
-        <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label className="block mb-1">SKU:</label>
-              <input
-                type="text"
-                name="sku"
-                value={currentCombination.sku}
-                onChange={handleCombinationChange}
-                className="w-full p-2 border rounded"
-                placeholder="Ej: CAM-ROJO-M"
-              />
-              <button
-                type="button"
-                onClick={generateSKU}
-                className="mt-1 text-sm text-blue-600"
-              >
-                Generar SKU
-              </button>
-            </div>
-
-            <div>
-              <label className="block mb-1">Precio:</label>
-              <input
-                type="number"
-                name="price"
-                value={currentCombination.price}
-                onChange={handleCombinationChange}
-                className="w-full p-2 border rounded"
-                step="0.01"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1">Stock:</label>
-              <input
-                type="number"
-                name="stock"
-                value={currentCombination.stock}
-                onChange={handleCombinationChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block mb-1">Opciones:</label>
-            <Select
-              isMulti
-              options={variantOptionsData.map((option) => ({
-                value: option.id,
-                label: `${option.value}`,
-              }))}
-              onChange={handleOptionSelect}
-              value={variantOptionsData
-                .filter((opt) => currentCombination.option_ids.includes(opt.id))
-                .map((opt) => ({
-                  value: opt.id,
-                  label: `${opt.value}`,
-                }))}
-              className="basic-multi-select"
-              classNamePrefix="select"
-            />
-          </div>
-
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="text-xl font-semibold">
+            {product?.id ? "Editar Producto" : "Nuevo Producto"}
+          </h2>
           <button
-            type="button"
-            onClick={addCombination}
-            className="bg-purple-500 text-white px-4 py-2 rounded"
+            onClick={onCancel}
+            className="text-gray-500 hover:text-gray-700"
           >
-            Añadir Combinación
+            <X size={24} />
           </button>
         </div>
 
-        {/* Lista de combinaciones añadidas */}
-        {product.product_variants.length > 0 && (
-          <div className="mt-4">
-            <h4 className="font-bold mb-2">Combinaciones Añadidas</h4>
-            <ul className="space-y-2">
-              {product.product_variants.map((pv, index) => (
-                <li
-                  key={index}
-                  className="flex justify-between items-center bg-gray-100 p-2 rounded"
-                >
-                  <div>
-                    <span className="font-medium">{pv.sku}</span> - ${pv.price}{" "}
-                    - Stock: {pv.stock}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeCombination(index)}
-                    className="text-red-500"
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ul>
+        {error && (
+          <div className="bg-red-100 text-red-700 p-3 flex items-center gap-2">
+            <AlertCircle size={18} />
+            <span>{error}</span>
           </div>
         )}
-      </div>
 
-      {/* Sección de imágenes */}
-      <div className="border-t pt-4">
-        <label className="block mb-1 font-medium">Imágenes:</label>
-        <input
-          type="file"
-          multiple
-          onChange={handleFileChange}
-          className="w-full p-2 border rounded"
-        />
-      </div>
+        <div className="p-6 space-y-6">
+          {/* Campos básicos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nombre*
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
 
-      <div className="border-t pt-4">
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700"
-        >
-          Guardar Producto
-        </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Categoría*
+              </label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                required
+              >
+                <option value="">Seleccionar categoría</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Precio Base*
+              </label>
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Imagen Principal
+              </label>
+              <input
+                type="file"
+                name="image"
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                accept="image/*"
+              />
+            </div>
+          </div>
+
+          {/* Descripción */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Descripción
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={3}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+
+          {/* Atributos */}
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-medium">Atributos del Producto</h3>
+              <button
+                type="button"
+                onClick={handleAddAttribute}
+                className="flex items-center gap-1 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+              >
+                <Plus size={16} />
+                <span>Agregar Atributo</span>
+              </button>
+            </div>
+
+            {productAttributes.length === 0 && (
+              <p className="text-gray-500 text-sm">
+                No hay atributos agregados
+              </p>
+            )}
+
+            {productAttributes.map((pa, index) => {
+              const attribute = attributes.find((a) => a.id === pa.attribute);
+              return (
+                <div key={index} className="border p-4 rounded-lg mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-medium">
+                      {attribute?.name || "Nuevo Atributo"}
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm("¿Eliminar este atributo?")) {
+                          setProductAttributes(
+                            productAttributes.filter((_, i) => i !== index)
+                          );
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+
+                  {/* Opciones del atributo */}
+                  <div className="space-y-3">
+                    {pa.options.map((option, optIndex) => (
+                      <div key={optIndex} className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-sm text-gray-600 mb-1">
+                            Opción
+                          </label>
+                          <input
+                            type="text"
+                            value={option.name}
+                            onChange={(e) => {
+                              const newOptions = [...pa.options];
+                              newOptions[optIndex].name = e.target.value;
+                              setProductAttributes(
+                                productAttributes.map((item, i) =>
+                                  i === index
+                                    ? { ...item, options: newOptions }
+                                    : item
+                                )
+                              );
+                            }}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-600 mb-1">
+                            Stock
+                          </label>
+                          <input
+                            type="number"
+                            value={pa.stocks[optIndex]?.stock || 0}
+                            onChange={(e) => {
+                              const newStocks = [...pa.stocks];
+                              newStocks[optIndex] = {
+                                ...newStocks[optIndex],
+                                stock: parseInt(e.target.value),
+                              };
+                              setProductAttributes(
+                                productAttributes.map((item, i) =>
+                                  i === index
+                                    ? { ...item, stocks: newStocks }
+                                    : item
+                                )
+                              );
+                            }}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-600 mb-1">
+                            Precio Adicional
+                          </label>
+                          <input
+                            type="number"
+                            value={pa.stocks[optIndex]?.price || 0}
+                            onChange={(e) => {
+                              const newStocks = [...pa.stocks];
+                              newStocks[optIndex] = {
+                                ...newStocks[optIndex],
+                                price: parseFloat(e.target.value),
+                              };
+                              setProductAttributes(
+                                productAttributes.map((item, i) =>
+                                  i === index
+                                    ? { ...item, stocks: newStocks }
+                                    : item
+                                )
+                              );
+                            }}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 p-4 border-t">
+          <button
+            type="button"
+            onClick={() => {
+              if (
+                formData.name ||
+                formData.description ||
+                productAttributes.length > 0
+              ) {
+                if (window.confirm("¿Cancelar sin guardar cambios?")) {
+                  onCancel();
+                }
+              } else {
+                onCancel();
+              }
+            }}
+            className="px-4 py-2 border rounded hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isLoading}
+            className="flex items-center gap-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
+          >
+            <Save size={18} />
+            <span>{isLoading ? "Guardando..." : "Guardar Producto"}</span>
+          </button>
+        </div>
       </div>
-    </form>
+    </div>
   );
 };
 

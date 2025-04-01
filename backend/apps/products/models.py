@@ -1,45 +1,58 @@
 from django.db import models
 
 class Category(models.Model):
-    name = models.CharField(max_length=100)
+    id=models.AutoField(primary_key=True)
+    name=models.CharField(max_length=255)
+    display_order=models.IntegerField(default=0)
+    parent_id=models.ForeignKey('self',on_delete=models.CASCADE,blank=True,null=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
-class Variant(models.Model):
-    name = models.CharField(max_length=100)  # Ejemplo: "Color" o "Talle"
-
+class Attribute(models.Model):
+    id=models.AutoField(primary_key=True)
+    name=models.CharField(max_length=255)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    
     def __str__(self):
         return self.name
 
-
-class VariantOption(models.Model):
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, null=True, related_name="options")
-    value = models.CharField(max_length=100)  # Ejemplo: "Rojo", "M", "L"
+class AttributeOption(models.Model):
+    id=models.AutoField(primary_key=True)
+    name=models.CharField(max_length=255)
+    attribute=models.ForeignKey(Attribute, on_delete=models.SET_NULL, null=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)   
 
     def __str__(self):
-        return f"{self.variant.name}: {self.value}"
+        return self.name
 
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
-    variants = models.ManyToManyField(Variant, related_name="products")
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)    
+    specifications=models.JSONField(blank=True, null=True)
+    html_description=models.TextField( null=True)
+    highlights=models.JSONField( null=True)
+    initial_buying_price=models.FloatField( null=True)
+    tax_percentage=models.FloatField( null=True)
+    brand=models.CharField(max_length=255, null=True)
+    brand_model=models.CharField(max_length=255, null=True)
+    status=models.CharField(max_length=255,choices=[('ACTIVE','ACTIVE'),('INACTIVE','INACTIVE')],default='ACTIVE')
+    seo_title=models.CharField(max_length=255, null=True)
+    seo_description=models.TextField( null=True)
+    seo_keywords=models.JSONField( null=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+   
 
     def __str__(self):
         return self.name
     
-class ProductVariant(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, related_name='product_variants')
-    sku = models.CharField(max_length=50, unique=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)  # Precio específico (opcional)
-    stock = models.PositiveIntegerField(default=0)
-    options = models.ManyToManyField(VariantOption)  # Relación con las opciones seleccionadas
-
-    def __str__(self):
-        return f"{self.product.name} - {', '.join(opt.value for opt in self.options.all())}"
 
 class ProductImages(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='uploaded_images')
@@ -48,3 +61,14 @@ class ProductImages(models.Model):
     def __str__(self):
         return self.image.url
     
+
+class ProductAttribute(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_attributes')
+    attribute = models.ManyToManyField(Attribute, related_name='attribute')
+    attributeoption = models.ManyToManyField(AttributeOption, related_name='product_attribute_options')
+    sku = models.CharField(max_length=255, blank=True, null=True)
+    selling_price=models.FloatField( null=True)
+    stock = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return self.product

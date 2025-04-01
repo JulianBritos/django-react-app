@@ -13,7 +13,6 @@ import ProductsSection from "./pages/ProductsSection";
 import CategoryPage from "./components/CategoryPage";
 import AdminComponent from "./components/AdminComponent";
 
-
 function App() {
   return (
     <Router>

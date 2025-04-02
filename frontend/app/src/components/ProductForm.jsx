@@ -65,27 +65,32 @@ const ProductForm = ({ product, onSave, onCancel }) => {
     setFormData({ ...formData, images: files });
   };
 
-  const handleAddAttribute = async () => {
-    try {
-      const newAttr = await createAttribute({
-        name: `Nuevo Atributo ${attributes.length + 1}`,
-      });
-      const newOption = await createAttributeOption({
-        attribute: newAttr.id,
-        name: "Opción 1",
-      });
+  const handleAddAttribute = async (attributeId) => {
+    if (!attributeId) return;
 
-      setAttributes([...attributes, newAttr]);
-      setProductAttributes([
-        ...productAttributes,
+    // Verificar si el atributo ya fue agregado
+    if (productAttributes.some((pa) => pa.attribute === attributeId)) {
+      return;
+    }
+
+    try {
+      // Obtener opciones del atributo seleccionado
+      const options = await getAttributeOptions(attributeId);
+
+      setProductAttributes((prevAttributes) => [
+        ...prevAttributes,
         {
-          attribute: newAttr.id,
-          options: [newOption],
-          stocks: [{ option: newOption.id, stock: 0, price: 0 }],
+          attribute: attributeId,
+          options,
+          stocks: options.map((opt) => ({
+            option: opt.id,
+            stock: 0,
+            price: 0,
+          })),
         },
       ]);
     } catch (err) {
-      setError("Error al crear atributo");
+      setError("Error al cargar opciones del atributo");
     }
   };
 
@@ -286,25 +291,17 @@ const ProductForm = ({ product, onSave, onCancel }) => {
                     {pa.options.map((option, optIndex) => (
                       <div key={optIndex} className="grid grid-cols-3 gap-3">
                         <div>
-                          <label className="block text-sm text-gray-600 mb-1">
-                            Opción
-                          </label>
-                          <input
-                            type="text"
-                            value={option.name}
-                            onChange={(e) => {
-                              const newOptions = [...pa.options];
-                              newOptions[optIndex].name = e.target.value;
-                              setProductAttributes(
-                                productAttributes.map((item, i) =>
-                                  i === index
-                                    ? { ...item, options: newOptions }
-                                    : item
-                                )
-                              );
-                            }}
-                            className="w-full p-2 border rounded"
-                          />
+                          <select
+                            onChange={(e) => handleAddAttribute(e.target.value)}
+                            className="p-2 border rounded"
+                          >
+                            <option value="">Seleccionar atributo</option>
+                            {attributes.map((attr) => (
+                              <option key={attr.id} value={attr.id}>
+                                {attr.name}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                         <div>
                           <label className="block text-sm text-gray-600 mb-1">

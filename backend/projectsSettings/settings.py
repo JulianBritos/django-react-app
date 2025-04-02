@@ -38,9 +38,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt', 
     'corsheaders',
-    'apps.api',
     'apps.products',
-    'apps.users',
+    'apps.users.apps.UsersConfig',
     'apps.payments',
     'apps.orders'
 ]
@@ -144,7 +143,7 @@ CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[]) #cuando pase
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-AUTH_USER_MODEL = 'api.User'
+AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

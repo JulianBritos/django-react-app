@@ -90,14 +90,23 @@ const AdminPanel = () => {
                   className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                 >
                   <div className="aspect-square bg-gray-100 flex items-center justify-center">
-                    {product.image ? (
+                    {product.uploaded_images &&
+                    product.uploaded_images.length > 0 ? (
                       <img
-                        src={product.image}
+                        src={product.uploaded_images[0].image}
                         alt={product.name}
-                        className="object-cover w-full h-full"
+                        className="w-full h-64 object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "/placeholder.jpg";
+                        }}
                       />
                     ) : (
-                      <span className="text-gray-400">Sin imagen</span>
+                      <img
+                        src="/placeholder.jpg"
+                        alt="Sin imagen"
+                        className="w-full h-64 object-cover"
+                      />
                     )}
                   </div>
                   <div className="p-4">

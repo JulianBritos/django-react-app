@@ -20,7 +20,8 @@ const ProductForm = ({ product, onSave, onCancel }) => {
     description: product?.description || "",
     price: product?.price || 0,
     category: product?.category || "",
-    image: null,
+    images: product?.uploaded_images || [],
+    status: product?.status || "",
   });
   const [attributes, setAttributes] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -32,6 +33,12 @@ const ProductForm = ({ product, onSave, onCancel }) => {
 
   // Cargar datos iniciales
   useEffect(() => {
+    if (product?.uploaded_images) {
+      setFormData((prev) => ({
+        ...prev,
+        category: product.category?.id || "",
+      }));
+    }
     const fetchData = async () => {
       try {
         const [cats, attrs] = await Promise.all([
@@ -48,40 +55,47 @@ const ProductForm = ({ product, onSave, onCancel }) => {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "image") {
-      setFormData({ ...formData, image: files[0] });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    const { name, value } = e.target;
+
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleAddAttribute = async () => {
-    try {
-      const newAttr = await createAttribute({
-        name: `Nuevo Atributo ${attributes.length + 1}`,
-      });
-      const newOption = await createAttributeOption({
-        attribute: newAttr.id,
-        name: "Opción 1",
-      });
+  const handleImageChange = (e) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    setFormData({ ...formData, images: files });
+  };
 
-      setAttributes([...attributes, newAttr]);
-      setProductAttributes([
-        ...productAttributes,
+  const handleAddAttribute = async (attributeId) => {
+    if (!attributeId) return;
+
+    // Verificar si el atributo ya fue agregado
+    if (productAttributes.some((pa) => pa.attribute === attributeId)) {
+      return;
+    }
+
+    try {
+      // Obtener opciones del atributo seleccionado
+      const options = await getAttributeOptions(attributeId);
+
+      setProductAttributes((prevAttributes) => [
+        ...prevAttributes,
         {
-          attribute: newAttr.id,
-          options: [newOption],
-          stocks: [{ option: newOption.id, stock: 0, price: 0 }],
+          attribute: attributeId,
+          options,
+          stocks: options.map((opt) => ({
+            option: opt.id,
+            stock: 0,
+            price: 0,
+          })),
         },
       ]);
     } catch (err) {
-      setError("Error al crear atributo");
+      setError("Error al cargar opciones del atributo");
     }
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.category) {
+    if (!formData.name || !formData.category || !formData.description) {
       setError("Nombre y categoría son requeridos");
       return;
     }
@@ -94,8 +108,11 @@ const ProductForm = ({ product, onSave, onCancel }) => {
         productData.append("name", formData.name);
         productData.append("description", formData.description);
         productData.append("price", formData.price);
-        productData.append("category", formData.category);
-        if (formData.image) productData.append("image", formData.image);
+        productData.append("category_id", formData.category);
+
+        formData.images.forEach((image, index) => {
+          productData.append(`uploaded_images`, image);
+        });
 
         const savedProduct = product?.id
           ? await updateProduct(product.id, productData)
@@ -194,15 +211,21 @@ const ProductForm = ({ product, onSave, onCancel }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Imagen Principal
+                Imágenes del Producto
               </label>
               <input
                 type="file"
-                name="image"
-                onChange={handleChange}
+                name="images"
+                onChange={handleImageChange}
                 className="w-full p-2 border rounded"
                 accept="image/*"
+                multiple // Permite selección múltiple
               />
+              {(formData.images || []).length > 0 && (
+                <div>
+                  {(formData.images || []).length} imágen(es) seleccionada(s)
+                </div>
+              )}
             </div>
           </div>
 
@@ -268,25 +291,17 @@ const ProductForm = ({ product, onSave, onCancel }) => {
                     {pa.options.map((option, optIndex) => (
                       <div key={optIndex} className="grid grid-cols-3 gap-3">
                         <div>
-                          <label className="block text-sm text-gray-600 mb-1">
-                            Opción
-                          </label>
-                          <input
-                            type="text"
-                            value={option.name}
-                            onChange={(e) => {
-                              const newOptions = [...pa.options];
-                              newOptions[optIndex].name = e.target.value;
-                              setProductAttributes(
-                                productAttributes.map((item, i) =>
-                                  i === index
-                                    ? { ...item, options: newOptions }
-                                    : item
-                                )
-                              );
-                            }}
-                            className="w-full p-2 border rounded"
-                          />
+                          <select
+                            onChange={(e) => handleAddAttribute(e.target.value)}
+                            className="p-2 border rounded"
+                          >
+                            <option value="">Seleccionar atributo</option>
+                            {attributes.map((attr) => (
+                              <option key={attr.id} value={attr.id}>
+                                {attr.name}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                         <div>
                           <label className="block text-sm text-gray-600 mb-1">

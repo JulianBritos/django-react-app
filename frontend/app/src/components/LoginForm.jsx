@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api/auth.api";
 import toast from "react-hot-toast";
+import GoogleLogin from "./GoogleLogin";
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -73,14 +74,21 @@ const LoginForm = () => {
           >
             Ingresar
           </button>
-          <a
-            href="/register"
-            className="text-blue-700 hover:text-gray-950 text-sm sm:text-base text-center block"
-          >
-            ¿Aún no tienes una cuenta? Regístrate
-          </a>
-          <a href="#" className="text-blue-700 hover:text-gray-950 text-sm sm:text-base text-center block pt-1">¿Olvidaste tu contraseña?</a>
+          <GoogleLogin />
         </form>
+
+        <a
+          href="/register"
+          className="text-blue-700 hover:text-gray-950 text-sm sm:text-base text-center block"
+        >
+          ¿Aún no tienes una cuenta? Regístrate
+        </a>
+        <a
+          href="#"
+          className="text-blue-700 hover:text-gray-950 text-sm sm:text-base text-center block pt-1"
+        >
+          ¿Olvidaste tu contraseña?
+        </a>
       </div>
     </div>
   );

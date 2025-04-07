@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Para redirigir
 import { registerUser } from "../api/auth.api"; // Función para hacer la petición
 import toast, { Toaster } from "react-hot-toast"; // Importamos toast
+import GoogleLogin from "./GoogleLogin";
 
 const RegisterForm = () => {
   const navigate = useNavigate(); // Hook de navegación
@@ -103,6 +104,7 @@ const RegisterForm = () => {
           >
             Registrarse
           </button>
+          <GoogleLogin />
         </form>
       </div>
     </div>

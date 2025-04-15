@@ -3,74 +3,8 @@ import { FiFilter, FiEdit, FiSearch, FiPlus } from "react-icons/fi";
 import ProductForm3 from "./ProductForm3";
 
 function AdminComponent({ products, categories }) {
-  const productsTest = [
-    {
-      id: 1,
-      name: "Camiseta Blanca",
-      price: 19.99,
-      category: "ropa",
-      uploaded_images: [
-        {
-          image: "https://images.unsplash.com/photo-1603808033192-082d72c10bda",
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: "Laptop HP",
-      price: 899.99,
-      category: "electronica",
-      uploaded_images: [
-        {
-          image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8",
-        },
-      ],
-    },
-    {
-      id: 3,
-      name: "Harry Potter y la piedra filosofal",
-      price: 12.5,
-      category: "libros",
-      uploaded_images: [
-        {
-          image: "https://images.unsplash.com/photo-1512820790803-83ca734da794",
-        },
-      ],
-    },
-    {
-      id: 4,
-      name: "Pantalón Jeans",
-      price: 39.99,
-      category: "ropa",
-      uploaded_images: [
-        {
-          image: "https://images.unsplash.com/photo-1581578731548-c64695cc695c",
-        },
-      ],
-    },
-    {
-      id: 5,
-      name: "Auriculares Bluetooth",
-      price: 59.99,
-      category: "electronica",
-      uploaded_images: [
-        {
-          image: "https://images.unsplash.com/photo-1587825140708-dfaf72ae4bde",
-        },
-      ],
-    },
-  ];
-  
-  
 
-  const categoriesTest = [
-    { name: "allproducts", label: "Todos" },
-    { name: "ropa", label: "Ropa" },
-    { name: "electronica", label: "Electrónica" },
-    { name: "libros", label: "Libros" },
-  ];
-
-  const [filteredProducts, setFilteredProducts] = useState(productsTest);
+  const [filteredProducts, setFilteredProducts] = useState(products);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("allproducts");
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
@@ -81,9 +15,9 @@ function AdminComponent({ products, categories }) {
     setSelectedCategory(category);
     setIsFilterMenuOpen(false);
     if (category === "allproducts") {
-      setFilteredProducts(productsTest);
+      setFilteredProducts(products);
     } else {
-      setFilteredProducts(productsTest.filter((product) => product.category === category));
+      setFilteredProducts(products.filter((product) => product.category === category));
     }
     setSearchTerm("");
   };
@@ -92,7 +26,7 @@ function AdminComponent({ products, categories }) {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
     setFilteredProducts(
-      productsTest.filter((product) =>
+      products.filter((product) =>
         product.category === selectedCategory || selectedCategory === "allproducts"
       ).filter((product) => product.name.toLowerCase().includes(term))
     );
@@ -112,7 +46,7 @@ function AdminComponent({ products, categories }) {
     <div className="admin-page p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-800">
-          {selectedCategory === "allproducts" ? "Todos los Productos" : categoriesTest.find(c => c.name === selectedCategory)?.label}
+          {selectedCategory === "allproducts" ? "Todos los Productos" : categories.find(c => c.name === selectedCategory)?.label}
         </h1>
         <div className="flex-1 flex justify-center items-center gap-4">
           <div className="relative w-2/5 min-w-[300px]">
@@ -137,7 +71,7 @@ function AdminComponent({ products, categories }) {
             </span>
             {isFilterMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg p-2">
-                {categoriesTest.map((category) => (
+                {categories.map((category) => (
                   <button
                     key={category.name}
                     onClick={() => handleCategoryClick(category.name)}

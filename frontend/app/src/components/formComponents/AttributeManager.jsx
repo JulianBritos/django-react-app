@@ -66,26 +66,7 @@ const AttributeManagerOriginal = ({ attributes, onChange }) => {
                 </select>
               </div>
 
-              {/* Selector de opción */}
-              <div className="col-span-1">
-                <label className="text-sm font-medium text-transparent">-</label>
-                <select
-                  value={block.optionId}
-                  onChange={(e) =>
-                    handleAttributeChange(index, 'optionId', e.target.value)
-                  }
-                  className="w-full border p-2 rounded"
-                >
-                  <option value="">Seleccionar atributo</option>
-                  {attributes
-                    .find((attr) => attr.id === block.attributeId)
-                    ?.options.map((opt) => (
-                      <option key={opt.id} value={opt.id}>
-                        {opt.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
+              
 
               {/* Stock */}
               <div className="col-span-1">

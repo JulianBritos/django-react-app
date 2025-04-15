@@ -16,7 +16,7 @@ const OwnerSection = () => {
   }, []);
 
   const loadProducts = async () => {
-    const data = await getProducts();
+    const data  = await getProducts();
     setProducts(data);
   };
 

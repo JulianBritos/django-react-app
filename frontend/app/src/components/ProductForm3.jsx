@@ -12,6 +12,7 @@ import {
   createProduct,
   updateProduct,
 } from "../api/products.api";
+import { getProducts } from "../api/products.api";
 
 import FormHeader from "./formComponents/FormHeader";
 import FormMessages from "./formComponents/FormMessages";

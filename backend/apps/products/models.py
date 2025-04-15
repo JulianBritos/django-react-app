@@ -54,14 +54,6 @@ class Product(models.Model):
         return self.name
     
 
-class ProductImages(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='uploaded_images')
-    image = models.ImageField(upload_to='product_images/')
-
-    def __str__(self):
-        return self.image.url
-    
-
 class ProductAttribute(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_attributes')
     attribute = models.ManyToManyField(Attribute, related_name='attribute')
@@ -69,6 +61,16 @@ class ProductAttribute(models.Model):
     sku = models.CharField(max_length=255, blank=True, null=True)
     selling_price=models.FloatField( null=True)
     stock = models.PositiveIntegerField(default=0)
+    stock_alert = models.PositiveIntegerField(default=0)
+    barcode = models.CharField(max_length=255, blank=True, null=True)
+    
 
     def __str__(self):
         return self.product
+    
+class ProductImages(models.Model):
+    productattribute = models.ForeignKey(ProductAttribute, on_delete=models.CASCADE, related_name='uploaded_images')
+    image = models.ImageField(upload_to='product_images/')
+
+    def __str__(self):
+        return self.image.url

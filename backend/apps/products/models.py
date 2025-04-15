@@ -36,30 +36,22 @@ class Product(models.Model):
     description = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)    
     specifications=models.JSONField(blank=True, null=True)
-    html_description=models.TextField( null=True)
-    highlights=models.JSONField( null=True)
+    html_description=models.TextField(blank=True, null=True)
+    highlights=models.JSONField(blank=True, null=True)
     initial_buying_price=models.FloatField( null=True)
-    tax_percentage=models.FloatField( null=True)
-    brand=models.CharField(max_length=255, null=True)
-    brand_model=models.CharField(max_length=255, null=True)
+    tax_percentage=models.FloatField(blank=True, null=True)
+    brand=models.CharField(max_length=255,blank=True, null=True)
+    brand_model=models.CharField(max_length=255,blank=True, null=True)
     status=models.CharField(max_length=255,choices=[('ACTIVE','ACTIVE'),('INACTIVE','INACTIVE')],default='ACTIVE')
-    seo_title=models.CharField(max_length=255, null=True)
-    seo_description=models.TextField( null=True)
-    seo_keywords=models.JSONField( null=True)
+    seo_title=models.CharField(max_length=255,blank=True, null=True)
+    seo_description=models.TextField(blank=True, null=True)
+    seo_keywords=models.JSONField(blank=True, null=True)
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
    
 
     def __str__(self):
         return self.name
-    
-
-class ProductImages(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='uploaded_images')
-    image = models.ImageField(upload_to='product_images/')
-
-    def __str__(self):
-        return self.image.url
     
 
 class ProductAttribute(models.Model):
@@ -69,6 +61,16 @@ class ProductAttribute(models.Model):
     sku = models.CharField(max_length=255, blank=True, null=True)
     selling_price=models.FloatField( null=True)
     stock = models.PositiveIntegerField(default=0)
+    stock_alert = models.PositiveIntegerField(default=0)
+    barcode = models.CharField(max_length=255, blank=True, null=True)
+    
 
     def __str__(self):
         return self.product
+    
+class ProductImages(models.Model):
+    productattribute = models.ForeignKey(ProductAttribute, on_delete=models.CASCADE, related_name='uploaded_images')
+    image = models.ImageField(upload_to='product_images/')
+
+    def __str__(self):
+        return self.image.url

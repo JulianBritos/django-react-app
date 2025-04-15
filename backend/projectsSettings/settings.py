@@ -29,6 +29,7 @@ ALLOWED_HOSTS = []
 SITE_ID = 1
 
 INSTALLED_APPS = [
+    "unfold",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'dj_rest_auth',
     'dj_rest_auth.registration',
+    'drf_yasg'
 ]
 
 SOCIALACCOUNT_PROVIDERS = {

@@ -44,6 +44,7 @@ class ProductSerializer(serializers.ModelSerializer):
         return product
 
 class ProductAttributeSerializer(serializers.ModelSerializer):
+    uploaded_images = ProductImagesSerializer(many=True, read_only=True)
     class Meta:
         model = ProductAttribute
         fields = '__all__'
@@ -59,7 +60,7 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
             valid_options[attribute.id] = set(
                 AttributeOption.objects.filter(attribute=attribute).values_list('id', flat=True)
             )
-
+        
         # Verificar que cada opción seleccionada pertenezca a su atributo
         for option in attribute_options:
             if option.attribute_id not in valid_options or option.id not in valid_options[option.attribute_id]:
@@ -74,6 +75,8 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
 
         attributes = validated_data.pop('attribute', None)  # Extraer atributo
         attribute_options = validated_data.pop('attributeoption', [])  # Extraer opciones de atributo
+        uploaded_images = validated_data.pop('uploaded_images', [])
+        
 
         product_attribute = ProductAttribute.objects.create(**validated_data)
 
@@ -82,5 +85,8 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
 
         if attribute_options:
             product_attribute.attributeoption.set(attribute_options) 
+        
+        for image in uploaded_images:
+            ProductImages.objects.create(product=product_attribute, image=image)
 
         return product_attribute

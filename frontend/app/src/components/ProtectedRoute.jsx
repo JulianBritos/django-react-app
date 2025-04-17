@@ -7,12 +7,12 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   if (!token) {
     // Si no hay token, redirige al login
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   if (requiredRole && userRole !== requiredRole) {
     // Si hay un rol requerido (ej: Admin) y el rol no coincide, redirige al home o página 403
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
   return children;

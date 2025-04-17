@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
-import { Menu, X, ShoppingCart, User, ChevronDown, Shield } from "lucide-react";
-import { getCategories } from "../api/categorys.api";
-import { Link } from "react-router-dom";
+import { Menu, X, ShoppingCart, User, ChevronDown } from "lucide-react"; // Para iconos
+import { getCategories } from "../api/categorys.api"; // Para obtener las categorías
+import { Link } from "react-router-dom"; // Asegúrate de importar Link
 
 function Header() {
+  const { isAuthenticated, logout } = useAuth(); // Obtener el estado de autenticación
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [categories, setCategories] = useState([]);
-
-  // Simulación de sesión de admin (esto luego se reemplazará por autenticación real)
-  const [isAdmin] = useState(true);
 
   useEffect(() => {
     loadCategories();
@@ -20,8 +19,34 @@ function Header() {
     setCategories(data);
   };
 
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const data = await getUserInfo();
+        setUserName(data.first_name);
+      } catch (error) {
+        console.error("Error fetching user info", error);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchUserInfo();
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    // Forzar la actualización del componente cuando isAuthenticated cambie
+    console.log("Estado de autenticación actualizado:", isAuthenticated);
+  }, [isAuthenticated]);
+
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+  const toggleUserDropdown = () => setUserDropdownOpen(!userDropdownOpen);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <header className="bg-purple-50 shadow-sm">
@@ -51,7 +76,9 @@ function Header() {
               >
                 Productos
                 <ChevronDown
-                  className={`w-4 h-4 ml-1 transition-transform ${dropdownOpen ? "rotate-180" : "rotate-0"}`}
+                  className={`w-4 h-4 ml-1 transition-transform ${
+                    dropdownOpen ? "rotate-180" : "rotate-0"
+                  }`}
                 />
               </Link>
               {dropdownOpen && (
@@ -69,7 +96,10 @@ function Header() {
               )}
             </div>
 
-            <Link to="/contact" className="text-black font-medium hover:text-gray-600">
+            <Link
+              to="/contact"
+              className="text-black font-medium hover:text-gray-600"
+            >
               Contacto
             </Link>
           </nav>
@@ -77,30 +107,52 @@ function Header() {
 
         {/* Iconos e Iniciar Sesión */}
         <div className="flex items-center space-x-6">
-          {isAdmin && (
-            <Link
-              to="/owner" // TODO: cambiar a "/admin" cuando la vista esté lista
-              className="hidden md:flex items-center bg-green-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-green-700 shadow-md transition text-base"
-            >
-              <Shield className="w-5 h-5 mr-2" /> Admin Panel
-            </Link>
-          )}
-
           <Link to="/cart" className="text-black">
             <ShoppingCart className="w-6 h-6 cursor-pointer" />
           </Link>
-          <Link to="/profile" className="text-black">
-            <User className="w-6 h-6 cursor-pointer" />
-          </Link>
 
-          <Link
-            to="/login"
-            className="hidden md:inline-block shadow-md shadow-purple-300 bg-white text-purple-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+          {isAuthenticated ? (
+            <div className="relative">
+              <button
+                onClick={toggleUserDropdown}
+                className="text-black focus:outline-none"
+              >
+                <User className="w-6 h-6 cursor-pointer" />
+              </button>
+              {userDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg z-10">
+                  <p className="px-4 py-2 text-gray-700">
+                    Hola, {userName || "Usuario"}
+                  </p>
+                  <hr className="border-gray-200" />
+                  <button
+                    onClick={() => navigate("/profile")}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Editar Información
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Cerrar Sesión
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="hidden md:inline-block shadow-md shadow-purple-300 bg-white text-purple-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+            >
+              Iniciar Sesión
+            </Link>
+          )}
+
+          <button
+            className="md:hidden text-black focus:outline-none"
+            onClick={toggleMenu}
           >
-            Iniciar Sesión
-          </Link>
-
-          <button className="md:hidden text-black focus:outline-none" onClick={toggleMenu}>
             {menuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
@@ -118,7 +170,11 @@ function Header() {
           </button>
         </div>
         <nav className="flex flex-col space-y-4 p-4">
-          <Link to="/" className="text-black hover:text-gray-600" onClick={toggleMenu}>
+          <Link
+            to="/"
+            className="text-black hover:text-gray-600"
+            onClick={toggleMenu}
+          >
             Inicio
           </Link>
           <div>
@@ -128,7 +184,9 @@ function Header() {
             >
               Productos
               <ChevronDown
-                className={`w-4 h-4 ml-1 transition-transform ${dropdownOpen ? "rotate-180" : "rotate-0"}`}
+                className={`w-4 h-4 ml-1 transition-transform ${
+                  dropdownOpen ? "rotate-180" : "rotate-0"
+                }`}
               />
             </button>
             {dropdownOpen && (
@@ -153,13 +211,25 @@ function Header() {
               </div>
             )}
           </div>
-          <Link to="/contact" className="text-black hover:text-gray-600" onClick={toggleMenu}>
+          <Link
+            to="/contact"
+            className="text-black hover:text-gray-600"
+            onClick={toggleMenu}
+          >
             Contacto
           </Link>
-          <Link to="/cart" className="text-black hover:text-gray-600" onClick={toggleMenu}>
+          <Link
+            to="/cart"
+            className="text-black hover:text-gray-600"
+            onClick={toggleMenu}
+          >
             Carrito
           </Link>
-          <Link to="/login" className="text-blue-600 font-medium hover:text-blue-800" onClick={toggleMenu}>
+          <Link
+            to="/login"
+            className="text-blue-600 font-medium hover:text-blue-800"
+            onClick={toggleMenu}
+          >
             Iniciar Sesión
           </Link>
           {isAdmin && (
@@ -178,4 +248,3 @@ function Header() {
 }
 
 export default Header;
-

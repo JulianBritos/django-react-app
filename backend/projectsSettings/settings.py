@@ -25,9 +25,6 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# Application definition
-SITE_ID = 1
-
 INSTALLED_APPS = [
     "unfold",
     'django.contrib.admin',
@@ -45,25 +42,10 @@ INSTALLED_APPS = [
     'apps.users.apps.UsersConfig',
     'apps.payments',
     'apps.orders',
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'dj_rest_auth',
-    'dj_rest_auth.registration',
     'drf_yasg'
 ]
 
-SOCIALACCOUNT_PROVIDERS = {
-    'google':{
-        'SCOPE':[
-            'profile',
-            'email'
-        ],
-        'AUTH_PARAMS':{'access_type':'online'}
-    }
-}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -73,8 +55,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 
    
 ]
@@ -169,6 +150,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        #'rest_framework.permissions.IsAuthenticated',
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -178,15 +162,13 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=int(env("ACCESS_TOKEN_LIFETIME_DAYS", default=1))),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=int(env("REFRESH_TOKEN_LIFETIME_DAYS", default=7))),
     'AUTH_HEADER_TYPES': (env("AUTH_HEADER_TYPES", default="Bearer"),),
+    'TOKEN_OBTAIN_SERIALIZER': 'apps.users.serializer.CustomTokenObtainPairSerializer',
 }
 
 MERCADOPAGO_ACCESS_TOKEN = env("MERCADOPAGO_ACCESS_TOKEN")
 
 AUTHENTICATION_BACKENDS = {
-    "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend"
+    "django.contrib.auth.backends.ModelBackend"
 }
 
-ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 

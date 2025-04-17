@@ -11,6 +11,7 @@ import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import ProductsSection from "./pages/ProductsSection";
 import CategoryPage from "./components/CategoryPage";
+import ProfilePage from "./pages/ProfilePage";
 import AdminComponent from "./components/AdminComponent";
 
 function App() {
@@ -30,10 +31,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/adminDashboard" element={<UserManagementPage />} />
-          <Route path="/owner" element={<AdminComponent />} />
         </Route>
         <Route path="/admin" element={<AdminPanel />} />
-
       </Routes>
     </Router>
   );

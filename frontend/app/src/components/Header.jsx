@@ -1,23 +1,27 @@
 import { useState, useEffect } from "react";
-import { Menu, X, ShoppingCart, User, ChevronDown } from "lucide-react"; // Para iconos
-import { getCategories } from "../api/categorys.api"; // Para obtener las categorías
-import { Link } from "react-router-dom"; // Asegúrate de importar Link
+import { Menu, X, ShoppingCart, User, ChevronDown, Shield } from "lucide-react";
+import { getCategories } from "../api/categorys.api";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { getUserInfo } from "../api/user.api";
 
 function Header() {
-  const { isAuthenticated, logout } = useAuth(); // Obtener el estado de autenticación
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [isAdmin] = useState(true); // Esto es temporal
 
   useEffect(() => {
+    const loadCategories = async () => {
+      const data = await getCategories();
+      setCategories(data);
+    };
     loadCategories();
   }, []);
-
-  const loadCategories = async () => {
-    const data = await getCategories();
-    setCategories(data);
-  };
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -28,15 +32,7 @@ function Header() {
         console.error("Error fetching user info", error);
       }
     };
-
-    if (isAuthenticated) {
-      fetchUserInfo();
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    // Forzar la actualización del componente cuando isAuthenticated cambie
-    console.log("Estado de autenticación actualizado:", isAuthenticated);
+    if (isAuthenticated) fetchUserInfo();
   }, [isAuthenticated]);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -64,7 +60,6 @@ function Header() {
             <Link to="/" className="text-black font-medium hover:text-gray-600">
               Inicio
             </Link>
-
             <div
               className="relative"
               onMouseEnter={() => setDropdownOpen(true)}
@@ -95,7 +90,6 @@ function Header() {
                 </div>
               )}
             </div>
-
             <Link
               to="/contact"
               className="text-black font-medium hover:text-gray-600"
@@ -107,54 +101,64 @@ function Header() {
 
         {/* Iconos e Iniciar Sesión */}
         <div className="flex items-center space-x-6">
-          <Link to="/cart" className="text-black">
-            <ShoppingCart className="w-6 h-6 cursor-pointer" />
-          </Link>
-
-          {isAuthenticated ? (
-            <div className="relative">
-              <button
-                onClick={toggleUserDropdown}
-                className="text-black focus:outline-none"
-              >
-                <User className="w-6 h-6 cursor-pointer" />
-              </button>
-              {userDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg z-10">
-                  <p className="px-4 py-2 text-gray-700">
-                    Hola, {userName || "Usuario"}
-                  </p>
-                  <hr className="border-gray-200" />
-                  <button
-                    onClick={() => navigate("/profile")}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  >
-                    Editar Información
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  >
-                    Cerrar Sesión
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
+          {isAdmin && (
             <Link
-              to="/login"
-              className="hidden md:inline-block shadow-md shadow-purple-300 bg-white text-purple-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+              to="/owner"
+              className="hidden md:flex items-center bg-green-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-green-700 shadow-md transition text-base"
             >
-              Iniciar Sesión
+              <Shield className="w-5 h-5 mr-2" /> Admin Panel
             </Link>
           )}
+          <div className="flex items-center space-x-6 relative">
+            <Link to="/cart" className="text-black">
+              <ShoppingCart className="w-6 h-6 cursor-pointer" />
+            </Link>
 
-          <button
-            className="md:hidden text-black focus:outline-none"
-            onClick={toggleMenu}
-          >
-            {menuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
+            {isAuthenticated ? (
+              <div className="relative">
+                <button
+                  onClick={toggleUserDropdown}
+                  className="text-black focus:outline-none"
+                >
+                  <User className="w-6 h-6 cursor-pointer" />
+                </button>
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg z-10">
+                    <p className="px-4 py-2 text-gray-700">
+                      Hola, {userName || "Usuario"}
+                    </p>
+                    <hr className="border-gray-200" />
+                    <button
+                      onClick={() => navigate("/profile")}
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Editar Información
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      Cerrar Sesión
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="hidden md:inline-block shadow-md shadow-purple-300 bg-white text-purple-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+              >
+                Iniciar Sesión
+              </Link>
+            )}
+
+            <button
+              className="md:hidden text-black focus:outline-none"
+              onClick={toggleMenu}
+            >
+              {menuOpen ? <X size={28} /> : <Menu size={28} />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -234,7 +238,7 @@ function Header() {
           </Link>
           {isAdmin && (
             <Link
-              to="/owner" // TODO: cambiar a "/admin" cuando la vista esté lista
+              to="/owner"
               className="bg-green-600 text-white px-5 py-2 rounded-md text-center font-bold hover:bg-green-700 transition text-base"
               onClick={toggleMenu}
             >

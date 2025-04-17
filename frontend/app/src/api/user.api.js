@@ -1,6 +1,18 @@
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000/apps/user"; // Corregir el prefijo de la URL base
+const API_URL = "http://127.0.0.1:8000/apps/user"; // Cambia esto según tu configuración
+
+// Configurar un interceptor global para manejar respuestas 401
+axios.interceptors.response.use(
+  (response) => response, // Devolver la respuesta si es exitosa
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Redirigir al usuario a la página de inicio de sesión
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Obtener información del usuario
 export const getUserInfo = async () => {

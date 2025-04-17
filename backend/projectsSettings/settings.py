@@ -171,4 +171,5 @@ AUTHENTICATION_BACKENDS = {
     "django.contrib.auth.backends.ModelBackend"
 }
 
+RECAPTCHA_SECRET_KEY = env("RECAPTCHA_SECRET_KEY")
 

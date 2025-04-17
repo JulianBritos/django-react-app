@@ -3,19 +3,27 @@ import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api/auth.api";
 import toast from "react-hot-toast";
 import GoogleLogin from "./GoogleLogin";
-import { useAuth } from "../context/AuthContext"; // Importar el contexto de autenticación
+import { useAuth } from "../context/AuthContext";
+
+const siteKey = "6LeXWhsrAAAAAFu3XvyaoYr3u3-ML96uEqsSfvtW"; // 🔒 Reemplazalo por el de tu cuenta
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [errors, setErrors] = useState({ username: false, password: false });
-  const [isLoading, setIsLoading] = useState(false); // Estado para la animación de carga
-  const { isAuthenticated, login } = useAuth(); // Obtener el estado de autenticación
+  const [isLoading, setIsLoading] = useState(false);
+  const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/"); // Redirigir si ya está autenticado
+      navigate("/");
     }
+
+    // Cargar el script de reCAPTCHA v3 al montar
+    const script = document.createElement("script");
+    script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+    script.async = true;
+    document.body.appendChild(script);
   }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
@@ -25,23 +33,41 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Mostrar animación de carga
+    setErrors({ username: false, password: false });
 
     try {
-      const data = await loginUser(formData);
+      if (!window.grecaptcha) {
+        throw new Error("reCAPTCHA no está disponible.");
+      }
+
+      const captchaToken = await window.grecaptcha.execute(siteKey, {
+        action: "login",
+      });
+
+      const payload = {
+        ...formData,
+        captchaToken,
+      };
+
+      const data = await loginUser(payload);
       localStorage.setItem("token", data.access);
-      localStorage.setItem("userRole", data.role); // Guardar el rol del usuario
-      login(data.access); // Actualizar el contexto de autenticación
+      login(data.access);
       toast.success("Bienvenido!", { duration: 3000 });
 
+      setIsLoading(true);
       setTimeout(() => {
-        setIsLoading(false); // Ocultar animación de carga
-        navigate("/"); // Redirigir a la página de inicio
+        navigate("/");
       }, 3000);
     } catch (error) {
-      setIsLoading(false); // Asegurarse de ocultar la animación en caso de error
-      toast.error("Credenciales inválidas");
-      setErrors({ username: true, password: true });
+      if (error.response && error.response.status === 401) {
+        setErrors({ username: true, password: true });
+        toast.error("Usuario o contraseña incorrectos");
+        setFormData({ username: "", password: "" });
+      } else {
+        toast.error("Error al intentar iniciar sesión");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -49,29 +75,32 @@ const LoginForm = () => {
     <div className="flex items-center justify-center min-h-screen bg-white">
       {isLoading ? (
         <div className="text-center">
-          <div className="loader mb-4"></div>{" "}
-          {/* Agregar un estilo de animación de carga */}
+          <div className="loader mb-4"></div>
           <p className="text-lg font-semibold">
             Volviendo a página de inicio...
           </p>
         </div>
       ) : (
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg shadow-blue-200 w-full max-w-lg lg:max-w-2xl lg:h-[400px] xl:h-[500px] mx-4">
+        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg shadow-blue-200 w-full max-w-lg lg:max-w-xl lg:h-[450px] xl:h-[500px] mx-4">
           <h1 className="text-xl sm:text-2xl lg:text-4xl text-center font-bold py-2 mb-4 md:mb-16 ">
             Iniciar Sesión
           </h1>
-
+          {errors.username && errors.password && (
+            <p className="text-red-500 text-center mb-4">
+              Usuario o contraseña incorrectos
+            </p>
+          )}
           <form onSubmit={handleSubmit}>
             <input
               type="text"
               name="username"
               placeholder="Usuario"
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 mb-4 
-            ${
-              errors.username
-                ? "border-red-500 focus:ring-red-500"
-                : "border-gray-300 focus:ring-green-500"
-            }`}
+                ${
+                  errors.username
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-green-500"
+                }`}
               onChange={handleChange}
               required
             />
@@ -80,11 +109,11 @@ const LoginForm = () => {
               name="password"
               placeholder="Contraseña"
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 mb-4 
-              ${
-                errors.password
-                  ? "border-red-500 focus:ring-red-500"
-                  : "border-gray-300 focus:ring-green-500"
-              }`}
+                ${
+                  errors.password
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-green-500"
+                }`}
               onChange={handleChange}
               required
             />

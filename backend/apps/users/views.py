@@ -13,6 +13,8 @@ from drf_yasg import openapi
 from django.utils.timezone import now, timedelta
 from .models import EmailVerification
 from random import randint
+import requests as external_requests
+from django.conf import settings
 
 
 User = get_user_model()
@@ -91,13 +93,38 @@ def register(request):
 def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
+    recaptcha_token = request.data.get('captchaToken')
+
+    if not recaptcha_token:
+        return Response({"error": "reCAPTCHA token faltante."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Verificar token con Google
+    recaptcha_response = external_requests.post(
+        "https://www.google.com/recaptcha/api/siteverify",
+        data={
+            "secret": settings.RECAPTCHA_SECRET_KEY,
+            "response": recaptcha_token,
+        },
+    )
+
+    result = recaptcha_response.json()
+
+    if not result.get("success") or result.get("score", 0) < 0.5:
+        return Response({"error": "Falló la verificación de reCAPTCHA."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Autenticar usuario
     user = authenticate(request, username=username, password=password)
 
     if user is not None:
         login(request, user)
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }, status=status.HTTP_200_OK)
+
     return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
+
     
 
 class UserManagementViewSet(viewsets.ModelViewSet):
@@ -181,4 +208,11 @@ class ResendVerificationCodeView(APIView):
 
         except EmailVerification.DoesNotExist:
             return Response({"error": "No se encontró una verificación para este correo."}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_info(request):
+    user = request.user
+    serializer = UserSerializer(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 

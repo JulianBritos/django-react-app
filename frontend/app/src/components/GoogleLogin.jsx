@@ -41,7 +41,7 @@ const GoogleLogin = () => {
         setUserName(data.user_name || "Usuario"); // Asume que el backend devuelve el nombre del usuario
         setIsLoggedIn(true);
         toast.success("Sesión iniciada con Google");
-        navigate("/"); // Redirige a la landing
+        //navigate("/"); // Redirige a la landing
       } else {
         toast.error(data.detail || "Error al iniciar sesión con Google");
       }

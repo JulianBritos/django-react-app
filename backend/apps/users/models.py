@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 
 
 class User(AbstractUser):
@@ -30,8 +31,26 @@ class User(AbstractUser):
         blank=True
     )
 
+    def clean(self):
+        super().clean()
+        if self.role not in dict(self.ROLE_CHOICES):
+            raise ValidationError({'role': 'El rol seleccionado no es válido.'})
+
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.role.name if self.role else 'Sin rol'})"
 
-    
+
+class EmailVerification(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="email_verification")
+    verification_code = models.CharField(max_length=6)
+    expiration_time = models.DateTimeField()
+
+    def is_code_valid(self):
+        from django.utils.timezone import now
+        return now() <= self.expiration_time
+
+    def __str__(self):
+        return f"Verification for {self.user.email}"
+
+
 

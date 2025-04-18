@@ -1,11 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Para redirigir
 import { registerUser } from "../api/auth.api"; // Función para hacer la petición
 import toast, { Toaster } from "react-hot-toast"; // Importamos toast
 import GoogleLogin from "./GoogleLogin";
+import { useAuth } from "../context/AuthContext"; // Importar el contexto de autenticación
 
 const RegisterForm = () => {
-  const navigate = useNavigate(); // Hook de navegación
+  const { isAuthenticated } = useAuth(); // Obtener el estado de autenticación
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/"); // Redirigir si ya está autenticado
+    }
+  }, [isAuthenticated, navigate]);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -30,10 +38,10 @@ const RegisterForm = () => {
 
     try {
       await registerUser(formData);
-      toast.success("✅ Registro exitoso. Redirigiendo...", { duration: 2000 });
+      toast.success("✅ Registro exitoso. Redirigiendo...", { duration: 5000 });
 
       setTimeout(() => {
-        navigate("/Home"); // Redirigir tras 2 segundos
+        navigate("/login"); // Redirigir tras 2 segundos
       }, 2000);
     } catch (error) {
       toast.error(

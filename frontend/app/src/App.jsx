@@ -12,6 +12,7 @@ import LoginPage from "./pages/LoginPage";
 import ProductsSection from "./pages/ProductsSection";
 import CategoryPage from "./components/CategoryPage";
 import AdminComponent from "./components/AdminComponent";
+import OwnerSection from "./pages/OwnerSection";
 
 function App() {
   return (
@@ -30,7 +31,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/adminDashboard" element={<UserManagementPage />} />
-          <Route path="/owner" element={<AdminComponent />} />
+          <Route path="/owner" element={<OwnerSection />} />
         </Route>
         <Route path="/admin" element={<AdminPanel />} />
 

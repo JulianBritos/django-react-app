@@ -5,14 +5,14 @@ import { getCategories } from "../api/categorys.api";
 import AdminComponent from "../components/AdminComponent";
 
 const OwnerSection = () => {
-  const [data, setData] = useState(null);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
 
 
   useEffect(() => {
     loadProducts();
-    loadCategories();
+    loadCategories(); 
+    console.log(products)
   }, []);
 
   const loadProducts = async () => {

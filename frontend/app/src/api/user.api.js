@@ -7,8 +7,7 @@ axios.interceptors.response.use(
   (response) => response, // Devolver la respuesta si es exitosa
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Redirigir al usuario a la página de inicio de sesión
-      window.location.href = "/login";
+      console.warn("Unauthorized access - 401"); // Log warning instead of redirecting
     }
     return Promise.reject(error);
   }

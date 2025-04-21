@@ -1,0 +1,176 @@
+import React, { useState } from "react";
+import {
+  Home,
+  BarChart2,
+  DollarSign,
+  Tag,
+  CreditCard,
+  Users,
+  Percent,
+  Megaphone,
+  Store,
+  MonitorSmartphone,
+  Share2,
+  Boxes,
+  Settings,
+  Puzzle
+} from "lucide-react";
+import ProductPage from "./ProductPage"; // Ruta corregida para importar ProductPage
+
+const sidebarItems = [
+  {
+    label: "Inicio",
+    icon: <Home size={18} />,
+    key: "inicio",
+    children: []
+  },
+  {
+    label: "Estadísticas",
+    icon: <BarChart2 size={18} />,
+    key: "estadisticas",
+    children: []
+  },
+  {
+    label: "Ventas",
+    icon: <DollarSign size={18} />,
+    key: "ventas",
+    children: [
+      "Lista de ventas",
+      "Órdenes de compra",
+      "Carritos abandonados"
+    ]
+  },
+  {
+    label: "Productos",
+    icon: <Tag size={18} />,
+    key: "productos",
+    children: ["Lista de productos", "Inventario", "Categorías"]
+  },
+  {
+    label: "Pagos",
+    icon: <CreditCard size={18} />,
+    key: "pagos",
+    children: ["Pasarelas", "Historial"]
+  },
+  {
+    label: "Clientes",
+    icon: <Users size={18} />,
+    key: "clientes",
+    children: ["Listado", "Segmentos"]
+  },
+  {
+    label: "Descuentos",
+    icon: <Percent size={18} />,
+    key: "descuentos",
+    children: ["Cupones", "Promociones"]
+  },
+  {
+    label: "Marketing",
+    icon: <Megaphone size={18} />,
+    key: "marketing",
+    children: ["Campañas", "Email Marketing"]
+  }
+];
+
+const Sidebar = () => {
+  const [openSection, setOpenSection] = useState(null);
+  const [activeMainItem, setActiveMainItem] = useState(null);
+  const [activeSubItem, setActiveSubItem] = useState(null); // Estado para el subbotón activo
+  const [currentPage, setCurrentPage] = useState(null); // Estado para la página actual
+
+  const handleToggle = (key) => {
+    if (openSection === key) {
+      setOpenSection(key); // Mantener la lista abierta al hacer clic nuevamente
+    } else {
+      setOpenSection(key); // Abrir la lista si no está abierta
+    }
+    setActiveMainItem(key); // Marcar la sección activa
+  };
+
+  const handleSubItemClick = (subItem) => {
+    setActiveSubItem(subItem); // Marcar el subbotón activo
+    if (subItem === "Lista de productos") {
+      setCurrentPage("ProductPage"); // Cambiar a la página ProductPage
+    } else {
+      setCurrentPage(null); // Restablecer la página si no es "Lista de productos"
+    }
+  };
+
+  return (
+    <div className="flex">
+      <div className="w-72 h-screen bg-gradient-to-b from-indigo-50 to-indigo-100 p-6 text-gray-700 shadow-lg rounded-lg overflow-y-auto scrollbar scrollbar-thumb-indigo-300 scrollbar-track-indigo-100 scrollbar-thin">
+        <ul className="space-y-4 mb-6">
+          {sidebarItems.map((item) => (
+            <li key={item.key} className="mb-4">
+              <div
+                onClick={() => handleToggle(item.key)}
+                className={`flex items-center gap-3 cursor-pointer px-4 py-3 rounded-lg transition-all duration-300 ease-in-out font-semibold ${
+                  activeMainItem === item.key
+                    ? "bg-indigo-200 text-indigo-700"
+                    : "hover:bg-indigo-100"
+                }`}
+              >
+                {item.icon}
+                <span className="text-sm">{item.label}</span>
+              </div>
+              {openSection === item.key && item.children.length > 0 && (
+                <ul className="ml-6 mt-3 space-y-3">
+                  {item.children.map((subItem, idx) => (
+                    <li
+                      key={idx}
+                      onClick={() => handleSubItemClick(subItem)} // Manejar clic en subbotón
+                      className={`cursor-pointer transition-all duration-200 text-sm ${
+                        activeSubItem === subItem
+                          ? "text-indigo-600"
+                          : "text-gray-600 hover:text-indigo-600"
+                      }`}
+                    >
+                      {subItem}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+
+        {/* Canales de venta */}
+        <h2 className="text-xs text-gray-500 uppercase mb-4">Canales de venta</h2>
+        <ul className="space-y-4 mb-6">
+          <li className="flex items-center gap-3 cursor-pointer hover:bg-indigo-100 px-4 py-3 rounded-lg transition-all duration-200">
+            <Store size={18} className="text-indigo-600" /> Tienda online
+          </li>
+          <li className="flex items-center gap-3 cursor-pointer hover:bg-indigo-100 px-4 py-3 rounded-lg transition-all duration-200">
+            <MonitorSmartphone size={18} className="text-indigo-600" /> Punto de Venta
+          </li>
+          <li className="flex items-center gap-3 cursor-pointer hover:bg-indigo-100 px-4 py-3 rounded-lg transition-all duration-200">
+            <Share2 size={18} className="text-indigo-600" /> Redes sociales
+          </li>
+          <li className="flex items-center gap-3 cursor-pointer hover:bg-indigo-100 px-4 py-3 rounded-lg transition-all duration-200">
+            <Boxes size={18} className="text-indigo-600" /> Marketplaces
+          </li>
+        </ul>
+
+        {/* Potenciar */}
+        <h2 className="text-xs text-gray-500 uppercase mb-4">Potenciar</h2>
+        <ul className="space-y-4 mb-6">
+          <li className="flex items-center gap-3 text-gray-400 px-4 py-3">
+            <Puzzle size={18} className="text-indigo-500" /> Aplicaciones
+          </li>
+        </ul>
+
+        {/* Configuración */}
+        <ul className="space-y-4 mt-auto">
+          <li className="flex items-center gap-3 cursor-pointer hover:bg-indigo-200 px-4 py-3 rounded-lg transition-all duration-200">
+            <Settings size={18} className="text-indigo-600" /> Configuración
+          </li>
+        </ul>
+      </div>
+      <div className="flex-1 p-6">
+        {currentPage === "ProductPage" && <ProductPage />} {/* Renderizar ProductPage */}
+      </div>
+    </div>
+  );
+};
+
+export default Sidebar;

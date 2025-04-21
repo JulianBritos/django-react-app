@@ -14,6 +14,7 @@ import CategoryPage from "./components/CategoryPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminComponent from "./components/AdminComponent";
 import OwnerSection from "./pages/OwnerSection";
+import OwnerSection2 from "./pages/OwnerSection2";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           <Route path="/owner" element={<OwnerSection />} />
         </Route>
         <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/owner2" element={<OwnerSection2 />} />
       </Routes>
     </Router>
   );

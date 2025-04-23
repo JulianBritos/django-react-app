@@ -111,7 +111,7 @@ function Header() {
         <div className="flex items-center space-x-6">
           {isAuthenticated && (
             <Link
-              to="/owner"
+              to="/owner2"
               className="hidden md:flex items-center bg-green-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-green-700 shadow-md transition text-base"
             >
               <Shield className="w-5 h-5 mr-2" /> Admin Panel

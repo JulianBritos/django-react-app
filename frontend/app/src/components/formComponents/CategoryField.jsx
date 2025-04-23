@@ -1,6 +1,6 @@
 const CategoryField = ({ value, onChange, categories, error }) => (
-  <div>
-    <label htmlFor="category" className="block text-sm font-medium mb-1">
+  <div className="p-4 bg-white shadow-lg rounded-lg">
+    <label htmlFor="category" className="block text-xl font-semibold mb-2">
       Categoría*
     </label>
     <select
@@ -8,7 +8,7 @@ const CategoryField = ({ value, onChange, categories, error }) => (
       name="category"
       value={value}
       onChange={onChange}
-      className="w-full p-2 border rounded"
+      className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
     >
       <option value="">Seleccionar categoría</option>
       {categories.map((cat) => (
@@ -17,7 +17,7 @@ const CategoryField = ({ value, onChange, categories, error }) => (
         </option>
       ))}
     </select>
-    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
   </div>
 );
 

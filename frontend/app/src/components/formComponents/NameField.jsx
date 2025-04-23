@@ -1,6 +1,6 @@
 const NameField = ({ value, onChange, error }) => (
-  <div className="md:col-span-2 p-4 bg-white shadow-lg rounded-lg">
-    <label htmlFor="name" className="block text-2xl font-bold mb-1">
+  <div className="p-4 bg-white shadow-lg rounded-lg">
+    <label htmlFor="name" className="block text-xl font-semibold mb-2">
       Nombre del producto*
     </label>
     <input
@@ -9,9 +9,9 @@ const NameField = ({ value, onChange, error }) => (
       name="name"
       value={value}
       onChange={onChange}
-      className="w-full p-2 border rounded"
+      className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
     />
-    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
   </div>
 );
 

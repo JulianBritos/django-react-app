@@ -1,6 +1,6 @@
 const PriceField = ({ value, onChange, error }) => (
-  <div>
-    <label htmlFor="price" className="block text-sm font-medium mb-1">
+  <div className="p-4 bg-white shadow-lg rounded-lg">
+    <label htmlFor="price" className="block text-xl font-semibold mb-2">
       Precio Base*
     </label>
     <input
@@ -10,9 +10,9 @@ const PriceField = ({ value, onChange, error }) => (
       min="0"
       value={value}
       onChange={onChange}
-      className="w-full p-2 border rounded"
+      className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
     />
-    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
   </div>
 );
 

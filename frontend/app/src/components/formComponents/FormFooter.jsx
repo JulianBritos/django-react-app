@@ -5,7 +5,7 @@ const FormFooter = ({ onCancel, onSave, isLoading }) => {
     <div className="flex justify-end gap-2 p-4 border-t">
       <button
         onClick={onCancel}
-        className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-100"
+        className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-200 transition"
         disabled={isLoading}
       >
         Cancelar
@@ -13,7 +13,7 @@ const FormFooter = ({ onCancel, onSave, isLoading }) => {
       <button
         onClick={onSave}
         disabled={isLoading}
-        className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 flex items-center gap-2"
+        className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 flex items-center gap-2 transition"
       >
         {isLoading ? (
           <svg

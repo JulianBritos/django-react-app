@@ -24,11 +24,11 @@ const ImageField = ({ images, onChange, imagePreviews }) => {
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
+    <div className="p-4 bg-white shadow-lg rounded-lg">
       <label className="block text-xl font-semibold mb-3">Fotos</label>
 
       <div
-        className="w-full p-6 border-2 border-dashed border-blue-400 rounded-lg bg-blue-50 text-center text-blue-600 cursor-pointer hover:bg-blue-100 transition relative"
+        className="w-full p-6 border-2 border-dashed border-blue-400 rounded-lg bg-gray-50 text-center text-blue-600 cursor-pointer hover:bg-blue-100 transition relative"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
@@ -51,7 +51,7 @@ const ImageField = ({ images, onChange, imagePreviews }) => {
         className="hidden"
       />
 
-      <p className="text-xs text-gray-500 mt-2">
+      <p className="text-sm text-gray-500 mt-2">
         📷 Tamaño mínimo recomendado: 1024px / Formatos recomendados: WEBP, PNG, JPEG o GIF
       </p>
 
@@ -62,7 +62,7 @@ const ImageField = ({ images, onChange, imagePreviews }) => {
               <img
                 src={src}
                 alt={`Preview ${i}`}
-                className="w-full h-32 object-cover rounded border"
+                className="w-full h-32 object-cover rounded-lg border"
                 style={{
                   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                 }}

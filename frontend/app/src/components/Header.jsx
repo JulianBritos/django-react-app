@@ -8,17 +8,22 @@ import { getUserInfo } from "../api/user.api";
 function Header() {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [isAdmin] = useState(true); // Esto es temporal
+  const [state, setState] = useState({
+    menuOpen: false,
+    dropdownOpen: false,
+    userDropdownOpen: false,
+    categories: [],
+    userName: "",
+  });
 
   useEffect(() => {
     const loadCategories = async () => {
-      const data = await getCategories();
-      setCategories(data);
+      try {
+        const data = await getCategories();
+        setState((prevState) => ({ ...prevState, categories: data }));
+      } catch (error) {
+        console.error("Error loading categories", error);
+      }
     };
     loadCategories();
   }, []);
@@ -27,7 +32,7 @@ function Header() {
     const fetchUserInfo = async () => {
       try {
         const data = await getUserInfo();
-        setUserName(data.first_name);
+        setState((prevState) => ({ ...prevState, userName: data.first_name }));
       } catch (error) {
         console.error("Error fetching user info", error);
       }
@@ -35,14 +40,17 @@ function Header() {
     if (isAuthenticated) fetchUserInfo();
   }, [isAuthenticated]);
 
-  const toggleMenu = () => setMenuOpen(!menuOpen);
-  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-  const toggleUserDropdown = () => setUserDropdownOpen(!userDropdownOpen);
+  const toggleState = (key) => {
+    setState((prevState) => ({ ...prevState, [key]: !prevState[key] }));
+  };
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
+
+  const { menuOpen, dropdownOpen, userDropdownOpen, categories, userName } =
+    state;
 
   return (
     <header className="bg-purple-50 shadow-sm">
@@ -62,8 +70,8 @@ function Header() {
             </Link>
             <div
               className="relative"
-              onMouseEnter={() => setDropdownOpen(true)}
-              onMouseLeave={() => setDropdownOpen(false)}
+              onMouseEnter={() => toggleState("dropdownOpen")}
+              onMouseLeave={() => toggleState("dropdownOpen")}
             >
               <Link
                 to="/products/allproducts"
@@ -78,9 +86,9 @@ function Header() {
               </Link>
               {dropdownOpen && (
                 <div className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10">
-                  {categories.map((category, index) => (
+                  {categories.map((category) => (
                     <Link
-                      key={index}
+                      key={category.name}
                       to={`/products/${category.name}`}
                       className="block px-4 py-2 text-black hover:bg-gray-100"
                     >
@@ -101,7 +109,7 @@ function Header() {
 
         {/* Iconos e Iniciar Sesión */}
         <div className="flex items-center space-x-6">
-          {isAdmin && (
+          {isAuthenticated && (
             <Link
               to="/owner"
               className="hidden md:flex items-center bg-green-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-green-700 shadow-md transition text-base"
@@ -117,7 +125,7 @@ function Header() {
             {isAuthenticated ? (
               <div className="relative">
                 <button
-                  onClick={toggleUserDropdown}
+                  onClick={() => toggleState("userDropdownOpen")}
                   className="text-black focus:outline-none"
                 >
                   <User className="w-6 h-6 cursor-pointer" />
@@ -154,7 +162,7 @@ function Header() {
 
             <button
               className="md:hidden text-black focus:outline-none"
-              onClick={toggleMenu}
+              onClick={() => toggleState("menuOpen")}
             >
               {menuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -169,7 +177,10 @@ function Header() {
         } md:hidden`}
       >
         <div className="p-4 flex justify-end">
-          <button onClick={toggleMenu} className="text-black">
+          <button
+            onClick={() => toggleState("menuOpen")}
+            className="text-black"
+          >
             <X size={28} />
           </button>
         </div>
@@ -177,14 +188,14 @@ function Header() {
           <Link
             to="/"
             className="text-black hover:text-gray-600"
-            onClick={toggleMenu}
+            onClick={() => toggleState("menuOpen")}
           >
             Inicio
           </Link>
           <div>
             <button
               className="text-black hover:text-gray-600 flex items-center w-full text-left"
-              onClick={toggleDropdown}
+              onClick={() => toggleState("dropdownOpen")}
             >
               Productos
               <ChevronDown
@@ -198,16 +209,16 @@ function Header() {
                 <Link
                   to="/products/allproducts"
                   className="block text-black hover:text-gray-600"
-                  onClick={toggleMenu}
+                  onClick={() => toggleState("menuOpen")}
                 >
                   Todos los productos
                 </Link>
-                {categories.map((category, index) => (
+                {categories.map((category) => (
                   <Link
-                    key={index}
+                    key={category.name}
                     to={`/products/${category.name}`}
                     className="block text-black hover:text-gray-600"
-                    onClick={toggleMenu}
+                    onClick={() => toggleState("menuOpen")}
                   >
                     {category.name}
                   </Link>
@@ -218,29 +229,29 @@ function Header() {
           <Link
             to="/contact"
             className="text-black hover:text-gray-600"
-            onClick={toggleMenu}
+            onClick={() => toggleState("menuOpen")}
           >
             Contacto
           </Link>
           <Link
             to="/cart"
             className="text-black hover:text-gray-600"
-            onClick={toggleMenu}
+            onClick={() => toggleState("menuOpen")}
           >
             Carrito
           </Link>
           <Link
             to="/login"
             className="text-blue-600 font-medium hover:text-blue-800"
-            onClick={toggleMenu}
+            onClick={() => toggleState("menuOpen")}
           >
             Iniciar Sesión
           </Link>
-          {isAdmin && (
+          {isAuthenticated && (
             <Link
               to="/owner"
               className="bg-green-600 text-white px-5 py-2 rounded-md text-center font-bold hover:bg-green-700 transition text-base"
-              onClick={toggleMenu}
+              onClick={() => toggleState("menuOpen")}
             >
               <Shield className="inline-block w-5 h-5 mr-2" /> Admin Panel
             </Link>

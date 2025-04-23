@@ -13,7 +13,7 @@ export default function EmptyProductView({ onAddProduct }) {
         Empieza a añadir productos a tu tienda para que tus clientes puedan verlos y comprarlos.
       </p>
       <button
-        onClick={onAddProduct}
+        onClick={onAddProduct} // Notificar al nivel superior para renderizar NewProduct
         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow transition"
       >
         Agregar producto

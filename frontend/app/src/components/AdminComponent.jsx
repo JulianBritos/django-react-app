@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FiFilter, FiEdit, FiSearch, FiPlus } from "react-icons/fi";
-import ProductForm3 from "./ProductForm3";
+import ProductForm3 from "./formComponents/ProductForm3";
 
 function AdminComponent({ products, categories }) {
   const [filteredProducts, setFilteredProducts] = useState([]);

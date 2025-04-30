@@ -1,38 +1,41 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.utils.translation import gettext_lazy as _
+from .models import CustomUserModel
 
 
 
-
-from .models import User
-
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = (
-        'id',
-        'password',
-        'last_login',
-        'is_superuser',
-        'username',
-        'is_staff',
-        'is_active',
-        'date_joined',
-        'first_name',
-        'last_name',
-        'email',
-        'phone',
-        'birth_date',
-        'address',
-        'city',
-        'country',
-        'role',
+class UserAdminCustom(UserAdmin):
+    fieldsets = (
+        (None, {"fields": ("email", "password")}),
+        (_("Personal info"), {"fields": ("first_name", "last_name")}),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                ),
+            },
+        ),
+        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
-    list_filter = (
-        'last_login',
-        'is_superuser',
-        'is_staff',
-        'is_active',
-        'date_joined',
-        'birth_date',
+   
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email","first_name", "last_name", "password1", "password2"),
+            },
+        ),
     )
-    raw_id_fields = ('groups', 'user_permissions')
+    list_display = ("email", "username","first_name", "last_name", "is_staff","is_active", "is_superuser")
+    search_fields = ( "first_name", "last_name", "email")
+    ordering = ("email",)
+    readonly_fields = ("last_login", "date_joined")
+
+admin.site.register(CustomUserModel, UserAdminCustom)

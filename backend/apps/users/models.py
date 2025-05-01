@@ -1,56 +1,35 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
+from django.contrib.auth.models import AbstractUser, PermissionsMixin
+from django.utils.translation import gettext_lazy as _
+from .managers import CustomUserManager
 
+class CustomUserModel(AbstractUser, PermissionsMixin):
 
-class User(AbstractUser):
-    ROLE_CHOICES = (
-        (0, 'client'),
-        (1, 'admin'),
-        (2, 'superadmin'),)
-
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
+    first_name = models.CharField(_("First Name"),max_length=100)
+    last_name = models.CharField(_("Last Name"),max_length=100, null=True, blank=True)
+    email = models.EmailField(_("Email Address"),unique=True, max_length=255)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    username = models.CharField(max_length=30, unique=True, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     country = models.CharField(max_length=100, blank=True, null=True)
-    role = models.IntegerField(choices=ROLE_CHOICES, default="0")
+    date_joined = models.DateTimeField(auto_now_add=True)
+    last_login = models.DateTimeField(auto_now=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
 
-    # Solución para evitar conflictos con la clase AbstractUser
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='custom_user_set',
-        blank=True
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='custom_user_permissions_set',
-        blank=True
-    )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name']
 
-    def clean(self):
-        super().clean()
-        if self.role not in dict(self.ROLE_CHOICES):
-            raise ValidationError({'role': 'El rol seleccionado no es válido.'})
+    objects = CustomUserManager()
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.role.name if self.role else 'Sin rol'})"
+        return self.email
 
 
-class EmailVerification(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="email_verification")
-    verification_code = models.CharField(max_length=6)
-    expiration_time = models.DateTimeField()
 
-    def is_code_valid(self):
-        from django.utils.timezone import now
-        return now() <= self.expiration_time
-
-    def __str__(self):
-        return f"Verification for {self.user.email}"
 
 
 

@@ -1,122 +1,124 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Para redirigir
-import { registerUser } from "../api/auth.api"; // Función para hacer la petición
-import toast, { Toaster } from "react-hot-toast"; // Importamos toast
-import GoogleLogin from "./GoogleLogin";
-import { useAuth } from "../context/AuthContext"; // Importar el contexto de autenticación
+import React, { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { register } from "../reducer/Actions";
+import { connect } from "react-redux";
 
-const RegisterForm = () => {
-  const { isAuthenticated } = useAuth(); // Obtener el estado de autenticación
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/"); // Redirigir si ya está autenticado
-    }
-  }, [isAuthenticated, navigate]);
-
+const RegisterForm = ({ register }) => {
+  const [status, setStatus] = useState(false);
   const [formData, setFormData] = useState({
-    username: "",
-    first_name: "",
-    last_name: "",
     email: "",
-    password: "",
+    username: "",
+    firstName: "",
+    lastName: "",
+    password1: "",
     password2: "",
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const navigate = useNavigate();
+
+  const { email, username, firstName, lastName, password1, password2 } =
+    formData;
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+      ...(name === "email" && { username: value }),
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.password !== formData.password2) {
-      toast.error("❌ Las contraseñas no coinciden");
-      return;
-    }
-
     try {
-      await registerUser(formData);
-      toast.success("✅ Registro exitoso. Redirigiendo...", { duration: 5000 });
-
-      setTimeout(() => {
-        navigate("/login"); // Redirigir tras 2 segundos
-      }, 2000);
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "❌ Error al registrar usuario"
+      await register(
+        email,
+        username,
+        firstName,
+        lastName,
+        password1,
+        password2
       );
+
+      navigate("../"); // Redirecciona luego de registrarse
+    } catch (error) {
+      console.error(error);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
-      <Toaster position="top-right" reverseOrder={false} />
-      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg shadow-blue-200 w-full max-w-sm mx-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-center mb-6">
-          Registro
-        </h2>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+      <div className="bg-white shadow-md rounded-2xl p-6 w-full max-w-md">
+        <h2 className="text-2xl font-semibold text-center mb-6">Registrarse</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="first_name"
-            placeholder="Nombre"
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
-          <input
-            type="text"
-            name="last_name"
-            placeholder="Apellido"
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Correo electrónico"
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
-          <input
-            type="text"
-            name="username"
-            placeholder="Usuario"
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Contraseña"
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
-          <input
-            type="password"
-            name="password2"
-            placeholder="Confirmar Contraseña"
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
+          <div>
+            <label className="block mb-1 font-medium">Nombre</label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+              value={firstName}
+              name="firstName"
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Apellido/s</label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+              value={lastName}
+              name="lastName"
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Email</label>
+            <input
+              type="email"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+              value={email}
+              name="email"
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Contraseña</label>
+            <input
+              type="password"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+              value={password1}
+              name="password1"
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Repetir contraseña</label>
+            <input
+              type="password"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+              value={password2}
+              name="password2"
+              onChange={handleInputChange}
+              required
+            />
+          </div>
           <button
             type="submit"
-            className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition"
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2 px-4 rounded-md transition duration-200 disabled:opacity-50"
           >
             Registrarse
           </button>
-          <GoogleLogin />
         </form>
       </div>
     </div>
   );
 };
 
-export default RegisterForm;
+export default connect(null, { register })(RegisterForm);

@@ -13,33 +13,62 @@ import ProductsSection from "./pages/ProductsSection";
 import CategoryPage from "./components/CategoryPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminComponent from "./components/AdminComponent";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
+import ResetPassword from "./pages/ResetPassword";
+import ResetPasswordConfirm from "./pages/ResetPasswordConfirm";
+import EmailVerificationPage from "./pages/EmailVerificationPage";
 import OwnerSection from "./pages/OwnerSection";
+import { Provider } from "react-redux";
+import Store from "./Store";
+import { Toaster } from "react-hot-toast";
 import OwnerSection2 from "./pages/OwnerSection2";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Rutas públicas envueltas en Layout */}
-        <Route path="/" element={<Layout />}>
-          <Route index element={<HomePage />} />
-          <Route path="/Home" element={<HomePage />} />
-          <Route path="/product/:id" element={<ProductDetailPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-          <Route path="/products" element={<ProductsSection />}>
-            <Route path=":categoryName" element={<CategoryPage />} />
+    <Provider store={Store}>
+      <Toaster
+        position="bottom-left"
+        toastOptions={{
+          duration: 5000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+          },
+        }}
+      />
+      <Router>
+        <Routes>
+          {/* Rutas públicas envueltas en Layout */}
+          <Route path="/" element={<Layout />}>
+            <Route index element={<HomePage />} />
+            <Route path="/Home" element={<HomePage />} />
+            <Route path="/product/:id" element={<ProductDetailPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+            <Route path="/adminDashboard" element={<UserManagementPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/owner" element={<OwnerSection />} />
+            <Route path="/products" element={<ProductsSection />}>
+              <Route path=":categoryName" element={<CategoryPage />} />
+            </Route>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/changePassword" element={<ChangePasswordPage />} />
+            <Route path="/reset/password" element={<ResetPassword />} />
+            <Route
+              path="dj-rest-auth/registration/account-confirm-email/:key/"
+              Component={EmailVerificationPage}
+            />
+            <Route
+              path="reset/password/confirm/:uid/:token"
+              Component={ResetPasswordConfirm}
+            />
           </Route>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/adminDashboard" element={<UserManagementPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/owner" element={<OwnerSection />} />
-        </Route>
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/owner2" element={<OwnerSection2 />} />
-      </Routes>
-    </Router>
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/owner2" element={<OwnerSection2 />} />
+        </Routes>
+      </Router>
+    </Provider>
   );
 }
 

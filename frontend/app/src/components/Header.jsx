@@ -2,18 +2,25 @@ import { useState, useEffect } from "react";
 import { Menu, X, ShoppingCart, User, ChevronDown, Shield } from "lucide-react";
 import { getCategories } from "../api/categorys.api";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { getUserInfo } from "../api/user.api";
+import { useDispatch, useSelector } from "react-redux";
+import { getUser, logout } from "../reducer/Actions";
 
 function Header() {
-  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isAuthenticated, user } = useSelector(
+    (state) =>
+      state.AuthReducer || {
+        isAuthenticated: false,
+        user: null,
+      }
+  );
+
   const [state, setState] = useState({
     menuOpen: false,
     dropdownOpen: false,
     userDropdownOpen: false,
     categories: [],
-    userName: "",
   });
 
   useEffect(() => {
@@ -29,28 +36,22 @@ function Header() {
   }, []);
 
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const data = await getUserInfo();
-        setState((prevState) => ({ ...prevState, userName: data.first_name }));
-      } catch (error) {
-        console.error("Error fetching user info", error);
-      }
-    };
-    if (isAuthenticated) fetchUserInfo();
-  }, [isAuthenticated]);
+    console.log("isAuthenticated en useEffect:", isAuthenticated);
+    if (isAuthenticated) {
+      dispatch(getUser());
+    }
+  }, [isAuthenticated, dispatch]);
 
   const toggleState = (key) => {
     setState((prevState) => ({ ...prevState, [key]: !prevState[key] }));
   };
 
   const handleLogout = () => {
-    logout();
+    dispatch(logout());
     navigate("/login");
   };
 
-  const { menuOpen, dropdownOpen, userDropdownOpen, categories, userName } =
-    state;
+  const { menuOpen, dropdownOpen, userDropdownOpen, categories } = state;
 
   return (
     <header className="bg-purple-50 shadow-sm">
@@ -133,7 +134,7 @@ function Header() {
                 {userDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg z-10">
                     <p className="px-4 py-2 text-gray-700">
-                      Hola, {userName || "Usuario"}
+                      Hola, {user?.first_name || "Usuario"}
                     </p>
                     <hr className="border-gray-200" />
                     <button

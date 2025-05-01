@@ -1,149 +1,109 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { loginUser } from "../api/auth.api";
-import toast from "react-hot-toast";
-import GoogleLogin from "./GoogleLogin";
-import { useAuth } from "../context/AuthContext";
+import React, { useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import { connect } from "react-redux";
+import { login, verify, getUser } from "../reducer/Actions";
+import { useEffect } from "react";
 
-const siteKey = "6LeXWhsrAAAAAFu3XvyaoYr3u3-ML96uEqsSfvtW"; // 🔒 Reemplazalo por el de tu cuenta
-
-const LoginForm = () => {
-  const [formData, setFormData] = useState({ username: "", password: "" });
-  const [errors, setErrors] = useState({ username: false, password: false });
-  const [isLoading, setIsLoading] = useState(false);
-  const { isAuthenticated, login } = useAuth();
+const LoginForm = ({ login, isAuthenticated }) => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    }
+  const { email, password } = formData;
 
-    // Cargar el script de reCAPTCHA v3 al montar
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
-    script.async = true;
-    document.body.appendChild(script);
-  }, [isAuthenticated, navigate]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors({ username: false, password: false });
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrors({ username: false, password: false });
-
+    setLoading(true);
     try {
-      if (!window.grecaptcha) {
-        throw new Error("reCAPTCHA no está disponible.");
-      }
+      await login(email, password);
+      await verify();
+      await getUser();
 
-      const captchaToken = await window.grecaptcha.execute(siteKey, {
-        action: "login",
-      });
-
-      const payload = {
-        ...formData,
-        captchaToken,
-      };
-
-      const data = await loginUser(payload);
-      localStorage.setItem("token", data.access);
-      login(data.access);
-      toast.success("Bienvenido!", { duration: 3000 });
-
-      setIsLoading(true);
-      setTimeout(() => {
-        navigate("/");
-      }, 3000);
+      // El éxito se manejará en la acción Redux con toast
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        setErrors({ username: true, password: true });
-        toast.error("Usuario o contraseña incorrectos");
-        setFormData({ username: "", password: "" });
-      } else {
-        toast.error("Error al intentar iniciar sesión");
-      }
+      // El error se manejará en la acción Redux con toast
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
+  if (isAuthenticated) {
+    return <Navigate to="/" />;
+  }
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
-      {isLoading ? (
-        <div className="text-center">
-          <div className="loader mb-4"></div>
-          <p className="text-lg font-semibold">
-            Volviendo a página de inicio...
-          </p>
-        </div>
-      ) : (
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg shadow-blue-200 w-full max-w-lg lg:max-w-xl lg:h-[450px] xl:h-[500px] mx-4">
-          <h1 className="text-xl sm:text-2xl lg:text-4xl text-center font-bold py-2 mb-4 md:mb-16 ">
-            Iniciar Sesión
-          </h1>
-          {errors.username && errors.password && (
-            <p className="text-red-500 text-center mb-4">
-              Usuario o contraseña incorrectos
-            </p>
-          )}
-          <form onSubmit={handleSubmit}>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+      <div className="bg-white shadow-md rounded-2xl p-6 w-full max-w-md">
+        <h2 className="text-2xl font-semibold text-center mb-6">
+          Iniciar sesión
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block mb-1 font-medium">Email</label>
             <input
-              type="text"
-              name="username"
-              placeholder="Usuario"
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 mb-4 
-                ${
-                  errors.username
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:ring-green-500"
-                }`}
-              onChange={handleChange}
+              type="email"
+              name="email"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+              value={email}
+              onChange={handleInputChange}
               required
             />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Contraseña</label>
             <input
               type="password"
               name="password"
-              placeholder="Contraseña"
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 mb-4 
-                ${
-                  errors.password
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:ring-green-500"
-                }`}
-              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+              value={password}
+              onChange={handleInputChange}
               required
             />
-
-            <button
-              type="submit"
-              className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition mb-4"
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2 px-4 rounded-md transition duration-200 disabled:opacity-50"
+            disabled={loading}
+          >
+            {loading ? "Ingresando..." : "Entrar"}
+          </button>
+        </form>
+        <div className="mt-6 text-center text-sm text-gray-600">
+          <p className="mb-2">
+            ¿Aún no tienes una cuenta?{" "}
+            <a
+              href="/register"
+              className="text-violet-600 hover:underline font-medium"
             >
-              Ingresar
-            </button>
-          </form>
-
-          <GoogleLogin />
-
-          <a
-            href="/register"
-            className="text-blue-700 hover:text-gray-950 text-sm sm:text-base text-center block"
-          >
-            ¿Aún no tienes una cuenta? Regístrate
-          </a>
-          <a
-            href="#"
-            className="text-blue-700 hover:text-gray-950 text-sm sm:text-base text-center block pt-1"
-          >
-            ¿Olvidaste tu contraseña?
-          </a>
+              Regístrate
+            </a>
+          </p>
+          <p>
+            <a
+              href="/reset/password"
+              className="text-violet-600 hover:underline font-medium"
+            >
+              ¿Olvidaste tu contraseña?
+            </a>
+          </p>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
-export default LoginForm;
+const mapStateToProps = (state) => ({
+  isAuthenticated: state.AuthReducer.isAuthenticated,
+});
+
+export default connect(mapStateToProps, { login, verify, getUser })(LoginForm);

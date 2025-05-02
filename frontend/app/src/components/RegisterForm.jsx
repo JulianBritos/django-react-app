@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import { register } from "../reducer/Actions";
 import { connect } from "react-redux";
 
@@ -9,16 +8,13 @@ const RegisterForm = ({ register }) => {
   const [formData, setFormData] = useState({
     email: "",
     username: "",
-    firstName: "",
-    lastName: "",
     password1: "",
     password2: "",
   });
 
   const navigate = useNavigate();
 
-  const { email, username, firstName, lastName, password1, password2 } =
-    formData;
+  const { email, username, password1, password2 } = formData;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,14 +30,7 @@ const RegisterForm = ({ register }) => {
     e.preventDefault();
 
     try {
-      await register(
-        email,
-        username,
-        firstName,
-        lastName,
-        password1,
-        password2
-      );
+      await register(email, username, password1, password2);
 
       navigate("../"); // Redirecciona luego de registrarse
     } catch (error) {
@@ -54,28 +43,6 @@ const RegisterForm = ({ register }) => {
       <div className="bg-white shadow-md rounded-2xl p-6 w-full max-w-md">
         <h2 className="text-2xl font-semibold text-center mb-6">Registrarse</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block mb-1 font-medium">Nombre</label>
-            <input
-              type="text"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
-              value={firstName}
-              name="firstName"
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-1 font-medium">Apellido/s</label>
-            <input
-              type="text"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
-              value={lastName}
-              name="lastName"
-              onChange={handleInputChange}
-              required
-            />
-          </div>
           <div>
             <label className="block mb-1 font-medium">Email</label>
             <input

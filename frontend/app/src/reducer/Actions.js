@@ -1,6 +1,7 @@
 import TYPE from "./Type";
 import toast from "react-hot-toast";
 import axios from "axios";
+axios.defaults.withCredentials = true;
 
 export const login = (email, password) => async (dispatch) => {
   const config = {
@@ -22,6 +23,7 @@ export const login = (email, password) => async (dispatch) => {
       type: TYPE.LOGIN_SUCCESS,
       payload: res.data,
     });
+
     toast.success("Has iniciado sesión correctamente");
   } catch (err) {
     dispatch({
@@ -29,36 +31,6 @@ export const login = (email, password) => async (dispatch) => {
     });
     toast.error("Error al iniciar sesión");
   }
-};
-
-export const verifySuccess = (user) => (dispatch) => {
-  toast.success("Verificación exitosa");
-  dispatch({
-    type: TYPE.VERIFY_SUCCESS,
-    payload: { user },
-  });
-};
-
-export const verifyFail = () => (dispatch) => {
-  toast.error("Error en la verificación");
-  dispatch({
-    type: TYPE.VERIFY_FAIL,
-  });
-};
-
-// Continúa con el mismo patrón para todas las acciones
-export const registerSuccess = () => (dispatch) => {
-  toast.success("Se ha enviado un link de verificación a tu correo");
-  dispatch({
-    type: TYPE.REGISTER_SUCCESS,
-  });
-};
-
-export const registerFail = () => (dispatch) => {
-  toast.error("Error al registrar el usuario");
-  dispatch({
-    type: TYPE.REGISTER_FAIL,
-  });
 };
 
 export const verify = () => async (dispatch) => {
@@ -118,11 +90,11 @@ export const refresh = () => async (dispatch) => {
         "Content-Type": "application/json",
       },
     };
-    const body = JSON.stringify({ refresh: localStorage.getItem("refresh") });
+
     try {
       const res = await axios.post(
         "http://localhost:8000/dj_rest_auth/token/refresh/",
-        body,
+        console.log(res.data),
         config
       );
       localStorage.setItem("access", res.data.access);
@@ -131,6 +103,7 @@ export const refresh = () => async (dispatch) => {
         payload: res.data,
       });
     } catch (err) {
+      console.log(err);
       dispatch({ type: TYPE.REFRESH_FAIL });
     }
   } else {
@@ -193,8 +166,7 @@ export const logout = () => async (dispatch) => {
 };
 
 export const register =
-  (email, username, first_name, last_name, password1, password2) =>
-  async (dispatch) => {
+  (email, username, password1, password2) => async (dispatch) => {
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -203,8 +175,6 @@ export const register =
     const body = JSON.stringify({
       email,
       username: email,
-      first_name,
-      last_name,
       password1,
       password2,
     });
@@ -214,6 +184,7 @@ export const register =
         body,
         config
       );
+
       dispatch({ type: TYPE.REGISTER_SUCCESS });
       toast.success("Se ha enviado un link de verificación a tu correo");
     } catch (err) {

@@ -36,7 +36,6 @@ function Header() {
   }, []);
 
   useEffect(() => {
-    console.log("isAuthenticated en useEffect:", isAuthenticated);
     if (isAuthenticated) {
       dispatch(getUser());
     }

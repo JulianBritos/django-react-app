@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { connect } from "react-redux";
-import { login, verify, getUser } from "../reducer/Actions";
+import { login, verify, getUser } from "../../reducer/Actions";
 import { useEffect } from "react";
 
 const LoginForm = ({ login, isAuthenticated }) => {

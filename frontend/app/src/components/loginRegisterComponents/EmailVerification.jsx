@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { connect } from "react-redux";
-import { emailVerification } from "../reducer/Actions";
+import { emailVerification } from "../../reducer/Actions";
 
 const EmailVerification = ({ emailVerification }) => {
   const [status, setStatus] = useState(false);

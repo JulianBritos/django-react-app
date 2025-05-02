@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { register } from "../reducer/Actions";
+import { register } from "../../reducer/Actions";
 import { connect } from "react-redux";
 
 const RegisterForm = ({ register }) => {

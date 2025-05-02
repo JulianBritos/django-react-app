@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Navigate } from "react-router-dom";
 import { connect } from "react-redux";
-import { changePassword } from "../reducer/Actions";
+import { changePassword } from "../../reducer/Actions";
 
 const ChangePassword = ({ isAuthenticated, changePassword }) => {
   const [formData, setFormData] = useState({

@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AdminPanel from "./pages/AdminPanel";
-
 import HomePage from "./pages/HomePage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
@@ -12,7 +11,8 @@ import LoginPage from "./pages/LoginPage";
 import ProductsSection from "./pages/ProductsSection";
 import CategoryPage from "./components/CategoryPage";
 import UserProfilePage from "./pages/UserProfilePage";
-import AdminComponent from "./components/AdminComponent";
+import UserOrdersPage from "./pages/UserOrdersPage";
+import UserOrderDetailPage from "./pages/UserOrderDetailPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import ResetPassword from "./pages/ResetPassword";
 import ResetPasswordConfirm from "./pages/ResetPasswordConfirm";
@@ -49,6 +49,11 @@ function App() {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/orderConfirmation" element={<OrderConfirmation />} />
+            <Route path="/myorders" element={<UserOrdersPage />} />
+            <Route
+              path="/myorders/:orderId"
+              element={<UserOrderDetailPage />}
+            />
             <Route path="/paymentMethods" element={<PaymentMethodsPage />} />
             <Route path="*" element={<NotFoundPage />} />
             <Route path="/adminDashboard" element={<UserManagementPage />} />

@@ -11,7 +11,7 @@ import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import ProductsSection from "./pages/ProductsSection";
 import CategoryPage from "./components/CategoryPage";
-import ProfilePage from "./pages/ProfilePage";
+import UserProfilePage from "./pages/UserProfilePage";
 import AdminComponent from "./components/AdminComponent";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import ResetPassword from "./pages/ResetPassword";
@@ -22,6 +22,9 @@ import { Provider } from "react-redux";
 import Store from "./Store";
 import { Toaster } from "react-hot-toast";
 import OwnerSection2 from "./pages/OwnerSection2";
+import CheckoutPage from "./pages/CheckoutPage";
+import OrderConfirmation from "./components/orderConfirmationComponenets/OrderConfirmation";
+import PaymentMethodsPage from "./pages/PaymentMethodsPage";
 
 function App() {
   return (
@@ -44,9 +47,12 @@ function App() {
             <Route path="/Home" element={<HomePage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/orderConfirmation" element={<OrderConfirmation />} />
+            <Route path="/paymentMethods" element={<PaymentMethodsPage />} />
             <Route path="*" element={<NotFoundPage />} />
             <Route path="/adminDashboard" element={<UserManagementPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile" element={<UserProfilePage />} />
             <Route path="/owner" element={<OwnerSection />} />
             <Route path="/products" element={<ProductsSection />}>
               <Route path=":categoryName" element={<CategoryPage />} />

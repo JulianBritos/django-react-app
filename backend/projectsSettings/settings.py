@@ -24,7 +24,6 @@ ALLOWED_HOSTS = []
 SITE_ID = 1
 
 INSTALLED_APPS = [
-    'unfold',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,7 +46,9 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.payments',
     'apps.orders',
-    'drf_yasg'
+    'apps.importer',
+    'drf_yasg',
+    'import_export'
 ]
 
 

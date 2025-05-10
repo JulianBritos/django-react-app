@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar Productos</title>
+</head>
+<body>
+    <h1>Importar Productos</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file">Selecciona un archivo CSV o XLSX:</label>
+        <input type="file" name="file" id="file" required><br><br>
+        <button type="submit">Subir archivo</button>
+    </form>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    
+    {% if success %}
+        <p style="color: green;">{{ success }}</p>
+    {% endif %}
+</body>
+</html>

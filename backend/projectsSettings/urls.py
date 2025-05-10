@@ -29,7 +29,7 @@ urlpatterns = [
     path('dj_rest_auth/registration/account-confirm-email/<str:key>/', email_confirmation),
     path('dj_rest_auth/registration/', include('dj_rest_auth.registration.urls')),
     path('reset/password/confirm/<uid>/<str:token>', reset_password_confirm, name='password_reset_confirm'),
-    path('import/', include('importer.urls')),   
+    path('records/', include('apps.importer.urls')),  
     
 
 

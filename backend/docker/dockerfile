@@ -1,5 +1,5 @@
 # Usa una imagen oficial de Python
-FROM python:3.10.16-alpine3.21
+FROM python:3.13.3-alpine3.21
 
 # Establece el directorio de trabajo en el contenedor
 WORKDIR /app
@@ -15,4 +15,6 @@ COPY . .
 EXPOSE 8000
 
 # Comando para correr Django
+RUN python manage.py makemigrations
+RUN python manage.py migrate
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

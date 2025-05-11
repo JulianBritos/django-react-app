@@ -1,0 +1,3 @@
+GRANT ALL PRIVILEGES ON DATABASE ecommerce TO admin;
+GRANT USAGE ON SCHEMA public TO admin;
+GRANT CREATE ON SCHEMA public TO admin;

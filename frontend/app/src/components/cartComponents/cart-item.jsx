@@ -1,5 +1,5 @@
 import { Minus, Plus, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 
 export default function CartItem({ item }) {
   const itemTotal = item.price * item.quantity;

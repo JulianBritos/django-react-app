@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getProducts } from "../api/products.api";
+import { getProducts } from "../../api/products.api";
 
 const BestProducts = () => {
   const [products, setProducts] = useState([]);
@@ -20,10 +20,11 @@ const BestProducts = () => {
           {/* Texto y botón */}
           <div className="md:w-3/6 mb-6 md:mb-0">
             <h2 className="text-start text-3xl font-bold text-black">
-              Best Selling Products
+              Productos destacados
             </h2>
             <p className="text-start text-gray-500 mt-2">
-              Easiest way to healthy life by buying your favorite toys
+              La forma más fácil de llevar una vida saludable comprando tus
+              juguetes favoritos.
             </p>
 
             <div className="flex flex-col items-start">

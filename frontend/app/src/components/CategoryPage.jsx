@@ -8,9 +8,10 @@ function CategoryPage() {
   const { products, categories } = useOutletContext();
   const navigate = useNavigate();
 
-  const filteredProducts = categoryName === "allproducts"
-    ? products
-    : products.filter((product) => product.category.name === categoryName);
+  const filteredProducts =
+    categoryName === "allproducts"
+      ? products
+      : products.filter((product) => product.category.name === categoryName);
 
   const handleCategoryClick = (category) => {
     navigate(`/products/${category.name}`);
@@ -36,8 +37,8 @@ function CategoryPage() {
             >
               <img
                 src={
-                  product.uploaded_images.length > 0
-                    ? product.uploaded_images[0].image
+                  product.product_attributes?.[0]?.uploaded_images?.[0]?.image
+                    ? product.product_attributes[0].uploaded_images[0].image
                     : "/placeholder.jpg"
                 }
                 alt={product.name}

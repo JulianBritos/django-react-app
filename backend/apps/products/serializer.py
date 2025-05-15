@@ -90,3 +90,16 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
             ProductImages.objects.create(product=product_attribute, image=image)
 
         return product_attribute
+    
+class ProductWithAttributesSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        source='category',
+        write_only=True
+    )
+    product_attributes = ProductAttributeSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Product
+        fields = '__all__'

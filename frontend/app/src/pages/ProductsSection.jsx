@@ -6,7 +6,7 @@
 // const ProductsSection = () => {
 //   const [products, setProducts] = useState([]);
 //   const [categories, setCategories] = useState([]);
-  
+
 //   const [selectedCategory, setSelectedCategory] =
 //     useState("Nuestros Productos"); // ESTADO PARA ALMACENAR LA CATEGORÍA SELECCIONADA
 
@@ -89,7 +89,6 @@
 // };
 
 // export default ProductsSection;
-
 
 import { useEffect, useState } from "react";
 import { getProducts } from "../api/products.api";

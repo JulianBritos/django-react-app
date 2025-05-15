@@ -46,7 +46,11 @@ const BestProducts = () => {
                 className="bg-white shadow rounded-lg overflow-hidden"
               >
                 <img
-                  src={product.image}
+                  src={
+                    product.product_attributes?.[0]?.uploaded_images?.[0]?.image
+                      ? product.product_attributes[0].uploaded_images[0].image
+                      : "/placeholder.jpg"
+                  }
                   alt={product.name}
                   className="w-full h-64 object-cover"
                 />

@@ -16,7 +16,7 @@ const CheckoutButton = ({ cartItems, userEmail }) => {
               unit_price: item.price,
             })),
             payer: { email: userEmail },
-            back_urls: {
+            back_urls: { // OJO CON ESTOS ENDPOINTS. Deberia ir: import.meta.env.VITE_BASE_URL + "/success/"
               success: "http://localhost:3000/success",
               failure: "http://localhost:3000/failure",
               pending: "http://localhost:3000/pending",

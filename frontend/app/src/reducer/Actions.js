@@ -12,7 +12,7 @@ export const login = (email, password) => async (dispatch) => {
   const body = JSON.stringify({ email, password });
   try {
     const res = await axios.post(
-      "http://localhost:8000/dj_rest_auth/login/",
+      import.meta.env.VITE_BASE_URL + "/dj_rest_auth/login/",
       body,
       config
     );
@@ -43,7 +43,7 @@ export const verify = () => async (dispatch) => {
     const body = JSON.stringify({ token: localStorage.getItem("access") });
     try {
       await axios.post(
-        "http://localhost:8000/dj_rest_auth/token/verify/",
+        import.meta.env.VITE_BASE_URL + "/dj_rest_auth/token/verify/",
         body,
         config
       );
@@ -68,7 +68,7 @@ export const getUser = () => async (dispatch) => {
     };
     try {
       const res = await axios.get(
-        "http://localhost:8000/dj_rest_auth/user/",
+        import.meta.env.VITE_BASE_URL + "/dj_rest_auth/user/",
         config
       );
       dispatch({
@@ -93,7 +93,7 @@ export const refresh = () => async (dispatch) => {
 
     try {
       const res = await axios.post(
-        "http://localhost:8000/dj_rest_auth/token/refresh/",
+        import.meta.env.VITE_BASE_URL + "/dj_rest_auth/token/refresh/",
         console.log(res.data),
         config
       );
@@ -123,7 +123,7 @@ export const changePassword =
     const body = JSON.stringify({ new_password1, new_password2, old_password });
     try {
       await axios.post(
-        "http://localhost:8000/dj_rest_auth/password/change/",
+        import.meta.env.VITE_BASE_URL + "/dj_rest_auth/password/change/",
         body,
         config
       );
@@ -147,7 +147,7 @@ export const logout = () => async (dispatch) => {
   };
   try {
     await axios.post(
-      "http://localhost:8000/dj_rest_auth/logout/",
+      import.meta.env.VITE_BASE_URL + "/dj_rest_auth/logout/",
 
       config
     );
@@ -180,7 +180,7 @@ export const register =
     });
     try {
       await axios.post(
-        "http://localhost:8000/dj_rest_auth/registration/",
+        import.meta.env.VITE_BASE_URL + "/dj_rest_auth/registration/",
         body,
         config
       );
@@ -202,7 +202,7 @@ export const emailVerification = (key) => async (dispatch) => {
   const body = JSON.stringify({ key });
   try {
     await axios.post(
-      "http://localhost:8000/dj_rest_auth/registration/verify-email/",
+      import.meta.env.VITE_BASE_URL + "/dj_rest_auth/registration/verify-email/",
       body,
       config
     );
@@ -223,7 +223,7 @@ export const resetPassword = (email) => async (dispatch) => {
   const body = JSON.stringify({ email });
   try {
     await axios.post(
-      "http://localhost:8000/dj_rest_auth/password/reset/",
+      import.meta.env.VITE_BASE_URL + "/dj_rest_auth/password/reset/",
       body,
       config
     );
@@ -245,7 +245,7 @@ export const resetPasswordConfirm =
     const body = JSON.stringify({ new_password1, new_password2, uid, token });
     try {
       await axios.post(
-        "http://localhost:8000/dj_rest_auth/password/reset/confirm/",
+        import.meta.env.VITE_BASE_URL + "/dj_rest_auth/password/reset/confirm/",
         body,
         config
       );

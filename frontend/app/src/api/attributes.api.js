@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000/apps/products/attributes/";
-const API_OPTIONS_URL = "http://127.0.0.1:8000/apps/products/attributeoptions/";
+const API_URL = import.meta.env.VITE_BASE_URL + "/apps/products/attributes/";
+const API_OPTIONS_URL = import.meta.env.VITE_BASE_URL + "/apps/products/attributeoptions/";
 
 // Obtener todos los atributos
 export const getAttributes = async () => {

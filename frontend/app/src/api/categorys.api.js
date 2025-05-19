@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8000/apps/products/categories/"; // Ajustá si usás otro puerto
+const API_URL = import.meta.env.VITE_BASE_URL + "/apps/products/categories/";
 
 // Obtener lista de categorias
 export const getCategories = async () => {

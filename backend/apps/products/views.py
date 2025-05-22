@@ -36,6 +36,13 @@ class AttributeOptionViewSet(viewsets.ModelViewSet):
     queryset = AttributeOption.objects.all()
     serializer_class = AttributeOptionSerializer
 
+    def get_queryset(self):
+        queryset = AttributeOption.objects.all()
+        attribute_id = self.request.query_params.get('attribute')
+        if attribute_id:
+            queryset = queryset.filter(attribute_id=attribute_id)
+        return queryset
+
 class ProductAttributeViewSet(viewsets.ModelViewSet):
     queryset = ProductAttribute.objects.all()
     serializer_class = ProductAttributeSerializer

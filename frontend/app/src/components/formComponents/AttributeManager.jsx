@@ -1,63 +1,170 @@
-import React, { useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import React, { useState } from "react";
+import { Plus, X } from "lucide-react";
 
-const AttributeManagerOriginal = ({ attributes, onChange }) => {
-  const [attributeBlocks, setAttributeBlocks] = useState([]);
+const AttributeManager = ({
+  attributes,
+  productAttributes,
+  setProductAttributes,
+  selectedAttribute,
+  setSelectedAttribute,
+  attributeOptions,
+}) => {
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState([]);
 
-  const handleAddAttributeBlock = () => {
-    setAttributeBlocks([...attributeBlocks, {
-      attributeId: '',
-      optionId: '',
-      stock: 0,
-      extraPrice: 0
-    }]);
+  const handleAddClick = () => {
+    setShowSidebar(true);
+    setSelectedAttribute("");
+    setSelectedOptions([]);
   };
 
-  const handleAttributeChange = (index, field, value) => {
-    const updated = [...attributeBlocks];
-    updated[index][field] = value;
-    setAttributeBlocks(updated);
-    onChange(updated); // Propagar al padre
+  const handleClosePanel = () => {
+    setShowSidebar(false);
+    setSelectedAttribute("");
+    setSelectedOptions([]);
   };
 
-  const handleRemoveAttributeBlock = (index) => {
-    const updated = [...attributeBlocks];
-    updated.splice(index, 1);
-    setAttributeBlocks(updated);
-    onChange(updated); // Propagar al padre
+  const handleAttributeSelect = (attributeId) => {
+    setSelectedAttribute(attributeId);
+    setSelectedOptions([]);
+  };
+
+  const handleOptionToggle = (option) => {
+    setSelectedOptions((prev) => {
+      const isSelected = prev.some((opt) => opt.id === option.id);
+      if (isSelected) {
+        return prev.filter((opt) => opt.id !== option.id);
+      } else {
+        return [...prev, option];
+      }
+    });
+  };
+
+  const handleSaveOptions = () => {
+    if (selectedAttribute && selectedOptions.length > 0) {
+      const newAttribute = {
+        attribute: selectedAttribute,
+        options: selectedOptions,
+      };
+
+      setProductAttributes((prev) => {
+        // Check if attribute already exists
+        const existingIndex = prev.findIndex(
+          (pa) => pa.attribute === selectedAttribute
+        );
+        if (existingIndex >= 0) {
+          // Update existing attribute's options
+          const updated = [...prev];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            options: [...selectedOptions],
+          };
+          return updated;
+        } else {
+          // Add new attribute
+          return [...prev, newAttribute];
+        }
+      });
+
+      setShowSidebar(false);
+      setSelectedAttribute("");
+      setSelectedOptions([]);
+    }
+  };
+
+  const removeAttribute = (index) => {
+    setProductAttributes((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
-    <div className="p-4 bg-white shadow-lg rounded-lg space-y-4">
-      <h2 className="text-xl font-semibold mb-4">Atributos del Producto</h2>
+    <div className="p-4 bg-white shadow-lg rounded-lg">
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">Atributos y variantes</h3>
+          <button
+            type="button"
+            onClick={handleAddClick}
+            className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+          >
+            <Plus className="h-5 w-5" />
+            Agregar atributo
+          </button>
+        </div>
 
-      <button
-        type="button"
-        onClick={handleAddAttributeBlock}
-        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+        {/* Lista de atributos seleccionados */}
+        <div className="space-y-4">
+          {productAttributes.map((pa, index) => {
+            const attr = attributes.find((a) => a.id === pa.attribute);
+            return (
+              <div
+                key={index}
+                className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h4 className="text-lg font-medium text-gray-900">
+                      {attr?.name}
+                    </h4>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {pa.options.map((opt) => (
+                        <span
+                          key={opt.id}
+                          className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium"
+                        >
+                          {opt.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => removeAttribute(index)}
+                    className="text-gray-400 hover:text-red-500 transition-colors duration-200"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Panel lateral */}
+      <div
+        className={`fixed inset-y-0 right-0 w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${
+          showSidebar ? "translate-x-0" : "translate-x-full"
+        }`}
       >
-        + Agregar Atributo
-      </button>
+        <div className="h-full flex flex-col">
+          {/* Header */}
+          <div className="px-6 py-4 border-b">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-semibold text-gray-900">
+                Agregar atributo
+              </h3>
+              <button
+                onClick={handleClosePanel}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
 
-      {attributeBlocks.length === 0 && (
-        <p className="text-sm text-gray-500">No hay atributos agregados</p>
-      )}
-
-      {attributeBlocks.length > 0 && (
-        <div className="border p-4 rounded-lg space-y-4 bg-gray-50">
-          {attributeBlocks.map((block, index) => (
-            <div key={index} className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4 items-end">
+          {/* Content */}
+          <div className="flex-1 p-6 overflow-y-auto">
+            <div className="space-y-6">
               {/* Selector de atributo */}
-              <div className="col-span-1">
-                <label className="block text-sm font-medium mb-1">Nuevo Atributo</label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Seleccionar atributo
+                </label>
                 <select
-                  value={block.attributeId}
-                  onChange={(e) =>
-                    handleAttributeChange(index, 'attributeId', e.target.value)
-                  }
-                  className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                  value={selectedAttribute}
+                  onChange={(e) => handleAttributeSelect(e.target.value)}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Seleccionar atributo</option>
+                  <option value="">Seleccione un atributo</option>
                   {attributes.map((attr) => (
                     <option key={attr.id} value={attr.id}>
                       {attr.name}
@@ -66,49 +173,61 @@ const AttributeManagerOriginal = ({ attributes, onChange }) => {
                 </select>
               </div>
 
-              {/* Stock */}
-              <div className="col-span-1">
-                <label className="block text-sm font-medium mb-1">Stock</label>
-                <input
-                  type="number"
-                  value={block.stock}
-                  onChange={(e) =>
-                    handleAttributeChange(index, 'stock', parseInt(e.target.value))
-                  }
-                  className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                  min="0"
-                />
-              </div>
-
-              {/* Precio adicional + eliminar */}
-              <div className="col-span-1 flex gap-2 items-end">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium mb-1">Precio Adicional</label>
-                  <input
-                    type="number"
-                    value={block.extraPrice}
-                    onChange={(e) =>
-                      handleAttributeChange(index, 'extraPrice', parseFloat(e.target.value))
-                    }
-                    className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                    min="0"
-                  />
+              {/* Selección de opciones */}
+              {selectedAttribute && attributeOptions.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Opciones disponibles
+                  </label>
+                  <div className="space-y-2">
+                    {attributeOptions.map((option) => (
+                      <label
+                        key={option.id}
+                        className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedOptions.some(
+                            (opt) => opt.id === option.id
+                          )}
+                          onChange={() => handleOptionToggle(option)}
+                          className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          data-option-id={option.id}
+                        />
+                        <span className="ml-3 text-gray-700">
+                          {option.name}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveAttributeBlock(index)}
-                  className="text-red-600 hover:text-red-800"
-                  title="Eliminar atributo"
-                >
-                  <Trash2 size={20} />
-                </button>
-              </div>
+              )}
             </div>
-          ))}
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t bg-gray-50">
+            <button
+              onClick={handleSaveOptions}
+              disabled={!selectedAttribute || selectedOptions.length === 0}
+              className="w-full bg-blue-500 text-white py-2.5 px-4 rounded-lg hover:bg-blue-600 
+                disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              Agregar opciones
+            </button>
+          </div>
         </div>
+      </div>
+
+      {/* Overlay */}
+      {showSidebar && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm transition-opacity z-40"
+          onClick={handleClosePanel}
+        />
       )}
     </div>
   );
 };
 
-export default AttributeManagerOriginal;
+export default AttributeManager;

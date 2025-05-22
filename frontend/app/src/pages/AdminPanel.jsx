@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import ProductForm from "../components/ProductForm";
+
+import ProductForm from "../components/formComponents/ProductForm";
 import { getProducts, deleteProduct } from "../api/products.api";
 
 const AdminPanel = () => {

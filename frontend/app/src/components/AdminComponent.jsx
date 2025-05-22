@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FiFilter, FiEdit, FiSearch, FiPlus } from "react-icons/fi";
-import ProductForm3 from "./formComponents/ProductForm3";
+import ProductForm from "./formComponents/ProductForm";
 
 function AdminComponent({ products, categories }) {
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -19,9 +19,10 @@ function AdminComponent({ products, categories }) {
     setSelectedCategory(category);
     setIsFilterMenuOpen(false);
 
-    const filtered = category === "allproducts"
-      ? products
-      : products.filter((product) => product.category === category);
+    const filtered =
+      category === "allproducts"
+        ? products
+        : products.filter((product) => product.category === category);
 
     setFilteredProducts(filtered);
     setSearchTerm("");
@@ -32,8 +33,10 @@ function AdminComponent({ products, categories }) {
     setSearchTerm(term);
 
     const filtered = products
-      .filter((product) =>
-        product.category === selectedCategory || selectedCategory === "allproducts"
+      .filter(
+        (product) =>
+          product.category === selectedCategory ||
+          selectedCategory === "allproducts"
       )
       .filter((product) => product.name.toLowerCase().includes(term));
 
@@ -56,7 +59,7 @@ function AdminComponent({ products, categories }) {
         <h1 className="text-3xl font-bold text-gray-800">
           {selectedCategory === "allproducts"
             ? "Todos los Productos"
-            : categories.find(c => c.name === selectedCategory)?.label}
+            : categories.find((c) => c.name === selectedCategory)?.label}
         </h1>
 
         <div className="flex-1 flex justify-center items-center gap-4">
@@ -88,7 +91,9 @@ function AdminComponent({ products, categories }) {
                   <button
                     key={category.name}
                     onClick={() => handleCategoryClick(category.name)}
-                    className={`block w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 ${selectedCategory === category.name ? 'font-bold' : ''}`}
+                    className={`block w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 ${
+                      selectedCategory === category.name ? "font-bold" : ""
+                    }`}
                   >
                     {category.label}
                   </button>
@@ -115,14 +120,19 @@ function AdminComponent({ products, categories }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
-            <div key={product.id} className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+            <div
+              key={product.id}
+              className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+            >
               <img
                 src={product.uploaded_images?.[0]?.image || "/placeholder.jpg"}
                 alt={product.name}
                 className="w-full h-64 object-cover"
               />
               <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {product.name}
+                </h3>
                 <p className="text-gray-600">${product.price}</p>
                 <button
                   onClick={() => handleOpenProductForm(product)}
@@ -134,12 +144,14 @@ function AdminComponent({ products, categories }) {
             </div>
           ))
         ) : (
-          <p className="text-gray-500 col-span-full text-center">No se encontraron productos.</p>
+          <p className="text-gray-500 col-span-full text-center">
+            No se encontraron productos.
+          </p>
         )}
       </div>
 
       {isProductFormOpen && (
-        <ProductForm3
+        <ProductForm
           product={selectedProduct}
           onSave={(savedProduct) => {
             console.log("Producto guardado:", savedProduct);

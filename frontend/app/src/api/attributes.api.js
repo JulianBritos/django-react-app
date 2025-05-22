@@ -32,6 +32,14 @@ export const getAttributeOptions = async () => {
   return response.data;
 };
 
+// Obtener una opción de atributo por ID de atributo
+export const getAttributeOptionsByAttributeId = async (attributeId) => {
+  const response = await axios.get(
+    `${API_OPTIONS_URL}?attribute=${attributeId}`
+  );
+  return response.data;
+};
+
 // Crear una nueva opción de atributo
 export const createAttributeOption = async (optionData) => {
   const response = await axios.post(API_OPTIONS_URL, optionData);

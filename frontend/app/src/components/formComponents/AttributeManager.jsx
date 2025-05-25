@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { Plus, X } from "lucide-react";
+import {
+  createAttribute,
+  createAttributeOption,
+} from "../../api/attributes.api";
 
 const AttributeManager = ({
   attributes,
@@ -11,6 +15,9 @@ const AttributeManager = ({
 }) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [creatingNewAttribute, setCreatingNewAttribute] = useState(false);
+  const [newAttributeName, setNewAttributeName] = useState("");
+  const [newOptionName, setNewOptionName] = useState("");
 
   const handleAddClick = () => {
     setShowSidebar(true);
@@ -155,10 +162,20 @@ const AttributeManager = ({
           <div className="flex-1 p-6 overflow-y-auto">
             <div className="space-y-6">
               {/* Selector de atributo */}
-              <div>
+              <div className="flex justify-between items-center max-w-4xl">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Seleccionar atributo
                 </label>
+
+                <button
+                  type="button"
+                  onClick={() => setCreatingNewAttribute(true)}
+                  className="text-blue-700 rounded-lg transition-all duration-200"
+                >
+                  Crear nuevo atributo
+                </button>
+              </div>
+              <div>
                 <select
                   value={selectedAttribute}
                   onChange={(e) => handleAttributeSelect(e.target.value)}
@@ -171,6 +188,66 @@ const AttributeManager = ({
                     </option>
                   ))}
                 </select>
+                {creatingNewAttribute && (
+                  <div className="space-y-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nuevo atributo
+                      </label>
+                      <input
+                        type="text"
+                        value={newAttributeName}
+                        onChange={(e) => setNewAttributeName(e.target.value)}
+                        className="w-full p-2 border rounded-lg"
+                        placeholder="Ej: Talla, Color"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nueva opción
+                      </label>
+                      <input
+                        type="text"
+                        value={newOptionName}
+                        onChange={(e) => setNewOptionName(e.target.value)}
+                        className="w-full p-2 border rounded-lg"
+                        placeholder="Ej: Rojo, M, Grande"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg"
+                      onClick={async () => {
+                        try {
+                          const newAttr = await createAttribute({
+                            name: newAttributeName,
+                          });
+                          const newOpt = await createAttributeOption({
+                            name: newOptionName,
+                            attribute: newAttr.id,
+                          });
+
+                          // Opcional: podrías actualizar la lista de atributos con el nuevo
+                          // setAttributes(prev => [...prev, newAttr]); // si tuvieras setAttributes
+
+                          setSelectedAttribute(newAttr.id);
+                          setSelectedOptions([newOpt]);
+
+                          setCreatingNewAttribute(false);
+                          setNewAttributeName("");
+                          setNewOptionName("");
+                        } catch (error) {
+                          console.error(
+                            "Error al crear atributo y opción:",
+                            error
+                          );
+                        }
+                      }}
+                    >
+                      Guardar
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Selección de opciones */}

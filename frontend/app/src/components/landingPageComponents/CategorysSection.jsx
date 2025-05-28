@@ -14,7 +14,7 @@ const Categories = () => {
           <h3 className="font-semibold">Artificial Plants</h3>
         </div>
       </div>
-      <button className="mt-6 px-6 py-2 bg-green-600 text-white rounded-lg shadow">
+      <button className="mt-6 px-6 py-2 bg-thirdary-600 text-white rounded-lg shadow">
         Explore
       </button>
     </section>

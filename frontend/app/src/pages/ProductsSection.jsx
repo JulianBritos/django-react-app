@@ -74,7 +74,7 @@
 
 //                 {/* Botón para agregar al carrito (opcional) */}
 //                 <button
-//                   className="w-full mt-4 bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition"
+//                   className="w-full mt-4 bg-thirdary-500 text-white py-2 rounded-md hover:bg-thirdary-600 transition"
 //                   onClick={() => alert(`Agregaste ${product.name} al carrito`)}
 //                 >
 //                   Agregar al carrito

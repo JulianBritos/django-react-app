@@ -17,7 +17,7 @@ const ImageField = ({ images, onChange, imagePreviews }) => {
 
   const handleDrop = (e) => {
     e.preventDefault();
-    const droppedFiles = Array.from(e.dataTransfer.files).filter(file =>
+    const droppedFiles = Array.from(e.dataTransfer.files).filter((file) =>
       file.type.startsWith("image/")
     );
     if (droppedFiles.length) handleFiles(droppedFiles);
@@ -28,14 +28,16 @@ const ImageField = ({ images, onChange, imagePreviews }) => {
       <label className="block text-xl font-semibold mb-3">Fotos</label>
 
       <div
-        className="w-full p-6 border-2 border-dashed border-blue-400 rounded-lg bg-gray-50 text-center text-blue-600 cursor-pointer hover:bg-blue-100 transition relative"
+        className="w-full p-6 border-2 border-dashed border-primary-400 rounded-lg bg-gray-50 text-center text-primary-600 cursor-pointer hover:bg-primary-100 transition relative"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
       >
         <div className="flex flex-col items-center">
           <Plus className="w-6 h-6 mb-1" />
-          <p className="font-medium">Arrastrá y soltá, o subí fotos del producto</p>
+          <p className="font-medium">
+            Arrastrá y soltá, o subí fotos del producto
+          </p>
         </div>
       </div>
 
@@ -52,7 +54,8 @@ const ImageField = ({ images, onChange, imagePreviews }) => {
       />
 
       <p className="text-sm text-gray-500 mt-2">
-        📷 Tamaño mínimo recomendado: 1024px / Formatos recomendados: WEBP, PNG, JPEG o GIF
+        📷 Tamaño mínimo recomendado: 1024px / Formatos recomendados: WEBP, PNG,
+        JPEG o GIF
       </p>
 
       {imagePreviews.length > 0 && (
@@ -64,7 +67,7 @@ const ImageField = ({ images, onChange, imagePreviews }) => {
                 alt={`Preview ${i}`}
                 className="w-full h-32 object-cover rounded-lg border"
                 style={{
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                 }}
               />
               <button

@@ -3,7 +3,7 @@ import React from "react";
 const OrderConfirmation = () => {
   return (
     <div className="max-w-2xl mx-auto p-6 text-center">
-      <h1 className="text-3xl font-semibold text-green-600 mb-4">
+      <h1 className="text-3xl font-semibold text-thirdary-600 mb-4">
         ¡Gracias por tu compra!
       </h1>
       <p className="text-gray-700 mb-6">
@@ -51,7 +51,7 @@ const OrderConfirmation = () => {
       <div className="text-center">
         <a
           href="/"
-          className="inline-block bg-green-500 text-white py-2 px-6 rounded-lg hover:bg-green-600 transition"
+          className="inline-block bg-thirdary-500 text-white py-2 px-6 rounded-lg hover:bg-thirdary-600 transition"
         >
           Volver al Inicio
         </a>

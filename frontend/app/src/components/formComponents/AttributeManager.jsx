@@ -17,7 +17,7 @@ const AttributeManager = ({
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [creatingNewAttribute, setCreatingNewAttribute] = useState(false);
   const [newAttributeName, setNewAttributeName] = useState("");
-  const [newOptionName, setNewOptionName] = useState("");
+  const [newOptionNames, setNewOptionNames] = useState([""]);
 
   const handleAddClick = () => {
     setShowSidebar(true);
@@ -91,7 +91,7 @@ const AttributeManager = ({
           <button
             type="button"
             onClick={handleAddClick}
-            className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+            className="inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
           >
             <Plus className="h-5 w-5" />
             Agregar atributo
@@ -116,7 +116,7 @@ const AttributeManager = ({
                       {pa.options.map((opt) => (
                         <span
                           key={opt.id}
-                          className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium"
+                          className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-sm font-medium"
                         >
                           {opt.name}
                         </span>
@@ -170,7 +170,7 @@ const AttributeManager = ({
                 <button
                   type="button"
                   onClick={() => setCreatingNewAttribute(true)}
-                  className="text-blue-700 rounded-lg transition-all duration-200"
+                  className="text-primary-700 rounded-lg transition-all duration-200"
                 >
                   Crear nuevo atributo
                 </button>
@@ -179,7 +179,7 @@ const AttributeManager = ({
                 <select
                   value={selectedAttribute}
                   onChange={(e) => handleAttributeSelect(e.target.value)}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 >
                   <option value="">Seleccione un atributo</option>
                   {attributes.map((attr) => (
@@ -204,38 +204,68 @@ const AttributeManager = ({
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Nueva opción
+                        Opciones del nuevo atributo
                       </label>
-                      <input
-                        type="text"
-                        value={newOptionName}
-                        onChange={(e) => setNewOptionName(e.target.value)}
-                        className="w-full p-2 border rounded-lg"
-                        placeholder="Ej: Rojo, M, Grande"
-                      />
+
+                      {newOptionNames.map((name, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 mb-2"
+                        >
+                          <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => {
+                              const updated = [...newOptionNames];
+                              updated[index] = e.target.value;
+                              setNewOptionNames(updated);
+                            }}
+                            className="flex-1 p-2 border rounded-lg"
+                            placeholder={`Ej: opción ${index + 1}`}
+                          />
+                          {index === newOptionNames.length - 1 && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setNewOptionNames([...newOptionNames, ""])
+                              }
+                              className="text-primary-600 hover:text-primary-800"
+                            >
+                              <Plus className="w-5 h-5" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
                     </div>
+
                     <button
                       type="button"
-                      className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg"
+                      className="w-full bg-thirdary-500 hover:bg-thirdary-600 text-white py-2 rounded-lg"
                       onClick={async () => {
                         try {
                           const newAttr = await createAttribute({
                             name: newAttributeName,
                           });
-                          const newOpt = await createAttributeOption({
-                            name: newOptionName,
-                            attribute: newAttr.id,
-                          });
+                          const createdOptions = await Promise.all(
+                            newOptionNames
+                              .filter((name) => name.trim() !== "")
+                              .map((name) =>
+                                createAttributeOption({
+                                  name,
+                                  attribute: newAttr.id,
+                                })
+                              )
+                          );
 
                           // Opcional: podrías actualizar la lista de atributos con el nuevo
                           // setAttributes(prev => [...prev, newAttr]); // si tuvieras setAttributes
 
                           setSelectedAttribute(newAttr.id);
-                          setSelectedOptions([newOpt]);
+                          setSelectedOptions(createdOptions);
 
                           setCreatingNewAttribute(false);
                           setNewAttributeName("");
-                          setNewOptionName("");
+                          setNewOptionNames([""]);
                         } catch (error) {
                           console.error(
                             "Error al crear atributo y opción:",
@@ -268,7 +298,7 @@ const AttributeManager = ({
                             (opt) => opt.id === option.id
                           )}
                           onChange={() => handleOptionToggle(option)}
-                          className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          className="h-4 w-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
                           data-option-id={option.id}
                         />
                         <span className="ml-3 text-gray-700">
@@ -287,7 +317,7 @@ const AttributeManager = ({
             <button
               onClick={handleSaveOptions}
               disabled={!selectedAttribute || selectedOptions.length === 0}
-              className="w-full bg-blue-500 text-white py-2.5 px-4 rounded-lg hover:bg-blue-600 
+              className="w-full bg-primary-500 text-white py-2.5 px-4 rounded-lg hover:bg-primary-600 
                 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
             >
               Agregar opciones

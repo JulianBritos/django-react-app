@@ -18,7 +18,7 @@ const ContactForm = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-purple-100 shadow-lg shadow-purple-300 rounded-2xl p-8">
+    <div className="max-w-2xl mx-auto bg-primary-100 shadow-lg shadow-primary-300 rounded-2xl p-8">
       <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
         Contact Us
       </h2>
@@ -29,7 +29,7 @@ const ContactForm = () => {
           placeholder="Your Name"
           value={formData.name}
           onChange={handleChange}
-          className="w-full p-3 shadow-md border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-700"
+          className="w-full p-3 shadow-md border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-700"
           required
         />
         <input
@@ -38,7 +38,7 @@ const ContactForm = () => {
           placeholder="Your Email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full p-3 shadow-md border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-700"
+          className="w-full p-3 shadow-md border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-700"
           required
         />
         <textarea
@@ -47,12 +47,12 @@ const ContactForm = () => {
           value={formData.message}
           onChange={handleChange}
           rows="4"
-          className="w-full p-3 shadow-md border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-700"
+          className="w-full p-3 shadow-md border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-700"
           required
         />
         <button
           type="submit"
-          className="mt-4 shadow-md shadow-purple-300 bg-white text-purple-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
+          className="mt-4 shadow-md shadow-primary-300 bg-white text-primary-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
         >
           Send Message
         </button>

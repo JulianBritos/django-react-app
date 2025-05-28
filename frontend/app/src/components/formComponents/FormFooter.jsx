@@ -13,7 +13,7 @@ const FormFooter = ({ onCancel, onSave, isLoading }) => {
       <button
         onClick={onSave}
         disabled={isLoading}
-        className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 flex items-center gap-2 transition"
+        className="px-4 py-2 rounded-lg bg-primary-500 text-white hover:bg-primary-600 flex items-center gap-2 transition"
       >
         {isLoading ? (
           <svg

@@ -124,7 +124,7 @@ const CheckoutForm = () => {
 
       {/* Botón de Confirmación */}
       <div className="text-center">
-        <button className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400">
+        <button className="w-full bg-thirdary-500 text-white p-3 rounded-lg hover:bg-thirdary-600 focus:outline-none focus:ring-2 focus:ring-thirdary-400">
           Confirmar Pedido
         </button>
       </div>

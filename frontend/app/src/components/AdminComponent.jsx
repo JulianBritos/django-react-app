@@ -111,7 +111,7 @@ function AdminComponent({ products, categories }) {
 
         <button
           onClick={() => handleOpenProductForm()}
-          className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+          className="flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition"
         >
           <FiPlus /> Nuevo Producto
         </button>
@@ -136,7 +136,7 @@ function AdminComponent({ products, categories }) {
                 <p className="text-gray-600">${product.price}</p>
                 <button
                   onClick={() => handleOpenProductForm(product)}
-                  className="w-full mt-4 bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition flex items-center justify-center gap-2"
+                  className="w-full mt-4 bg-primary-500 text-white py-2 rounded-md hover:bg-primary-600 transition flex items-center justify-center gap-2"
                 >
                   <FiEdit /> Editar producto
                 </button>

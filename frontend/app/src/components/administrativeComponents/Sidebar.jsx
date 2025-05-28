@@ -13,7 +13,7 @@ import {
   Share2,
   Boxes,
   Settings,
-  Puzzle
+  Puzzle,
 } from "lucide-react";
 
 const sidebarItems = [
@@ -21,54 +21,50 @@ const sidebarItems = [
     label: "Inicio",
     icon: <Home size={18} />,
     key: "inicio",
-    children: []
+    children: [],
   },
   {
     label: "Estadísticas",
     icon: <BarChart2 size={18} />,
     key: "estadisticas",
-    children: []
+    children: [],
   },
   {
     label: "Ventas",
     icon: <DollarSign size={18} />,
     key: "ventas",
-    children: [
-      "Lista de ventas",
-      "Órdenes de compra",
-      "Carritos abandonados"
-    ]
+    children: ["Lista de ventas", "Órdenes de compra", "Carritos abandonados"],
   },
   {
     label: "Productos",
     icon: <Tag size={18} />,
     key: "productos",
-    children: ["Lista de productos", "Inventario", "Categorías"]
+    children: ["Lista de productos", "Inventario", "Categorías"],
   },
   {
     label: "Pagos",
     icon: <CreditCard size={18} />,
     key: "pagos",
-    children: ["Pasarelas", "Historial"]
+    children: ["Pasarelas", "Historial"],
   },
   {
     label: "Clientes",
     icon: <Users size={18} />,
     key: "clientes",
-    children: ["Listado", "Segmentos"]
+    children: ["Listado", "Segmentos"],
   },
   {
     label: "Descuentos",
     icon: <Percent size={18} />,
     key: "descuentos",
-    children: ["Cupones", "Promociones"]
+    children: ["Cupones", "Promociones"],
   },
   {
     label: "Marketing",
     icon: <Megaphone size={18} />,
     key: "marketing",
-    children: ["Campañas", "Email Marketing"]
-  }
+    children: ["Campañas", "Email Marketing"],
+  },
 ];
 
 const Sidebar = ({ onSelect }) => {
@@ -91,7 +87,7 @@ const Sidebar = ({ onSelect }) => {
   };
 
   return (
-    <div className="w-72 h-screen bg-gradient-to-b from-indigo-50 to-indigo-100 p-6 text-gray-700 shadow-lg rounded-lg overflow-y-auto scrollbar scrollbar-thumb-indigo-300 scrollbar-track-indigo-100 scrollbar-thin">
+    <div className="w-72 h-screen bg-gradient-to-b from-primary-50 to-primary-100 p-6 text-gray-700 shadow-lg rounded-lg overflow-y-auto scrollbar scrollbar-thumb-primary-300 scrollbar-track-primary-100 scrollbar-thin">
       <ul className="space-y-4 mb-6">
         {sidebarItems.map((item) => (
           <li key={item.key} className="mb-4">
@@ -99,8 +95,8 @@ const Sidebar = ({ onSelect }) => {
               onClick={() => handleToggle(item.key)}
               className={`flex items-center gap-3 cursor-pointer px-4 py-3 rounded-lg transition-all duration-300 ease-in-out font-semibold ${
                 activeMainItem === item.key
-                  ? "bg-indigo-200 text-indigo-700"
-                  : "hover:bg-indigo-100"
+                  ? "bg-primary-200 text-primary-700"
+                  : "hover:bg-primary-100"
               }`}
             >
               {item.icon}
@@ -114,8 +110,8 @@ const Sidebar = ({ onSelect }) => {
                     onClick={() => handleSubItemClick(subItem)} // Manejar clic en subbotón
                     className={`cursor-pointer transition-all duration-200 text-sm ${
                       activeSubItem === subItem
-                        ? "text-indigo-600"
-                        : "text-gray-600 hover:text-indigo-600"
+                        ? "text-primary-600"
+                        : "text-gray-600 hover:text-primary-600"
                     }`}
                   >
                     {subItem}
@@ -130,17 +126,18 @@ const Sidebar = ({ onSelect }) => {
       {/* Canales de venta */}
       <h2 className="text-xs text-gray-500 uppercase mb-4">Canales de venta</h2>
       <ul className="space-y-4 mb-6">
-        <li className="flex items-center gap-3 cursor-pointer hover:bg-indigo-100 px-4 py-3 rounded-lg transition-all duration-200">
-          <Store size={18} className="text-indigo-600" /> Tienda online
+        <li className="flex items-center gap-3 cursor-pointer hover:bg-primary-100 px-4 py-3 rounded-lg transition-all duration-200">
+          <Store size={18} className="text-primary-600" /> Tienda online
         </li>
-        <li className="flex items-center gap-3 cursor-pointer hover:bg-indigo-100 px-4 py-3 rounded-lg transition-all duration-200">
-          <MonitorSmartphone size={18} className="text-indigo-600" /> Punto de Venta
+        <li className="flex items-center gap-3 cursor-pointer hover:bg-primary-100 px-4 py-3 rounded-lg transition-all duration-200">
+          <MonitorSmartphone size={18} className="text-primary-600" /> Punto de
+          Venta
         </li>
-        <li className="flex items-center gap-3 cursor-pointer hover:bg-indigo-100 px-4 py-3 rounded-lg transition-all duration-200">
-          <Share2 size={18} className="text-indigo-600" /> Redes sociales
+        <li className="flex items-center gap-3 cursor-pointer hover:bg-primary-100 px-4 py-3 rounded-lg transition-all duration-200">
+          <Share2 size={18} className="text-primary-600" /> Redes sociales
         </li>
-        <li className="flex items-center gap-3 cursor-pointer hover:bg-indigo-100 px-4 py-3 rounded-lg transition-all duration-200">
-          <Boxes size={18} className="text-indigo-600" /> Marketplaces
+        <li className="flex items-center gap-3 cursor-pointer hover:bg-primary-100 px-4 py-3 rounded-lg transition-all duration-200">
+          <Boxes size={18} className="text-primary-600" /> Marketplaces
         </li>
       </ul>
 
@@ -148,14 +145,14 @@ const Sidebar = ({ onSelect }) => {
       <h2 className="text-xs text-gray-500 uppercase mb-4">Potenciar</h2>
       <ul className="space-y-4 mb-6">
         <li className="flex items-center gap-3 text-gray-400 px-4 py-3">
-          <Puzzle size={18} className="text-indigo-500" /> Aplicaciones
+          <Puzzle size={18} className="text-primary-500" /> Aplicaciones
         </li>
       </ul>
 
       {/* Configuración */}
       <ul className="space-y-4 mt-auto">
-        <li className="flex items-center gap-3 cursor-pointer hover:bg-indigo-200 px-4 py-3 rounded-lg transition-all duration-200">
-          <Settings size={18} className="text-indigo-600" /> Configuración
+        <li className="flex items-center gap-3 cursor-pointer hover:bg-primary-200 px-4 py-3 rounded-lg transition-all duration-200">
+          <Settings size={18} className="text-primary-600" /> Configuración
         </li>
       </ul>
     </div>

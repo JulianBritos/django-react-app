@@ -367,7 +367,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
                               key={imgIndex}
                               className={`relative w-12 h-12 border rounded cursor-pointer ${
                                 combo.images.includes(imgIndex)
-                                  ? "border-blue-500 border-3"
+                                  ? "border-primary-500 border-3"
                                   : "border-gray-200"
                               }`}
                               onClick={() => {

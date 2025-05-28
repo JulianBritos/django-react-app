@@ -12,7 +12,10 @@ const CarouselOfImages = ({ images }) => {
   const maxVisibleThumbnails = Math.floor(600 / 80);
 
   const selectImage = (index) => {
-    if (index === maxVisibleThumbnails - 1 && images.length > maxVisibleThumbnails) {
+    if (
+      index === maxVisibleThumbnails - 1 &&
+      images.length > maxVisibleThumbnails
+    ) {
       setCurrentIndex(maxVisibleThumbnails - 1);
       setIsOverlayOpen(true);
     } else {
@@ -63,12 +66,16 @@ const CarouselOfImages = ({ images }) => {
             key={index}
             src={img}
             alt={`Miniatura ${index + 1}`}
-            className={`w-20 h-20 object-cover rounded cursor-pointer border ${index === currentIndex ? 'border-blue-500 border-2' : 'border-gray-300 border'}`}
+            className={`w-20 h-20 object-cover rounded cursor-pointer border ${
+              index === currentIndex
+                ? "border-primary-500 border-2"
+                : "border-gray-300 border"
+            }`}
             onMouseEnter={() => setCurrentIndex(index)}
           />
         ))}
         {images.length > maxVisibleThumbnails && (
-          <div 
+          <div
             className="absolute bottom-0 left-0 w-20 h-20 bg-gray-800 bg-opacity-50 flex items-center justify-center text-white text-sm font-bold rounded cursor-pointer"
             onClick={() => {
               setCurrentIndex(maxVisibleThumbnails - 1);
@@ -92,10 +99,8 @@ const CarouselOfImages = ({ images }) => {
 
       {/* Overlay de imagen ampliada */}
       {isOverlayOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 overlay"
-        >
-          <div 
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 overlay">
+          <div
             className="relative w-[100%] h-[100%] flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
@@ -107,19 +112,19 @@ const CarouselOfImages = ({ images }) => {
             <div className="absolute top-4 left-4 bg-black bg-opacity-50 w-16 h-12 flex items-center justify-center rounded shadow-md text-white text-lg font-semibold">
               {currentIndex + 1} / {images.length}
             </div>
-            <button 
+            <button
               className="absolute top-4 right-4 bg-black bg-opacity-50 w-12 h-12 flex items-center justify-center rounded shadow-md"
               onClick={toggleOverlay}
             >
               <X className="text-white w-10 h-10" />
             </button>
-            <button 
+            <button
               className="absolute left-4 bg-black bg-opacity-50 w-12 h-12 flex items-center justify-center rounded shadow-md"
               onClick={() => navigateOverlay(-1)}
             >
               <ChevronLeft className="text-white w-10 h-10" />
             </button>
-            <button 
+            <button
               className="absolute right-4 bg-black bg-opacity-50 w-12 h-12 flex items-center justify-center rounded shadow-md"
               onClick={() => navigateOverlay(1)}
             >

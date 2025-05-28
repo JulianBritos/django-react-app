@@ -10,7 +10,7 @@ const FormMessages = ({ error, successMessage }) => {
         </div>
       )}
       {successMessage && (
-        <div className="bg-green-100 text-green-700 p-3 flex items-center gap-2 rounded">
+        <div className="bg-thirdary-100 text-thirdary-700 p-3 flex items-center gap-2 rounded">
           <Save size={18} />
           <span>{successMessage}</span>
         </div>

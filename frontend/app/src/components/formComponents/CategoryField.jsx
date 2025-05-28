@@ -8,7 +8,7 @@ const CategoryField = ({ value, onChange, categories, error }) => (
       name="category"
       value={value}
       onChange={onChange}
-      className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-primary-400 focus:outline-none"
     >
       <option value="">Seleccionar categoría</option>
       {categories.map((cat) => (

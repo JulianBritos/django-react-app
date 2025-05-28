@@ -10,7 +10,7 @@ const PriceField = ({ value, onChange, error }) => (
       min="0"
       value={value}
       onChange={onChange}
-      className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-primary-400 focus:outline-none"
     />
     {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
   </div>

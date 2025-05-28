@@ -30,7 +30,7 @@ const BestProducts = () => {
             <div className="flex flex-col items-start">
               <a
                 href="/products"
-                className="mt-4 text-starts items-start inline-flex shadow-md shadow-purple-300 bg-white text-purple-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
+                className="mt-4 text-starts items-start inline-flex shadow-md shadow-primary-300 bg-white text-primary-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
               >
                 Ver más
                 <span className="ml-2">→</span>

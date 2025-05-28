@@ -29,7 +29,7 @@ const UserOrders = () => {
             </div>
             <Link
               to={`/myorders/${order}00123`}
-              className="text-blue-600 hover:underline"
+              className="text-primary-600 hover:underline"
             >
               Ver Detalle
             </Link>

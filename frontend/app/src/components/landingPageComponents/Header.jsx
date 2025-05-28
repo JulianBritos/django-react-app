@@ -53,7 +53,7 @@ function Header() {
   const { menuOpen, dropdownOpen, userDropdownOpen, categories } = state;
 
   return (
-    <header className="bg-purple-50 shadow-sm">
+    <header className="bg-primary-50 shadow-sm">
       <div className="container mx-auto flex justify-between items-center px-4 py-4">
         {/* Logo + Menú Desktop */}
         <div className="flex items-center space-x-6">
@@ -112,7 +112,7 @@ function Header() {
           {isAuthenticated && (
             <Link
               to="/owner2"
-              className="hidden md:flex items-center bg-green-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-green-700 shadow-md transition text-base"
+              className="hidden md:flex items-center bg-thirdary-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-thirdary-700 shadow-md transition text-base"
             >
               <Shield className="w-5 h-5 mr-2" /> Admin Panel
             </Link>
@@ -154,7 +154,7 @@ function Header() {
             ) : (
               <Link
                 to="/login"
-                className="hidden md:inline-block shadow-md shadow-purple-300 bg-white text-purple-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+                className="hidden md:inline-block shadow-md shadow-primary-300 bg-white text-primary-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
               >
                 Iniciar Sesión
               </Link>
@@ -242,7 +242,7 @@ function Header() {
           </Link>
           <Link
             to="/login"
-            className="text-blue-600 font-medium hover:text-blue-800"
+            className="text-primary-600 font-medium hover:text-primary-800"
             onClick={() => toggleState("menuOpen")}
           >
             Iniciar Sesión
@@ -250,7 +250,7 @@ function Header() {
           {isAuthenticated && (
             <Link
               to="/owner"
-              className="bg-green-600 text-white px-5 py-2 rounded-md text-center font-bold hover:bg-green-700 transition text-base"
+              className="bg-thirdary-600 text-white px-5 py-2 rounded-md text-center font-bold hover:bg-thirdary-700 transition text-base"
               onClick={() => toggleState("menuOpen")}
             >
               <Shield className="inline-block w-5 h-5 mr-2" /> Admin Panel

@@ -111,7 +111,7 @@ export default function Cart() {
               </div>
             </div>
 
-            <Button className="w-full bg-green-600 hover:bg-green-700">
+            <Button className="w-full bg-thirdary-600 hover:bg-thirdary-700">
               Proceder al Pago
             </Button>
 

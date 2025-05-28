@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
   return (
-    <div className="border p-4 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-purple-500">
+    <div className="border p-4 rounded-lg shadow-lg bg-gradient-to-r from-primary-500 to-primary-500">
       <img
         src={product.image || "/placeholder.png"}
         alt={product.name}
@@ -13,12 +13,12 @@ const ProductCard = ({ product }) => {
       <p className="text-gray-100 font-bold">${product.price}</p>
       <Link
         to={`/product/${product.id}`}
-        className="mt-2 inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        className="mt-2 inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-primary-600"
       >
         Ver Detalle
       </Link>
       <button
-        className="bg-green-500 text-white px-3 py-1 rounded"
+        className="bg-thirdary-500 text-white px-3 py-1 rounded"
         onClick={() => addToCart(product)}
       >
         Agregar al Carrito

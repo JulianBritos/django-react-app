@@ -4,12 +4,12 @@ const HeroSection = () => {
   const [showMore, setShowMore] = useState(false);
 
   return (
-    <section className="w-full max-w-7xl mx-auto shadow-xl mt-6 p-6 bg-gradient-to-r from-blue-400 to-purple-300 text-black rounded-2xl flex flex-col lg:flex-row  items-center justify-center text-center lg:text-left">
+    <section className="w-full max-w-7xl mx-auto shadow-xl mt-6 p-6 bg-gradient-to-r from-secondary-400 to-primary-300 text-black rounded-2xl flex flex-col lg:flex-row  items-center justify-center text-center lg:text-left">
       <div className="max-w-3xl">
-        <h1 className="text-4xl text-blue-950 lg:text-6xl font-bold leading-tight mb-4">
+        <h1 className="text-4xl text-secondary-950 lg:text-6xl font-bold leading-tight mb-4">
           Cosmo Play
         </h1>
-        <p className="text-lg text-blue-900 lg:text-xl mb-6">
+        <p className="text-lg text-secondary-900 lg:text-xl mb-6">
           Juegos y juguetes diseñados para estimular, relajar y acompañar a
           personas con TDAH, TEA y ansiedad. Herramientas ideales para
           profesionales de la salud y familias.
@@ -17,13 +17,13 @@ const HeroSection = () => {
         <div className="flex justify-center lg:justify-start gap-4">
           <a
             href="/products"
-            className="bg-white text-blue-600 font-semibold py-3 px-6 rounded-lg shadow-xl hover:bg-blue-100 transition"
+            className="bg-white text-secondary-600 font-semibold py-3 px-6 rounded-lg shadow-xl hover:bg-secondary-100 transition"
           >
             Ver productos
           </a>
           <button
             onClick={() => setShowMore(!showMore)}
-            className="bg-transparent border border-white text-white font-semibold py-3 px-6 rounded-lg shadow-xl hover:bg-white hover:text-blue-600 transition"
+            className="bg-transparent border border-white text-white font-semibold py-3 px-6 rounded-lg shadow-xl hover:bg-white hover:text-secondary-600 transition"
           >
             {showMore ? "Ver menos" : "Conocé más"}
           </button>

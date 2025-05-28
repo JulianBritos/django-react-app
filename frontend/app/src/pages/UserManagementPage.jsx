@@ -7,7 +7,7 @@ const Header = ({ column, onSort, sortOrder, sortColumn }) => {
   return (
     <th
       className={`px-4 py-2 cursor-pointer ${
-        isActive ? "text-blue-500 font-bold" : "text-gray-700"
+        isActive ? "text-secondary-500 font-bold" : "text-gray-700"
       }`}
       onClick={() => onSort(column)}
     >

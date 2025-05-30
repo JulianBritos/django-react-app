@@ -18,6 +18,7 @@ const AttributeManager = ({
   const [creatingNewAttribute, setCreatingNewAttribute] = useState(false);
   const [newAttributeName, setNewAttributeName] = useState("");
   const [newOptionNames, setNewOptionNames] = useState([""]);
+  const [selectedAttributeName, setSelectedAttributeName] = useState("");
 
   const handleAddClick = () => {
     setShowSidebar(true);
@@ -34,6 +35,8 @@ const AttributeManager = ({
   const handleAttributeSelect = (attributeId) => {
     setSelectedAttribute(attributeId);
     setSelectedOptions([]);
+    const attr = attributes.find((a) => a.id === attributeId);
+    setSelectedAttributeName(attr ? attr.name : "");
   };
 
   const handleOptionToggle = (option) => {
@@ -83,6 +86,22 @@ const AttributeManager = ({
     setProductAttributes((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleRemoveOption = (attributeId, optionId) => {
+    setProductAttributes(
+      (prev) =>
+        prev
+          .map((pa) =>
+            pa.attribute === attributeId
+              ? {
+                  ...pa,
+                  options: pa.options.filter((opt) => opt.id !== optionId),
+                }
+              : pa
+          )
+          .filter((pa) => pa.options.length > 0) // elimina atributos sin opciones
+    );
+  };
+
   return (
     <div className="p-4 bg-white shadow-lg rounded-lg">
       <div className="flex flex-col gap-4">
@@ -114,12 +133,21 @@ const AttributeManager = ({
                     </h4>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {pa.options.map((opt) => (
-                        <span
+                        <div
                           key={opt.id}
-                          className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-sm font-medium"
+                          className="inline-flex items-center gap-1 bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-sm font-medium"
                         >
-                          {opt.name}
-                        </span>
+                          <span>{opt.name}</span>
+                          <button
+                            onClick={() =>
+                              handleRemoveOption(pa.attribute, opt.id)
+                            }
+                            className="text-primary-500 hover:text-red-500 ml-1"
+                            title="Quitar opción"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -176,18 +204,20 @@ const AttributeManager = ({
                 </button>
               </div>
               <div>
-                <select
-                  value={selectedAttribute}
-                  onChange={(e) => handleAttributeSelect(e.target.value)}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                >
-                  <option value="">Seleccione un atributo</option>
-                  {attributes.map((attr) => (
-                    <option key={attr.id} value={attr.id}>
-                      {attr.name}
-                    </option>
-                  ))}
-                </select>
+                {!creatingNewAttribute && (
+                  <select
+                    value={selectedAttribute}
+                    onChange={(e) => handleAttributeSelect(e.target.value)}
+                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="">Seleccione un atributo</option>
+                    {attributes.map((attr) => (
+                      <option key={attr.id} value={attr.id}>
+                        {attr.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 {creatingNewAttribute && (
                   <div className="space-y-4 mt-4">
                     <div>
@@ -237,76 +267,95 @@ const AttributeManager = ({
                         </div>
                       ))}
                     </div>
-
-                    <button
-                      type="button"
-                      className="w-full bg-thirdary-500 hover:bg-thirdary-600 text-white py-2 rounded-lg"
-                      onClick={async () => {
-                        try {
-                          const newAttr = await createAttribute({
-                            name: newAttributeName,
-                          });
-                          const createdOptions = await Promise.all(
-                            newOptionNames
-                              .filter((name) => name.trim() !== "")
-                              .map((name) =>
-                                createAttributeOption({
-                                  name,
-                                  attribute: newAttr.id,
-                                })
-                              )
-                          );
-
-                          // Opcional: podrías actualizar la lista de atributos con el nuevo
-                          // setAttributes(prev => [...prev, newAttr]); // si tuvieras setAttributes
-
-                          setSelectedAttribute(newAttr.id);
-                          setSelectedOptions(createdOptions);
-
+                    <div className="flex gap-4">
+                      <button
+                        type="button"
+                        className="flex-1 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg transition-colors"
+                        onClick={() => {
                           setCreatingNewAttribute(false);
                           setNewAttributeName("");
                           setNewOptionNames([""]);
-                        } catch (error) {
-                          console.error(
-                            "Error al crear atributo y opción:",
-                            error
-                          );
-                        }
-                      }}
-                    >
-                      Guardar
-                    </button>
+                        }}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        className="flex-1 w-full bg-thirdary-500 hover:bg-thirdary-600 text-white py-2 rounded-lg"
+                        onClick={async () => {
+                          try {
+                            const newAttr = await createAttribute({
+                              name: newAttributeName,
+                            });
+                            const createdOptions = await Promise.all(
+                              newOptionNames
+                                .filter((name) => name.trim() !== "")
+                                .map((name) =>
+                                  createAttributeOption({
+                                    name,
+                                    attribute: newAttr.id,
+                                  })
+                                )
+                            );
+
+                            setSelectedAttribute(newAttr.id);
+                            setSelectedOptions(createdOptions);
+                            setSelectedAttributeName(newAttributeName);
+                            setCreatingNewAttribute(false);
+                            setNewAttributeName("");
+                            setNewOptionNames([""]);
+                          } catch (error) {
+                            console.error(
+                              "Error al crear atributo y opción:",
+                              error
+                            );
+                          }
+                        }}
+                      >
+                        Guardar
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
 
               {/* Selección de opciones */}
-              {selectedAttribute && attributeOptions.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Opciones disponibles
-                  </label>
-                  <div className="space-y-2">
-                    {attributeOptions.map((option) => (
-                      <label
-                        key={option.id}
-                        className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedOptions.some(
-                            (opt) => opt.id === option.id
-                          )}
-                          onChange={() => handleOptionToggle(option)}
-                          className="h-4 w-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
-                          data-option-id={option.id}
-                        />
-                        <span className="ml-3 text-gray-700">
-                          {option.name}
-                        </span>
+              {selectedAttribute && (
+                <div className="space-y-2">
+                  <h4 className="text-md font-semibold text-gray-900">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Atributo seleccionado
+                    </label>
+                    {selectedAttributeName}
+                  </h4>
+                  {attributeOptions.length > 0 && (
+                    <>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Opciones disponibles
                       </label>
-                    ))}
-                  </div>
+                      <div className="space-y-2">
+                        {attributeOptions.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedOptions.some(
+                                (opt) => opt.id === option.id
+                              )}
+                              onChange={() => handleOptionToggle(option)}
+                              className="h-4 w-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                              data-option-id={option.id}
+                            />
+                            <span className="ml-3 text-gray-700">
+                              {option.name}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>

@@ -52,6 +52,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [combinations, setCombinations] = useState([]);
   const [attributeOptions, setAttributeOptions] = useState([]);
+  const [checkedOptions, setCheckedOptions] = useState({});
 
   useEffect(() => {
     if (productAttributes.length === 0) {
@@ -131,6 +132,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
               : attr
           )
         );
+        setCheckedOptions({});
       } catch (error) {
         toast.error("Error al cargar las opciones del atributo.");
       }
@@ -193,43 +195,37 @@ const ProductForm = ({ product, onSave, onCancel }) => {
 
       // Create product attributes with their combinations and images
       for (const combo of combinations) {
-        const variantData = new FormData();
-        const optionIds = combo.attributes.map((attr) => attr.optionId);
-
-        variantData.append("product", savedProduct.id);
-        variantData.append("attribute", combo.attributes[0].attributeId);
-
-        optionIds.forEach((optionId) => {
-          variantData.append("attributeoption", optionId);
-        });
-
-        variantData.append("stock", combo.stock);
-        variantData.append(
-          "selling_price",
-          parseFloat(formData.price) + parseFloat(combo.price)
-        );
-
-        // Append SKU if provided
-        variantData.append("sku", combo.sku || "");
-
-        // Append selected images for this variant
-        combo.images.forEach((imgIndex) => {
-          if (formData.images[imgIndex]) {
-            variantData.append("uploaded_images", formData.images[imgIndex]);
-          }
-        });
-
-        await createProductAttribute(variantData);
+        // Enviar una variante por cada atributo-opción
+        for (const attr of combo.attributes) {
+          const variantData = new FormData();
+          variantData.append("product", savedProduct.id);
+          variantData.append("attribute", attr.attributeId);
+          variantData.append("attributeoption", attr.optionId);
+          variantData.append("stock", combo.stock);
+          variantData.append(
+            "selling_price",
+            parseFloat(formData.price) + parseFloat(combo.price)
+          );
+          variantData.append("sku", combo.sku || "");
+          combo.images.forEach((imgIndex) => {
+            if (formData.images[imgIndex]) {
+              variantData.append("uploaded_images", formData.images[imgIndex]);
+            }
+          });
+          await createProductAttribute(variantData);
+        }
       }
 
-      toast.success("Producto guardado exitosamente.");
-      onSave(savedProduct);
+      // Solo mostrar el toast y llamar a onSave si todo salió bien
     } catch (err) {
       console.error(err);
       toast.error("Error al guardar el producto.");
+      return;
     } finally {
       setIsLoading(false);
     }
+    toast.success("Producto guardado exitosamente.");
+    onSave(savedProduct);
   };
 
   const handleAddAttribute = async () => {
@@ -248,9 +244,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
 
       // Obtener las opciones seleccionadas del panel
       const selectedOptions = currentAttribute.attributeoption_set.filter(
-        (option) =>
-          document.querySelector(`input[data-option-id="${option.id}"]`)
-            ?.checked
+        (option) => checkedOptions[option.id]
       );
 
       if (selectedOptions.length === 0) {
@@ -269,6 +263,12 @@ const ProductForm = ({ product, onSave, onCancel }) => {
     } catch (err) {
       toast.error("Error al agregar el atributo");
     }
+  };
+  const handleOptionChange = (optionId) => {
+    setCheckedOptions((prev) => ({
+      ...prev,
+      [optionId]: !prev[optionId],
+    }));
   };
 
   return (
@@ -309,6 +309,8 @@ const ProductForm = ({ product, onSave, onCancel }) => {
           setSelectedAttribute={setSelectedAttribute}
           handleAddAttribute={handleAddAttribute}
           attributeOptions={attributeOptions}
+          checkedOptions={checkedOptions}
+          handleOptionChange={handleOptionChange}
         />
       </div>
 

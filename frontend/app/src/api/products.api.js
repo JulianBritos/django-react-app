@@ -33,6 +33,11 @@ export const getProductAttributes = async () => {
 };
 
 export const createProductAttribute = async (productAttributeData) => {
+  const config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  };
   const response = await axios.post(
     `${API_URL}productattributes/`,
     productAttributeData

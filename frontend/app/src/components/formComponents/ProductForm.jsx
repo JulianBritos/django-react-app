@@ -70,8 +70,8 @@ const ProductForm = ({ product, onSave, onCancel }) => {
 
     const enrichedCombinations = rawCombinations.map((combo) => ({
       attributes: combo,
-      stock: 0,
-      price: 0,
+      stock: "",
+      price: "",
       images: [], // Add array to store image associations
       sku: "", // Add SKU field
     }));
@@ -198,7 +198,8 @@ const ProductForm = ({ product, onSave, onCancel }) => {
         const optionIds = combo.attributes.map((attr) => attr.optionId);
 
         variantData.append("product", savedProduct.id);
-        variantData.append("attributeoption", JSON.stringify(optionIds));
+        variantData.append("attribute", combo.attributes[0].attributeId);
+        variantData.append("attributeoption", optionIds);
         variantData.append("stock", combo.stock);
         variantData.append(
           "selling_price",

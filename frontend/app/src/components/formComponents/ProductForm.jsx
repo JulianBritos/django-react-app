@@ -19,6 +19,7 @@ import ImageField from "./ImageField";
 import AttributeManager from "./AttributeManager";
 import FormFooter from "./FormFooter";
 import DescriptionField from "./DescriptionField";
+import toast from "react-hot-toast";
 
 function crossJoin(optionsPerAttribute) {
   return optionsPerAttribute.reduce(
@@ -96,7 +97,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
         setCategories(cats);
         setAttributes(attrs);
       } catch (err) {
-        setError("Error al cargar datos iniciales");
+        toast.error("Error al cargar datos iniciales");
       }
     };
     fetchData();
@@ -131,7 +132,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
           )
         );
       } catch (error) {
-        setError("Error al cargar las opciones del atributo.");
+        toast.error("Error al cargar las opciones del atributo.");
       }
     };
 
@@ -166,15 +167,13 @@ const ProductForm = ({ product, onSave, onCancel }) => {
   };
 
   const handleSave = async () => {
-    setError("");
-    setSuccessMessage("");
+    setIsLoading(true);
 
     if (!validateForm()) {
-      setError("Por favor corrija los errores antes de continuar.");
+      toast.error("Por favor corrija los errores antes de continuar.");
+      setIsLoading(false);
       return;
     }
-
-    setIsLoading(true);
 
     try {
       const productData = new FormData();
@@ -199,7 +198,11 @@ const ProductForm = ({ product, onSave, onCancel }) => {
 
         variantData.append("product", savedProduct.id);
         variantData.append("attribute", combo.attributes[0].attributeId);
-        variantData.append("attributeoption", optionIds);
+
+        optionIds.forEach((optionId) => {
+          variantData.append("attributeoption", optionId);
+        });
+
         variantData.append("stock", combo.stock);
         variantData.append(
           "selling_price",
@@ -219,11 +222,11 @@ const ProductForm = ({ product, onSave, onCancel }) => {
         await createProductAttribute(variantData);
       }
 
-      setSuccessMessage("Producto guardado exitosamente.");
+      toast.success("Producto guardado exitosamente.");
       onSave(savedProduct);
     } catch (err) {
       console.error(err);
-      setError("Error al guardar el producto.");
+      toast.error("Error al guardar el producto.");
     } finally {
       setIsLoading(false);
     }
@@ -251,7 +254,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
       );
 
       if (selectedOptions.length === 0) {
-        setError("Debes seleccionar al menos una opción");
+        toast.error("Debes seleccionar al menos una opción");
         return;
       }
 
@@ -264,14 +267,13 @@ const ProductForm = ({ product, onSave, onCancel }) => {
       ]);
       setSelectedAttribute("");
     } catch (err) {
-      setError("Error al agregar el atributo");
+      toast.error("Error al agregar el atributo");
     }
   };
 
   return (
     <div className="w-full max-w-4xl p-6 space-y-6">
       <FormHeader onCancel={onCancel} product={product} />
-      <FormMessages error={error} successMessage={successMessage} />
 
       <div className="space-y-6">
         <NameField

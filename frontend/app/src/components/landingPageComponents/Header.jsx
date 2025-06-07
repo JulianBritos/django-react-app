@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, ShoppingCart, User, ChevronDown, Shield } from "lucide-react";
-import { getCategories } from "../../api/categorys.api";
+import { getCategories } from "../../api/categories.api";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser, logout } from "../../reducer/Actions";

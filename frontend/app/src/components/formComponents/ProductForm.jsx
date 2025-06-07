@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getCategories } from "../../api/categorys.api";
+import { getCategories } from "../../api/categories.api";
 import {
   getAttributes,
   getAttributeOptionsByAttributeId,
@@ -347,13 +347,14 @@ const ProductForm = ({ product, onSave, onCancel }) => {
                           updated[index].stock = parseInt(e.target.value) || 0;
                           setCombinations(updated);
                         }}
+                        required
                       />
                     </td>
                     <td className="p-3">
                       <input
                         type="number"
                         min="0"
-                        step="0.01"
+                        step="1"
                         className="w-24 p-2 border rounded"
                         value={combo.price}
                         onChange={(e) => {
@@ -362,6 +363,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
                             parseFloat(e.target.value) || 0;
                           setCombinations(updated);
                         }}
+                        required
                       />
                     </td>
                     <td className="p-3">

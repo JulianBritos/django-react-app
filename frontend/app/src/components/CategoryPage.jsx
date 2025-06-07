@@ -17,6 +17,10 @@ function CategoryPage() {
     navigate(`/products/${category.name}`);
   };
 
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
+  };
+
   return (
     <div>
       <ScrollableNavBar
@@ -33,7 +37,8 @@ function CategoryPage() {
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+              className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => handleProductClick(product.id)}
             >
               <img
                 src={
@@ -52,7 +57,10 @@ function CategoryPage() {
                 <p className="text-gray-600">${product.price}</p>
                 <button
                   className="w-full mt-4 bg-thirdary-500 text-white py-2 rounded-md hover:bg-thirdary-600 transition"
-                  onClick={() => alert(`Agregaste ${product.name} al carrito`)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    alert(`Agregaste ${product.name} al carrito`);
+                  }}
                 >
                   Agregar al carrito
                 </button>

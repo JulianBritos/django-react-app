@@ -1,6 +1,6 @@
 // import { useEffect, useState } from "react";
 // import { getProducts } from "../api/products.api"; // Solo necesitas obtener productos
-// import { getCategories } from "../api/categorys.api"; // Solo necesitas obtener productos
+// import { getCategories } from "../api/categoreis.api"; // Solo necesitas obtener productos
 // import ScrollableNavBar from "../components/ScrollableNavVar";
 
 // const ProductsSection = () => {
@@ -92,7 +92,7 @@
 
 import { useEffect, useState } from "react";
 import { getProducts } from "../api/products.api";
-import { getCategories } from "../api/categorys.api";
+import { getCategories } from "../api/categories.api";
 import { Outlet } from "react-router-dom";
 
 const ProductsSection = () => {

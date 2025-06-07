@@ -1,22 +1,21 @@
 import { useEffect, useState } from "react";
 // import { getAdminData } from "../api/admin.api"; // Reemplazá esto cuando tengas tu API real
 import { getProducts } from "../api/products.api";
-import { getCategories } from "../api/categorys.api";
+import { getCategories } from "../api/categories.api";
 import AdminComponent from "../components/AdminComponent";
 
 const OwnerSection = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
 
-
   useEffect(() => {
     loadProducts();
-    loadCategories(); 
-    console.log(products)
+    loadCategories();
+    console.log(products);
   }, []);
 
   const loadProducts = async () => {
-    const data  = await getProducts();
+    const data = await getProducts();
     setProducts(data);
   };
 
@@ -27,7 +26,7 @@ const OwnerSection = () => {
 
   return (
     <div className="p-4">
-      <AdminComponent products={products} categories={categories}/>
+      <AdminComponent products={products} categories={categories} />
     </div>
   );
 };

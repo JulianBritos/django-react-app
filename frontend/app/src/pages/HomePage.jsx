@@ -1,5 +1,5 @@
 import HeroSection from "../components/landingPageComponents/HeroSection";
-import Categories from "../components/landingPageComponents/CategorysSection";
+import Categories from "../components/landingPageComponents/CategoriesSection";
 import AboutUs from "../components/landingPageComponents/AboutUs";
 import Testimonials from "../components/landingPageComponents/Testimonials";
 import BestProducts from "../components/landingPageComponents/BestProducts";

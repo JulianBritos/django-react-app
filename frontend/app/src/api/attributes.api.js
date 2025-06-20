@@ -1,7 +1,13 @@
+// Obtener un atributo por ID
+export const getAttributeById = async (id) => {
+  const response = await axios.get(`${API_URL}${id}/`);
+  return response.data;
+};
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_BASE_URL + "/apps/products/attributes/";
-const API_OPTIONS_URL = import.meta.env.VITE_BASE_URL + "/apps/products/attributeoptions/";
+const API_OPTIONS_URL =
+  import.meta.env.VITE_BASE_URL + "/apps/products/attributeoptions/";
 
 // Obtener todos los atributos
 export const getAttributes = async () => {

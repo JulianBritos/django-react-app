@@ -8,33 +8,46 @@ import CarouselOfImages from "../components/CarouselOfImages";
 const ProductDetailPage = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const { addToCart } = useCart();
+  const [selectedAttribute, setSelectedAttribute] = useState(null);
   const [productImages, setProductImages] = useState([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const productData = await getProductById(id);
+
+        // Enriquecer los datos del producto con los nombres de atributos y opciones
+        if (productData.product_attributes) {
+          productData.product_attributes = productData.product_attributes.map(
+            (attr) => ({
+              ...attr,
+              attribute_name: attr.attribute?.name || "Sin nombre",
+              option_name:
+                attr.attributeoption?.map((opt) => opt.name).join(", ") ||
+                "Sin opción",
+            })
+          );
+        }
+
         setProduct(productData);
 
-        // Extract image URLs from product_attributes and ensure they use the full URL
-        const allImages = productData.product_attributes?.flatMap(
-          (attr) =>
-            attr.uploaded_images?.map((img) => {
-              // If the image URL is relative, make it absolute
-              if (img.image.startsWith("/")) {
-                return `${process.env.REACT_APP_API_URL}${img.image}`;
-              }
-              return img.image;
-            }) || []
-        );
+        // Seleccionar el primer atributo por defecto
+        if (productData?.product_attributes?.length > 0) {
+          const firstAttribute = productData.product_attributes[0];
+          setSelectedAttribute(firstAttribute);
 
-        if (!allImages || allImages.length === 0) {
-          console.log("No images found, using placeholder");
-          setProductImages(["/placeholder.jpg"]);
-        } else {
-          console.log("Images found:", allImages);
-          setProductImages(allImages);
+          // Establecer las imágenes del primer atributo
+          const images =
+            firstAttribute.uploaded_images?.map((img) => {
+              // Asegurarse de que la URL de la imagen sea completa
+              if (img.image.startsWith("http")) {
+                return img.image;
+              } else {
+                return `${import.meta.env.VITE_BASE_URL}${img.image}`;
+              }
+            }) || [];
+
+          setProductImages(images.length > 0 ? images : ["/placeholder.jpg"]);
         }
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -46,19 +59,55 @@ const ProductDetailPage = () => {
       fetchProduct();
     }
   }, [id]);
+
+  const handleAttributeSelect = (attribute) => {
+    setSelectedAttribute(attribute);
+
+    // Actualizar las imágenes cuando se selecciona un nuevo atributo
+    const attributeImages =
+      attribute.uploaded_images?.map((img) => {
+        if (img.image.startsWith("http")) {
+          return img.image;
+        } else {
+          return `${import.meta.env.VITE_BASE_URL}${img.image}`;
+        }
+      }) || [];
+
+    setProductImages(
+      attributeImages.length > 0 ? attributeImages : ["/placeholder.jpg"]
+    );
+  };
+
   if (!product) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-gray-500">Cargando producto...</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex justify-center items-center h-64">
+            <p className="text-gray-500">Cargando producto...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <CarouselOfImages key={product.id} images={productImages} />
-        <ProductInfoCard product={product} />
+    <div className="container mx-auto px-4 py-8">
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-gray-50 rounded-lg p-4">
+            <CarouselOfImages
+              key={selectedAttribute?.id}
+              images={productImages}
+            />
+          </div>
+          <div>
+            <ProductInfoCard
+              product={product}
+              onAttributeSelect={handleAttributeSelect}
+              selectedAttribute={selectedAttribute}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

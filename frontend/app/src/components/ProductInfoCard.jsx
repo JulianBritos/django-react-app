@@ -1,39 +1,69 @@
 import { useCart } from "../hooks/useCart";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getAttributeById } from "../api/attributes.api";
 import { Heart, ChevronDown } from "lucide-react";
+import AttributeSelector from "./ui/AttributeSelector";
 
-const ProductInfoCard = ({ product }) => {
+const ProductInfoCard = ({ product, onAttributeSelect, selectedAttribute }) => {
   const { addToCart } = useCart();
   const [isFavorite, setIsFavorite] = useState(false);
-
-  // Estado para el color seleccionado, por defecto el primer color de la lista
-  // Comentado para probar funcionalidad hasta que esté el backend
-  // const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || "");
-
-  // Testeo Hardcodeado para prueba de botones
-  const colors = [
-    { name: "Rojo", value: "red" },
-    { name: "Azul", value: "primary" },
-    { name: "Verde", value: "thirdary" },
-  ];
-
-  const [selectedColor, setSelectedColor] = useState(colors[0].name);
-
-  // Estado para la cantidad seleccionada
   const [quantity, setQuantity] = useState(1);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Simulación de stock si no viene del backend
-  const availableStock = product.stock ?? 10;
+  // Estado para los atributos con nombre
+  const [attributesWithNames, setAttributesWithNames] = useState([]);
+
+  useEffect(() => {
+    if (product?.product_attributes?.length > 0 && !selectedAttribute) {
+      onAttributeSelect(product.product_attributes[0]);
+    }
+  }, [product]);
+
+  // Cargar los nombres de los atributos
+  useEffect(() => {
+    const fetchAttributeNames = async () => {
+      if (!product?.product_attributes) return;
+      // Obtener los IDs únicos de atributos (pueden venir como array)
+      const attributeIds = [
+        ...new Set(
+          product.product_attributes.flatMap((attr) =>
+            Array.isArray(attr.attribute) ? attr.attribute : [attr.attribute]
+          )
+        ),
+      ];
+      // Consultar los nombres de los atributos
+      const attributesData = await Promise.all(
+        attributeIds.map((id) => getAttributeById(id))
+      );
+      setAttributesWithNames(
+        attributesData.map((attr) => ({ id: attr.id, name: attr.name }))
+      );
+    };
+    fetchAttributeNames();
+  }, [product]);
 
   if (!product) {
     return <p className="p-4">Cargando producto...</p>;
   }
 
+  // Calcular el stock disponible basado en el atributo seleccionado
+  const availableStock = selectedAttribute?.stock ?? product.stock ?? 0;
+
+  // Obtener el precio actual basado en el atributo seleccionado
+  const currentPrice = selectedAttribute?.selling_price ?? product.price;
+
   const categoryLink = product.category
     ? `/products/${product.category}`
     : "/products";
+
+  // Función auxiliar para obtener el nombre de la opción del atributo
+  const getAttributeOptionName = (attr) => {
+    const attributeOption = attr.attributeoption?.[0];
+    return attributeOption
+      ? `${attr.attribute_name}: ${attributeOption}`
+      : "Sin opción";
+  };
 
   return (
     <div className="p-4 border rounded-lg shadow-lg bg-white max-w-md text text-center relative">
@@ -62,22 +92,33 @@ const ProductInfoCard = ({ product }) => {
             ? product.name.charAt(0).toUpperCase() + product.name.slice(1)
             : "Producto sin nombre"}
         </h1>
-        <p className="text-gray-700 mb-4">
-          {product.description || "Sin descripción disponible"}
-        </p>
-        <p className="text-5xl font-light text-gray-500">
-          ${product.price ?? "Precio no disponible"}
-        </p>
-        {/* Botón para ver medios de pago */}
-        <button className="mt-2 text-primary-500 hover:underline">
-          Ver los medios de pago
-        </button>
-        {/* Indicador de stock */}
-        <p className="text-sm font-bold text-gray-800 mt-2">
-          Stock disponible: {availableStock} unidades
-        </p>
-        {/* Selección de cantidad */}
-        <div className="mt-4 relative">
+
+        <div
+          className="prose prose-sm max-w-none mb-4"
+          dangerouslySetInnerHTML={{
+            __html: product.description || "Sin descripción disponible",
+          }}
+        />
+
+        {/* Sección de precio */}
+        <p className="text-5xl font-light text-gray-500">${currentPrice}</p>
+
+        {/* Sección de atributos */}
+        {attributesWithNames.length > 0 && (
+          <div className="mt-4 w-full">
+            <h3 className="text-lg font-semibold mb-3">
+              Variantes disponibles
+            </h3>
+            <AttributeSelector
+              attributes={attributesWithNames}
+              selectedAttribute={selectedAttribute}
+              onAttributeSelect={onAttributeSelect}
+            />
+          </div>
+        )}
+
+        {/* Selector de cantidad */}
+        <div className="mt-4 relative w-full">
           <button
             className="text-black font-medium hover:text-gray-600 flex items-center px-4 py-2 "
             onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -106,40 +147,29 @@ const ProductInfoCard = ({ product }) => {
             </div>
           )}
         </div>
-        {/* Sección de selección de color */}
-        <p className="text-sm font-bold text-gray-800 mt-4">
-          Color: {selectedColor || "Seleccione un color"}
-        </p>
-        <div className="flex gap-2 mt-2">
-          {/* Botones de colores con fondo de color, en el futuro se modificarán para mostrar imágenes */}
-          {colors.map((color, index) => (
-            <button
-              key={index}
-              className={`w-10 h-10 rounded-full border-2 ${
-                selectedColor === color.name
-                  ? "border-primary-500"
-                  : "border-gray-300"
-              }`}
-              style={{ backgroundColor: color.value }}
-              title={color.name}
-              onClick={() => setSelectedColor(color.name)} // Actualiza el color seleccionado
-            ></button>
-          ))}
-        </div>
 
+        {/* Botones de acción */}
         <button
-          className="mt-6  bg-primary-500 text-white px-4 py-2 rounded hover:bg-primary-600 w-full self-center"
-          onClick={() => product && console.log("Comprar ahora", product)}
-          disabled={!product}
+          className="mt-6 bg-primary-500 text-white px-4 py-2 rounded hover:bg-primary-600 w-full self-center"
+          onClick={() =>
+            selectedAttribute && console.log("Comprar ahora", selectedAttribute)
+          }
+          disabled={!selectedAttribute || availableStock === 0}
         >
           Comprar Ahora
         </button>
-        {/* Botón de agregar al carrito */}
 
         <button
           className="mt-4 mb-8 bg-primary-100 text-primary-500 px-4 py-2 rounded hover:bg-primary-200 transition w-full self-center"
-          onClick={() => product && addToCart(product)}
-          disabled={!product}
+          onClick={() =>
+            selectedAttribute &&
+            addToCart({
+              ...product,
+              selectedVariant: selectedAttribute,
+              quantity,
+            })
+          }
+          disabled={!selectedAttribute || availableStock === 0}
         >
           Agregar al Carrito
         </button>

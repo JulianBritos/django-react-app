@@ -91,16 +91,16 @@ const ProductDetailPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto p-4">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-gray-50 rounded-lg p-4">
+        <div className="grid grid-cols-1 grid-rows-1 md:grid-cols-3 gap-8">
+          <div className="rounded-lg p-4 col-span-1 md:col-span-2">
             <CarouselOfImages
               key={selectedAttribute?.id}
               images={productImages}
             />
           </div>
-          <div>
+          <div className="col-span-1 md:col-span-1">
             <ProductInfoCard
               product={product}
               onAttributeSelect={handleAttributeSelect}

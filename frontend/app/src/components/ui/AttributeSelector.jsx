@@ -85,7 +85,7 @@ const AttributeSelector = ({ attributes = [] }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
+    <div className="bg-transparent p-2">
       <div className="space-y-4">
         {validAttributes.map((attribute) => {
           const options = optionsByAttribute[attribute.id] || [];
@@ -100,13 +100,13 @@ const AttributeSelector = ({ attributes = [] }) => {
               </label>
               <div className="flex flex-col items-start space-y-2">
                 <select
-                  className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-transparent"
+                  className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   value={selectedOptions[attribute.id]}
                   onChange={(e) =>
                     handleOptionSelect(attribute.id, e.target.value)
                   }
                 >
-                  <option className="bg-transparent" value="">
+                  <option value="">
                     Seleccionar {attribute.name || `Atributo #${attribute.id}`}
                   </option>
                   {filteredOptions.map((option) => (

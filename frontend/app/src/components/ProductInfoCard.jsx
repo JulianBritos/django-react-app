@@ -106,9 +106,7 @@ const ProductInfoCard = ({ product, onAttributeSelect, selectedAttribute }) => {
         {/* Sección de atributos */}
         {attributesWithNames.length > 0 && (
           <div className="mt-4 w-full">
-            <h3 className="text-lg font-semibold mb-3">
-              Variantes disponibles
-            </h3>
+            <h3 className="text-lg font-semibold">Variantes disponibles</h3>
             <AttributeSelector
               attributes={attributesWithNames}
               selectedAttribute={selectedAttribute}

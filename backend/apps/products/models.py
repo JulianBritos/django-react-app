@@ -53,23 +53,20 @@ class Product(models.Model):
     def __str__(self):
         return self.name
     
-
 class ProductAttribute(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_attributes')
-    attribute = models.ManyToManyField(Attribute, related_name='attribute')
-    attributeoption = models.ManyToManyField(AttributeOption, related_name='product_attribute_options')
     sku = models.CharField(max_length=255, blank=True, null=True)
-    selling_price=models.FloatField( null=True)
-    offer_price=models.FloatField( null=True)
-    offer_start_date=models.DateTimeField(blank=True, null=True)
-    offer_end_date=models.DateTimeField(blank=True, null=True)
+    selling_price = models.FloatField(null=True)
+    offer_price = models.FloatField(null=True)
+    offer_start_date = models.DateTimeField(blank=True, null=True)
+    offer_end_date = models.DateTimeField(blank=True, null=True)
     stock = models.PositiveIntegerField(default=0)
     stock_alert = models.PositiveIntegerField(default=0)
     barcode = models.CharField(max_length=255, blank=True, null=True)
-    
 
     def __str__(self):
-        return self.product
+        return f"{self.product.name} - Variante {self.id}"
+
     
 class ProductImages(models.Model):
     productattribute = models.ForeignKey(ProductAttribute, on_delete=models.CASCADE, related_name='uploaded_images')
@@ -77,3 +74,13 @@ class ProductImages(models.Model):
 
     def __str__(self):
         return self.image.url
+
+class ProductAttributeOptionLink(models.Model):
+    product_attribute = models.ForeignKey('ProductAttribute', on_delete=models.CASCADE, related_name='attribute_links')
+    attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE)
+    attributeoption = models.ForeignKey(AttributeOption, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('product_attribute', 'attribute')  # Asegura una sola opción por atributo
+    def __str__(self):
+        return f"{self.attribute.name}: {self.attribute_option.name}"

@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { getAttributeOptionsByAttributeId } from "../../api/attributes.api";
 
 // Recibe los atributos como prop
-const AttributeSelector = ({ attributes = [] }) => {
+const AttributeSelector = ({
+  attributes = [],
+  onSelectionChange,
+  selectedAttribute,
+}) => {
   const [optionsByAttribute, setOptionsByAttribute] = useState({});
   const [searchQueries, setSearchQueries] = useState({});
   const [selectedOptions, setSelectedOptions] = useState({});
@@ -44,6 +48,25 @@ const AttributeSelector = ({ attributes = [] }) => {
     };
     loadOptions();
   }, [attributes]);
+  useEffect(() => {
+    if (!attributes || attributes.length === 0 || !selectedAttribute) return;
+
+    const selected = {};
+    attributes.forEach((attr) => {
+      const option = selectedAttribute.attributeoption?.find(
+        (opt) => opt.attribute === attr.id || opt.attribute_id === attr.id
+      );
+      selected[attr.id] = option?.id?.toString() || "";
+    });
+
+    setSelectedOptions(selected);
+  }, [selectedAttribute, attributes]);
+
+  useEffect(() => {
+    if (onSelectionChange) {
+      onSelectionChange(selectedOptions);
+    }
+  }, [selectedOptions]);
 
   const handleSearchChange = (attributeId, searchValue) => {
     setSearchQueries((prev) => ({

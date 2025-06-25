@@ -72,7 +72,7 @@ class ProductAttributeAdmin(admin.ModelAdmin):
         'barcode',
     )
     list_filter = ('product',)
-    raw_id_fields = ('attribute', 'attributeoption')
+    #raw_id_fields = ('attribute', 'attributeoption')
 
 
 @admin.register(ProductImages)

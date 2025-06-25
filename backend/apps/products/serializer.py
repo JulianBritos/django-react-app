@@ -1,5 +1,6 @@
+import json
 from rest_framework import serializers
-from .models import Product, Category, ProductImages, Attribute, AttributeOption, ProductAttribute
+from .models import Product, Category, ProductImages, Attribute, AttributeOption, ProductAttribute, ProductAttributeOptionLink
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,52 +46,56 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class ProductAttributeSerializer(serializers.ModelSerializer):
     uploaded_images = ProductImagesSerializer(many=True, read_only=True)
+    attribute_options = serializers.ListField(
+        child=serializers.CharField(), write_only=True,
+        required=False,
+        help_text='Lista de objetos JSON string con clave "attribute" y "option"'
+    )
+    attributes = serializers.SerializerMethodField()
+    
     class Meta:
         model = ProductAttribute
         fields = '__all__'
-    
-    def validate(self, data):
- 
-        attributes = set(data.get('attribute', []))  # Convertir en conjunto para acceso rápido
-        attribute_options = data.get('attributeoption', [])
-
-        # Crear un diccionario {id_atributo: set(opciones_permitidas)}
-        valid_options = {}
-        for attribute in attributes:
-            valid_options[attribute.id] = set(
-                AttributeOption.objects.filter(attribute=attribute).values_list('id', flat=True)
-            )
-        
-        # Verificar que cada opción seleccionada pertenezca a su atributo
-        for option in attribute_options:
-            if option.attribute_id not in valid_options or option.id not in valid_options[option.attribute_id]:
-                raise serializers.ValidationError(
-                    f"La opción de atributo '{option.name}' no pertenece a los atributos seleccionados."
-            )
-
-        return data
-
 
     def create(self, validated_data):
-
-        attributes = validated_data.pop('attribute', None)  # Extraer atributo
-        attribute_options = validated_data.pop('attributeoption', [])  # Extraer opciones de atributo
+        attribute_option_data = validated_data.pop('attribute_options', [])
         uploaded_images = validated_data.pop('uploaded_images', [])
-        
 
         product_attribute = ProductAttribute.objects.create(**validated_data)
 
-        if attributes:
-            product_attribute.attribute.set(attributes)  # Asignar atributo
+        for link_str in attribute_option_data:
+            parsed = json.loads(link_str)
+            attribute_id = parsed["attribute"]
+            option_id = parsed["option"]
 
-        if attribute_options:
-            product_attribute.attributeoption.set(attribute_options) 
-        
+            # Validación de consistencia atributo-opción
+            if not AttributeOption.objects.filter(id=option_id, attribute_id=attribute_id).exists():
+                raise serializers.ValidationError(
+                    f"La opción {option_id} no pertenece al atributo {attribute_id}."
+                )
+
+            ProductAttributeOptionLink.objects.create(
+                product_attribute=product_attribute,
+                attribute_id=attribute_id,
+                option_id=option_id
+            )
+
         for image in uploaded_images:
-            ProductImages.objects.create(product=product_attribute, image=image)
+            ProductImages.objects.create(productattribute=product_attribute, image=image)
 
         return product_attribute
-    
+
+    def get_attributes(self, obj):
+        links = ProductAttributeOptionLink.objects.filter(product_attribute=obj)
+        return [
+            {
+                "attribute_id": link.attribute.id,
+                "attribute_name": link.attribute.name,
+                "option_id": link.option.id,
+                "option_name": link.option.name,
+            }
+            for link in links
+        ]
 class ProductWithAttributesSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(
@@ -103,3 +108,11 @@ class ProductWithAttributesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
+class ProductAttributeOptionLinkSerializer(serializers.ModelSerializer):
+    attribute_name = serializers.CharField(source="attribute.name", read_only=True)
+    option_name = serializers.CharField(source="option.name", read_only=True)
+
+    class Meta:
+        model = ProductAttributeOptionLink
+        fields = ['id', 'attribute', 'option', 'attribute_name', 'option_name']

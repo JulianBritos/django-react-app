@@ -15,20 +15,31 @@ const ProductDetailPage = () => {
     const fetchProduct = async () => {
       try {
         const productData = await getProductById(id);
+        console.log("Producto crudo del backend:", productData);
 
         // Enriquecer los datos del producto con los nombres de atributos y opciones
         if (productData.product_attributes) {
           productData.product_attributes = productData.product_attributes.map(
-            (attr) => ({
-              ...attr,
-              attribute_name: attr.attribute?.name || "Sin nombre",
-              option_name:
-                attr.attributeoption?.map((opt) => opt.name).join(", ") ||
-                "Sin opción",
-            })
+            (attr) => {
+              const attributeId = Array.isArray(attr.attribute)
+                ? attr.attribute[0] // tomamos el primer ID del array
+                : attr.attribute;
+
+              return {
+                ...attr,
+                attribute: attributeId, // 👈 corregido a número
+                attribute_name: attr.attribute?.name || "Sin nombre",
+                option_name:
+                  attr.attributeoption?.map((opt) => opt.name).join(", ") ||
+                  "Sin opción",
+              };
+            }
           );
         }
-
+        console.log("Producto crudo del backend:", productData);
+        productData.product_attributes?.forEach((attr, i) => {
+          console.log(`Atributo #${i}:`, attr);
+        });
         setProduct(productData);
 
         // Seleccionar el primer atributo por defecto
@@ -61,6 +72,7 @@ const ProductDetailPage = () => {
   }, [id]);
 
   const handleAttributeSelect = (attribute) => {
+    console.log("handleAttributeSelect llamado con atributo:", attribute);
     setSelectedAttribute(attribute);
 
     // Actualizar las imágenes cuando se selecciona un nuevo atributo

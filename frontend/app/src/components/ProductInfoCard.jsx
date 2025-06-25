@@ -111,6 +111,38 @@ const ProductInfoCard = ({ product, onAttributeSelect, selectedAttribute }) => {
               attributes={attributesWithNames}
               selectedAttribute={selectedAttribute}
               onAttributeSelect={onAttributeSelect}
+              onSelectionChange={(selectedOptions) => {
+                console.log("Opciones seleccionadas:", selectedOptions);
+                // Buscar una variante que coincida exactamente
+                const matchingVariant = product.product_attributes.find(
+                  (variant) => {
+                    const variantOptions = (variant.attributeoption || [])
+                      .filter(
+                        (opt) => opt && opt.id !== undefined && opt.id !== null
+                      )
+                      .map((opt) => opt.id.toString());
+
+                    const selectedOptionIds = Object.values(selectedOptions)
+                      .filter((id) => id)
+                      .map(String);
+                    console.log("variantOptions:", variantOptions);
+                    console.log("selectedOptionIds:", selectedOptionIds);
+
+                    return (
+                      variantOptions.length === selectedOptionIds.length &&
+                      selectedOptionIds.every((id) =>
+                        variantOptions.includes(id)
+                      )
+                    );
+                  }
+                );
+                console.log("Opciones seleccionadas:", selectedOptions);
+                console.log("matchingVariant encontrado:", matchingVariant);
+
+                if (matchingVariant) {
+                  onAttributeSelect(matchingVariant);
+                }
+              }}
             />
           </div>
         )}

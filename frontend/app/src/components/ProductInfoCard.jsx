@@ -1,73 +1,88 @@
 import { useCart } from "../hooks/useCart";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getAttributeById } from "../api/attributes.api";
-import { Heart, ChevronDown } from "lucide-react";
+import { Heart, ChevronDown, Package, AlertCircle } from "lucide-react";
 import AttributeSelector from "./ui/AttributeSelector";
 
-const ProductInfoCard = ({ product, onAttributeSelect, selectedAttribute }) => {
+const ProductInfoCard = ({
+  product,
+  selectedVariant,
+  availableVariants,
+  onVariantSelect,
+  onAttributeSelection,
+}) => {
   const { addToCart } = useCart();
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Estado para los atributos con nombre
-  const [attributesWithNames, setAttributesWithNames] = useState([]);
+  // Extraer atributos únicos de todas las variantes
+  const [uniqueAttributes, setUniqueAttributes] = useState([]);
 
+  // Cerrar dropdown cuando se hace clic fuera
   useEffect(() => {
-    if (product?.product_attributes?.length > 0 && !selectedAttribute) {
-      onAttributeSelect(product.product_attributes[0]);
-    }
-  }, [product]);
-
-  // Cargar los nombres de los atributos
-  useEffect(() => {
-    const fetchAttributeNames = async () => {
-      if (!product?.product_attributes) return;
-      // Obtener los IDs únicos de atributos (pueden venir como array)
-      const attributeIds = [
-        ...new Set(
-          product.product_attributes.flatMap((attr) =>
-            Array.isArray(attr.attribute) ? attr.attribute : [attr.attribute]
-          )
-        ),
-      ];
-      // Consultar los nombres de los atributos
-      const attributesData = await Promise.all(
-        attributeIds.map((id) => getAttributeById(id))
-      );
-      setAttributesWithNames(
-        attributesData.map((attr) => ({ id: attr.id, name: attr.name }))
-      );
+    const handleClickOutside = (event) => {
+      if (dropdownOpen && !event.target.closest(".quantity-dropdown")) {
+        setDropdownOpen(false);
+      }
     };
-    fetchAttributeNames();
-  }, [product]);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
+
+  useEffect(() => {
+    if (availableVariants && availableVariants.length > 0) {
+      // Obtener todos los atributos únicos de todas las variantes
+      const allAttributes = availableVariants.flatMap(
+        (variant) => variant.attributes || []
+      );
+
+      // Agrupar por attribute_id para obtener atributos únicos
+      const attributeMap = new Map();
+      allAttributes.forEach((attr) => {
+        if (!attributeMap.has(attr.attribute_id)) {
+          attributeMap.set(attr.attribute_id, {
+            id: attr.attribute_id,
+            name: attr.attribute_name,
+            options: [],
+          });
+        }
+        // Agregar la opción si no existe
+        const existingOption = attributeMap
+          .get(attr.attribute_id)
+          .options.find((opt) => opt.id === attr.option_id);
+        if (!existingOption) {
+          attributeMap.get(attr.attribute_id).options.push({
+            id: attr.option_id,
+            name: attr.option_name,
+          });
+        }
+      });
+
+      setUniqueAttributes(Array.from(attributeMap.values()));
+    }
+  }, [availableVariants]);
 
   if (!product) {
     return <p className="p-4">Cargando producto...</p>;
   }
 
-  // Calcular el stock disponible basado en el atributo seleccionado
-  const availableStock = selectedAttribute?.stock ?? product.stock ?? 0;
+  // Calcular el stock disponible basado en la variante seleccionada
+  const availableStock = selectedVariant?.stock || 0;
 
-  // Obtener el precio actual basado en el atributo seleccionado
-  const currentPrice = selectedAttribute?.selling_price ?? product.price;
+  // Obtener el precio actual basado en la variante seleccionada
+  const currentPrice = selectedVariant?.selling_price || product.price || 0;
 
   const categoryLink = product.category
     ? `/products/${product.category}`
     : "/products";
 
-  // Función auxiliar para obtener el nombre de la opción del atributo
-  const getAttributeOptionName = (attr) => {
-    const attributeOption = attr.attributeoption?.[0];
-    return attributeOption
-      ? `${attr.attribute_name}: ${attributeOption}`
-      : "Sin opción";
-  };
-
   return (
-    <div className="p-4 border rounded-lg shadow-lg bg-white max-w-md text text-center relative">
-      <div className="flex justify-between items-center mb-2">
+    <div className="p-6 border rounded-lg shadow-lg bg-white max-w-md text-left">
+      <div className="flex justify-between items-center mb-4">
         {/* Enlace a la categoría del producto */}
         <div className="text-sm text-primary-500">
           <Link to={categoryLink} className="hover:underline">
@@ -85,124 +100,164 @@ const ProductInfoCard = ({ product, onAttributeSelect, selectedAttribute }) => {
           <Heart fill={isFavorite ? "#3b82f6" : "none"} />
         </button>
       </div>
-      <div className="flex flex-col justify-center items-start flex-grow w-full">
-        <h1 className="text-3xl font-bold mb-2 my-6">
-          {/* Asegurar que la primera letra del nombre del producto esté en mayúscula */}
-          {product.name
-            ? product.name.charAt(0).toUpperCase() + product.name.slice(1)
-            : "Producto sin nombre"}
-        </h1>
 
-        <div
-          className="prose prose-sm max-w-none mb-4"
-          dangerouslySetInnerHTML={{
-            __html: product.description || "Sin descripción disponible",
-          }}
-        />
+      <div className="space-y-6">
+        {/* Nombre del producto */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {product.name || "Producto sin nombre"}
+          </h1>
+          <p className="text-gray-600 text-sm">
+            {product.category?.name || "Sin categoría"}
+          </p>
+        </div>
 
-        {/* Sección de precio */}
-        <p className="text-5xl font-light text-gray-500">${currentPrice}</p>
+        {/* Descripción */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Descripción
+          </h3>
+          <div
+            className="prose prose-sm max-w-none text-gray-600"
+            dangerouslySetInnerHTML={{
+              __html: product.description || "Sin descripción disponible",
+            }}
+          />
+        </div>
 
-        {/* Sección de atributos */}
-        {attributesWithNames.length > 0 && (
-          <div className="mt-4 w-full">
-            <h3 className="text-lg font-semibold">Variantes disponibles</h3>
+        {/* Precio */}
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">Precio:</span>
+            <span className="text-3xl font-bold text-primary-600">
+              ${currentPrice.toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        {/* Atributos y variantes */}
+        {uniqueAttributes.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Variantes disponibles
+            </h3>
             <AttributeSelector
-              attributes={attributesWithNames}
-              selectedAttribute={selectedAttribute}
-              onAttributeSelect={onAttributeSelect}
-              onSelectionChange={(selectedOptions) => {
-                console.log("Opciones seleccionadas:", selectedOptions);
-                // Buscar una variante que coincida exactamente
-                const matchingVariant = product.product_attributes.find(
-                  (variant) => {
-                    const variantOptions = (variant.attributeoption || [])
-                      .filter(
-                        (opt) => opt && opt.id !== undefined && opt.id !== null
-                      )
-                      .map((opt) => opt.id.toString());
-
-                    const selectedOptionIds = Object.values(selectedOptions)
-                      .filter((id) => id)
-                      .map(String);
-                    console.log("variantOptions:", variantOptions);
-                    console.log("selectedOptionIds:", selectedOptionIds);
-
-                    return (
-                      variantOptions.length === selectedOptionIds.length &&
-                      selectedOptionIds.every((id) =>
-                        variantOptions.includes(id)
-                      )
-                    );
-                  }
-                );
-                console.log("Opciones seleccionadas:", selectedOptions);
-                console.log("matchingVariant encontrado:", matchingVariant);
-
-                if (matchingVariant) {
-                  onAttributeSelect(matchingVariant);
-                }
-              }}
+              attributes={uniqueAttributes}
+              onSelectionChange={onAttributeSelection}
             />
           </div>
         )}
 
-        {/* Selector de cantidad */}
-        <div className="mt-4 relative w-full">
-          <button
-            className="text-black font-medium hover:text-gray-600 flex items-center px-4 py-2 "
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-          >
-            Cantidad: {quantity} unidad{quantity > 1 ? "es" : ""}
-            <ChevronDown
-              className={`w-4 h-4 mr-1 m-1 transition-transform ${
-                dropdownOpen ? "rotate-180" : "rotate-0"
-              }`}
-            />
-          </button>
-          {dropdownOpen && (
-            <div className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10">
-              {[...Array(availableStock)].map((_, i) => (
-                <button
-                  key={i}
-                  className="block px-4 py-2 text-black hover:bg-gray-100 w-full text-left"
-                  onClick={() => {
-                    setQuantity(i + 1);
-                    setDropdownOpen(false);
-                  }}
-                >
-                  {i + 1}
-                </button>
+        {/* Información de la variante seleccionada */}
+        {selectedVariant && (
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-semibold text-gray-900 mb-2">
+              Variante seleccionada:
+            </h4>
+            <div className="space-y-2">
+              {selectedVariant.attributes?.map((attr, index) => (
+                <div key={index} className="flex justify-between text-sm">
+                  <span className="text-gray-600">{attr.attribute_name}:</span>
+                  <span className="font-medium">{attr.option_name}</span>
+                </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Stock y cantidad */}
+        <div className="space-y-4">
+          {/* Información de stock */}
+          <div className="flex items-center gap-2">
+            <Package size={20} className="text-gray-500" />
+            <span className="text-sm text-gray-600">
+              Stock disponible:{" "}
+              <span className="font-medium">{availableStock}</span>
+            </span>
+          </div>
+
+          {availableStock === 0 && (
+            <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg">
+              <AlertCircle size={20} />
+              <span className="text-sm font-medium">Producto agotado</span>
+            </div>
+          )}
+
+          {/* Selector de cantidad */}
+          {availableStock > 0 && (
+            <div className="relative quantity-dropdown">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Cantidad
+              </label>
+              <button
+                className="w-full flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <span className="text-gray-900">
+                  {quantity} unidad{quantity > 1 ? "es" : ""}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-500 transition-transform ${
+                    dropdownOpen ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </button>
+
+              {dropdownOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                  {[...Array(Math.min(availableStock, 20))].map((_, i) => (
+                    <button
+                      key={i}
+                      className="block w-full px-4 py-2 text-left text-gray-900 hover:bg-gray-100 transition-colors"
+                      onClick={() => {
+                        setQuantity(i + 1);
+                        setDropdownOpen(false);
+                      }}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Botones de acción */}
-        <button
-          className="mt-6 bg-primary-500 text-white px-4 py-2 rounded hover:bg-primary-600 w-full self-center"
-          onClick={() =>
-            selectedAttribute && console.log("Comprar ahora", selectedAttribute)
-          }
-          disabled={!selectedAttribute || availableStock === 0}
-        >
-          Comprar Ahora
-        </button>
+        <div className="space-y-3">
+          <button
+            className="w-full bg-primary-500 text-white py-3 px-4 rounded-lg hover:bg-primary-600 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+            onClick={() => {
+              if (selectedVariant) {
+                console.log("Comprar ahora", {
+                  product,
+                  selectedVariant,
+                  quantity,
+                });
+                // Aquí iría la lógica de compra
+              }
+            }}
+            disabled={!selectedVariant || availableStock === 0}
+          >
+            {availableStock === 0 ? "Agotado" : "Comprar Ahora"}
+          </button>
 
-        <button
-          className="mt-4 mb-8 bg-primary-100 text-primary-500 px-4 py-2 rounded hover:bg-primary-200 transition w-full self-center"
-          onClick={() =>
-            selectedAttribute &&
-            addToCart({
-              ...product,
-              selectedVariant: selectedAttribute,
-              quantity,
-            })
-          }
-          disabled={!selectedAttribute || availableStock === 0}
-        >
-          Agregar al Carrito
-        </button>
+          <button
+            className="w-full bg-primary-100 text-primary-600 py-3 px-4 rounded-lg hover:bg-primary-200 transition-colors font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+            onClick={() => {
+              if (selectedVariant && availableStock > 0) {
+                addToCart({
+                  ...product,
+                  selectedVariant,
+                  quantity,
+                });
+              }
+            }}
+            disabled={!selectedVariant || availableStock === 0}
+          >
+            Agregar al Carrito
+          </button>
+        </div>
       </div>
     </div>
   );

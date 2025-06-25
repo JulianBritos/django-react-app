@@ -8,6 +8,10 @@ import {
   Search,
   Filter,
   ArrowLeft,
+  ChevronDown,
+  ChevronRight,
+  Tag,
+  Info,
 } from "lucide-react";
 import ProductForm from "../formComponents/ProductForm";
 import { getProducts, deleteProduct } from "../../api/products.api";
@@ -20,6 +24,7 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [categories, setCategories] = useState([]);
+  const [expandedProducts, setExpandedProducts] = useState(new Set());
 
   useEffect(() => {
     loadProducts();
@@ -92,6 +97,66 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
       (product.category && product.category.name === selectedCategory);
     return matchesSearch && matchesCategory;
   });
+
+  const toggleProductExpansion = (productId) => {
+    setExpandedProducts((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(productId)) {
+        newSet.delete(productId);
+      } else {
+        newSet.add(productId);
+      }
+      return newSet;
+    });
+  };
+
+  const expandAllProducts = () => {
+    setExpandedProducts(new Set(filteredProducts.map((product) => product.id)));
+  };
+
+  const collapseAllProducts = () => {
+    setExpandedProducts(new Set());
+  };
+
+  const getAttributeGroups = (attributes) => {
+    if (!attributes || attributes.length === 0) return [];
+
+    const groups = {};
+    attributes.forEach((attr) => {
+      const attributeName = attr.attribute_name || "Sin nombre";
+      if (!groups[attributeName]) {
+        groups[attributeName] = [];
+      }
+      groups[attributeName].push(attr.option_name || "Sin opción");
+    });
+
+    return Object.entries(groups).map(([attributeName, options]) => ({
+      attributeName,
+      options: [...new Set(options)], // Eliminar duplicados
+    }));
+  };
+
+  const getProductAttributeSummary = (product) => {
+    if (
+      !product.product_attributes ||
+      product.product_attributes.length === 0
+    ) {
+      return null;
+    }
+
+    const allAttributes = product.product_attributes.flatMap(
+      (variant) => variant.attributes || []
+    );
+
+    if (allAttributes.length === 0) {
+      return null;
+    }
+
+    const groups = getAttributeGroups(allAttributes);
+    return groups
+      .map((group) => `${group.attributeName}: ${group.options.join(", ")}`)
+      .join(" | ");
+  };
 
   if (showProductForm) {
     return (
@@ -193,9 +258,34 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
 
       {/* Lista de productos */}
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Lista de Productos
-        </h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-800">
+            Lista de Productos
+          </h2>
+          {filteredProducts.length > 0 && (
+            <div className="flex gap-2">
+              <span className="text-sm text-gray-500 flex items-center">
+                {expandedProducts.size} de {filteredProducts.length} expandidos
+              </span>
+              <button
+                onClick={expandAllProducts}
+                className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                title="Expandir todos los productos"
+              >
+                <ChevronDown size={16} />
+                Expandir todo
+              </button>
+              <button
+                onClick={collapseAllProducts}
+                className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                title="Contraer todos los productos"
+              >
+                <ChevronRight size={16} />
+                Contraer todo
+              </button>
+            </div>
+          )}
+        </div>
 
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
@@ -208,82 +298,318 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white"
-              >
-                <div className="aspect-square bg-gray-100 flex items-center justify-center">
-                  {product.product_attributes &&
-                  product.product_attributes.length > 0 &&
-                  product.product_attributes[0].uploaded_images &&
-                  product.product_attributes[0].uploaded_images.length > 0 ? (
-                    <img
-                      src={
-                        product.product_attributes[0].uploaded_images[0].image
-                      }
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = "/placeholder.jpg";
-                      }}
-                    />
-                  ) : (
-                    <Package size={48} className="text-gray-400" />
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-1 line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-                    {product.description}
-                  </p>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-gray-500">
-                      {product.category
-                        ? product.category.name
-                        : "Sin categoría"}
-                    </span>
-                    <span className="font-medium text-primary-600">
-                      ${product.product_attributes?.[0]?.selling_price || "N/A"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">
-                      Stock: {product.product_attributes?.[0]?.stock || 0}
-                    </span>
-                    <div className="flex gap-2">
+          <div className="space-y-4">
+            {filteredProducts.map((product) => {
+              const isExpanded = expandedProducts.has(product.id);
+              const hasAttributes =
+                product.product_attributes &&
+                product.product_attributes.length > 0;
+
+              return (
+                <div
+                  key={product.id}
+                  className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white"
+                >
+                  {/* Header del producto */}
+                  <div className="flex items-center p-4 border-b bg-gray-50">
+                    <div className="flex-1 flex items-center gap-4">
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                        {product.product_attributes &&
+                        product.product_attributes.length > 0 &&
+                        product.product_attributes[0].uploaded_images &&
+                        product.product_attributes[0].uploaded_images.length >
+                          0 ? (
+                          <img
+                            src={
+                              product.product_attributes[0].uploaded_images[0]
+                                .image
+                            }
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "/placeholder.jpg";
+                            }}
+                          />
+                        ) : (
+                          <Package size={24} className="text-gray-400" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg mb-1">
+                          {product.name}
+                        </h3>
+                        <p className="text-gray-600 text-sm line-clamp-1">
+                          {product.description}
+                        </p>
+                        {getProductAttributeSummary(product) && (
+                          <p className="text-xs text-blue-600 mt-1 line-clamp-1">
+                            {getProductAttributeSummary(product)}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-4 mt-1">
+                          <span className="text-sm text-gray-500">
+                            {product.category
+                              ? product.category.name
+                              : "Sin categoría"}
+                          </span>
+                          <span className="text-sm font-medium text-primary-600">
+                            $
+                            {product.product_attributes?.[0]?.selling_price ||
+                              "N/A"}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            Stock: {product.product_attributes?.[0]?.stock || 0}
+                          </span>
+                          {hasAttributes && (
+                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                              {product.product_attributes.length} variante
+                              {product.product_attributes.length !== 1
+                                ? "s"
+                                : ""}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => toggleProductExpansion(product.id)}
+                        className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                        title={
+                          isExpanded ? "Contraer detalles" : "Expandir detalles"
+                        }
+                      >
+                        {isExpanded ? (
+                          <ChevronDown size={20} />
+                        ) : (
+                          <ChevronRight size={20} />
+                        )}
+                      </button>
                       <button
                         onClick={() => {
                           setEditingProduct(product);
                           setShowProductForm(true);
                         }}
-                        className="text-blue-500 hover:text-blue-700 p-1 rounded"
+                        className="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
                         title="Editar"
                       >
                         <Edit size={16} />
                       </button>
                       <button
                         onClick={() => handleDeleteProduct(product.id)}
-                        className="text-red-500 hover:text-red-700 p-1 rounded"
+                        className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
                         title="Eliminar"
                       >
                         <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
+
+                  {/* Contenido expandible */}
+                  {isExpanded && (
+                    <div className="p-4 bg-gray-50">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Información básica del producto */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+                            <Info size={20} />
+                            <span>Información del Producto</span>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Nombre:</span>
+                              <span className="font-medium">
+                                {product.name}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Categoría:</span>
+                              <span className="font-medium">
+                                {product.category
+                                  ? product.category.name
+                                  : "Sin categoría"}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Estado:</span>
+                              <span
+                                className={`font-medium px-2 py-1 rounded-full text-xs ${
+                                  product.status === "ACTIVE"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {product.status === "ACTIVE"
+                                  ? "Activo"
+                                  : "Inactivo"}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">
+                                Fecha de creación:
+                              </span>
+                              <span className="font-medium">
+                                {new Date(
+                                  product.created_at
+                                ).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="mt-4">
+                            <h4 className="font-medium text-gray-800 mb-2">
+                              Descripción:
+                            </h4>
+                            <p className="text-gray-600 text-sm bg-white p-3 rounded-lg border">
+                              {product.description || "Sin descripción"}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Atributos y variantes */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+                            <Tag size={20} />
+                            <span>Atributos y Variantes</span>
+                          </div>
+
+                          {hasAttributes ? (
+                            <div className="space-y-3">
+                              {product.product_attributes.map(
+                                (variant, index) => (
+                                  <div
+                                    key={index}
+                                    className="bg-white p-4 rounded-lg border"
+                                  >
+                                    <div className="flex justify-between items-start mb-3">
+                                      <h5 className="font-medium text-gray-800">
+                                        Variante #{index + 1}
+                                      </h5>
+                                      <div className="text-right">
+                                        <div className="font-medium text-primary-600">
+                                          ${variant.selling_price || "N/A"}
+                                        </div>
+                                        <div className="text-sm text-gray-500">
+                                          Stock: {variant.stock || 0}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Atributos de esta variante */}
+                                    {variant.attributes &&
+                                    variant.attributes.length > 0 ? (
+                                      <div className="space-y-2">
+                                        <h6 className="text-sm font-medium text-gray-700">
+                                          Atributos:
+                                        </h6>
+                                        <div className="flex flex-wrap gap-2">
+                                          {getAttributeGroups(
+                                            variant.attributes
+                                          ).map((group, groupIndex) => (
+                                            <span
+                                              key={groupIndex}
+                                              className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                                            >
+                                              {group.attributeName}:{" "}
+                                              {group.options.join(", ")}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-gray-500">
+                                        Sin atributos específicos
+                                      </p>
+                                    )}
+
+                                    {/* SKU */}
+                                    {variant.sku && (
+                                      <div className="mt-2">
+                                        <span className="text-sm text-gray-600">
+                                          SKU:{" "}
+                                        </span>
+                                        <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                                          {variant.sku}
+                                        </span>
+                                      </div>
+                                    )}
+
+                                    {/* Imágenes de la variante */}
+                                    {variant.uploaded_images &&
+                                      variant.uploaded_images.length > 0 && (
+                                        <div className="mt-3">
+                                          <h6 className="text-sm font-medium text-gray-700 mb-2">
+                                            Imágenes (
+                                            {variant.uploaded_images.length}):
+                                          </h6>
+                                          <div className="grid grid-cols-4 gap-2">
+                                            {variant.uploaded_images.map(
+                                              (img, imgIndex) => (
+                                                <div
+                                                  key={imgIndex}
+                                                  className="relative group"
+                                                >
+                                                  <img
+                                                    src={img.image}
+                                                    alt={`Imagen ${
+                                                      imgIndex + 1
+                                                    }`}
+                                                    className="w-full h-16 object-cover rounded border cursor-pointer hover:opacity-75 transition-opacity"
+                                                    onError={(e) => {
+                                                      e.target.onerror = null;
+                                                      e.target.src =
+                                                        "/placeholder.jpg";
+                                                    }}
+                                                    onClick={() =>
+                                                      window.open(
+                                                        img.image,
+                                                        "_blank"
+                                                      )
+                                                    }
+                                                    title="Hacer clic para ver en tamaño completo"
+                                                  />
+                                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded flex items-center justify-center">
+                                                    <span className="text-white text-xs opacity-0 group-hover:opacity-100">
+                                                      Ver
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                              )
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          ) : (
+                            <div className="bg-white p-4 rounded-lg border text-center text-gray-500">
+                              <Package
+                                size={32}
+                                className="mx-auto mb-2 text-gray-300"
+                              />
+                              <p>
+                                Este producto no tiene variantes configuradas
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
 
       {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-8">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -345,6 +671,27 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
               </p>
             </div>
             <Package size={24} className="text-red-500" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Con Variantes</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {
+                  products.filter(
+                    (p) =>
+                      p.product_attributes &&
+                      p.product_attributes.length > 0 &&
+                      p.product_attributes.some(
+                        (attr) => attr.attributes && attr.attributes.length > 0
+                      )
+                  ).length
+                }
+              </p>
+            </div>
+            <Tag size={24} className="text-purple-500" />
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import ProductViewSet, CategoryViewSet, AttributeViewSet, AttributeOptionViewSet, ProductAttributeViewSet
+from .views import ProductViewSet, CategoryViewSet, AttributeViewSet, AttributeOptionViewSet, ProductAttributeViewSet, ProductAttributeOptionLinkViewSet
 from rest_framework.routers import DefaultRouter
 
 
@@ -10,6 +10,7 @@ router.register(r'categories', CategoryViewSet)
 router.register(r'attributes', AttributeViewSet)
 router.register(r'attributeoptions', AttributeOptionViewSet)
 router.register(r'productattributes', ProductAttributeViewSet)
+router.register(r'productattributeoptionlinks', ProductAttributeOptionLinkViewSet)
 
 
 

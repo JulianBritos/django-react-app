@@ -2,7 +2,7 @@ import { X } from "lucide-react";
 
 const FormHeader = ({ isEditMode }) => {
   return (
-    <div className="flex justify-between items-center p-4 mt-8 mx-auto max-w-4xl">
+    <div className="flex justify-between items-center p-4 mt-8 mx-auto max-w-xl">
       <h2 className="text-4xl font-semibold">
         {isEditMode ? "Editar Producto" : "Nuevo Producto"}
       </h2>

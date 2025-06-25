@@ -57,3 +57,16 @@ export const deleteProductAttribute = async (id) => {
   const response = await axios.delete(`${API_URL}productattributes/${id}/`);
   return response.data;
 };
+
+export const createProductAttributeLink = async (attributeLinkData) => {
+  const response = await axios.post(
+    `${API_URL}productattributeoptionlinks/`,
+    attributeLinkData,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  return response.data;
+};

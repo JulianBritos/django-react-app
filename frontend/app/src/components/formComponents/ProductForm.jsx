@@ -8,6 +8,7 @@ import {
   createProduct,
   updateProduct,
   createProductAttribute,
+  createProductAttributeLink,
 } from "../../api/products.api";
 
 import FormHeader from "./FormHeader";
@@ -196,24 +197,51 @@ const ProductForm = ({ product, onSave, onCancel }) => {
 
       // Create product attributes with their combinations and images
       for (const combo of combinations) {
-        // Enviar una variante por cada atributo-opción
+        // Crear una sola variante por combinación
+        const variantData = new FormData();
+        variantData.append("product", savedProduct.id);
+        variantData.append("stock", combo.stock || 0);
+        variantData.append("selling_price", combo.price || formData.price);
+        variantData.append("sku", combo.sku || "");
+
+        // Agregar imágenes de la variante
+        combo.images.forEach((imgIndex) => {
+          if (formData.images[imgIndex]) {
+            variantData.append("uploaded_images", formData.images[imgIndex]);
+          }
+        });
+
+        // Crear la variante
+        const savedVariant = await createProductAttribute(variantData);
+
+        // Crear los enlaces de atributos para esta variante específica
         for (const attr of combo.attributes) {
-          const variantData = new FormData();
-          variantData.append("product", savedProduct.id);
-          variantData.append("attribute", attr.attributeId);
-          variantData.append("attributeoption", attr.optionId);
-          variantData.append("stock", combo.stock);
-          variantData.append(
-            "selling_price",
-            parseFloat(formData.price) + parseFloat(combo.price)
+          console.log("Procesando atributo:", attr);
+          console.log("Tipo de attributeId:", typeof attr.attributeId);
+          console.log("Tipo de optionId:", typeof attr.optionId);
+
+          const attributeLinkData = {
+            product_attribute: savedVariant.id,
+            attribute: parseInt(attr.attributeId),
+            attributeoption: parseInt(attr.optionId),
+          };
+
+          console.log(
+            "Enviando datos de enlace de atributo:",
+            attributeLinkData
           );
-          variantData.append("sku", combo.sku || "");
-          combo.images.forEach((imgIndex) => {
-            if (formData.images[imgIndex]) {
-              variantData.append("uploaded_images", formData.images[imgIndex]);
-            }
-          });
-          await createProductAttribute(variantData);
+          console.log("Combo attributes:", combo.attributes);
+          console.log("Attr individual:", attr);
+
+          // Usar un endpoint específico para crear enlaces de atributos
+          try {
+            const result = await createProductAttributeLink(attributeLinkData);
+            console.log("Enlace de atributo creado exitosamente:", result);
+          } catch (error) {
+            console.error("Error al crear enlace de atributo:", error);
+            console.error("Datos enviados:", attributeLinkData);
+            throw error;
+          }
         }
       }
 
@@ -273,7 +301,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
   };
 
   return (
-    <div className="w-full max-w-4xl p-6 space-y-6">
+    <div className="w-full max-w p-6 space-y-6">
       <FormHeader onCancel={onCancel} product={product} />
 
       <div className="space-y-6">

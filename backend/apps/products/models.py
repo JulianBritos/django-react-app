@@ -83,4 +83,4 @@ class ProductAttributeOptionLink(models.Model):
     class Meta:
         unique_together = ('product_attribute', 'attribute')  # Asegura una sola opción por atributo
     def __str__(self):
-        return f"{self.attribute.name}: {self.attribute_option.name}"
+        return f"{self.attribute.name}: {self.attributeoption.name}"

@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status, viewsets
-from .models import Product, Category, ProductImages, Attribute, AttributeOption, ProductAttribute
-from .serializer import CategorySerializer, AttributeSerializer, AttributeOptionSerializer, ProductAttributeSerializer, ProductWithAttributesSerializer
+from .models import Product, Category, ProductImages, Attribute, AttributeOption, ProductAttribute, ProductAttributeOptionLink
+from .serializer import CategorySerializer, AttributeSerializer, AttributeOptionSerializer, ProductAttributeSerializer, ProductWithAttributesSerializer, ProductAttributeOptionLinkSerializer
 
 
 import environ
@@ -65,4 +65,19 @@ class ProductAttributeViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             print("Errores de validación:", serializer.errors)  # Ver errores en consola
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ProductAttributeOptionLinkViewSet(viewsets.ModelViewSet):
+    queryset = ProductAttributeOptionLink.objects.all()
+    serializer_class = ProductAttributeOptionLinkSerializer
+
+    def create(self, request, *args, **kwargs):
+        print("Datos recibidos en ProductAttributeOptionLinkViewSet:", request.data)
+        serializer = self.get_serializer(data=request.data)
+        
+        if serializer.is_valid():
+            product_attribute_link = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            print("Errores de validación:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

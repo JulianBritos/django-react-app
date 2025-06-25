@@ -8,8 +8,9 @@ import CarouselOfImages from "../components/CarouselOfImages";
 const ProductDetailPage = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [selectedAttribute, setSelectedAttribute] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [productImages, setProductImages] = useState([]);
+  const [availableVariants, setAvailableVariants] = useState([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -17,49 +18,49 @@ const ProductDetailPage = () => {
         const productData = await getProductById(id);
         console.log("Producto crudo del backend:", productData);
 
-        // Enriquecer los datos del producto con los nombres de atributos y opciones
-        if (productData.product_attributes) {
-          productData.product_attributes = productData.product_attributes.map(
-            (attr) => {
-              const attributeId = Array.isArray(attr.attribute)
-                ? attr.attribute[0] // tomamos el primer ID del array
-                : attr.attribute;
+        // Procesar las variantes del producto
+        if (
+          productData.product_attributes &&
+          productData.product_attributes.length > 0
+        ) {
+          const processedVariants = productData.product_attributes.map(
+            (variant) => {
+              // Obtener los atributos de esta variante
+              const variantAttributes = variant.attributes || [];
 
               return {
-                ...attr,
-                attribute: attributeId, // 👈 corregido a número
-                attribute_name: attr.attribute?.name || "Sin nombre",
-                option_name:
-                  attr.attributeoption?.map((opt) => opt.name).join(", ") ||
-                  "Sin opción",
+                ...variant,
+                attributes: variantAttributes,
+                // Crear un identificador único para esta variante
+                variantKey: variantAttributes
+                  .map((attr) => `${attr.attribute_name}:${attr.option_name}`)
+                  .join("|"),
               };
             }
           );
+
+          setAvailableVariants(processedVariants);
+
+          // Seleccionar la primera variante por defecto
+          if (processedVariants.length > 0) {
+            const firstVariant = processedVariants[0];
+            setSelectedVariant(firstVariant);
+
+            // Establecer las imágenes de la primera variante
+            const images =
+              firstVariant.uploaded_images?.map((img) => {
+                if (img.image.startsWith("http")) {
+                  return img.image;
+                } else {
+                  return `${import.meta.env.VITE_BASE_URL}${img.image}`;
+                }
+              }) || [];
+
+            setProductImages(images.length > 0 ? images : ["/placeholder.jpg"]);
+          }
         }
-        console.log("Producto crudo del backend:", productData);
-        productData.product_attributes?.forEach((attr, i) => {
-          console.log(`Atributo #${i}:`, attr);
-        });
+
         setProduct(productData);
-
-        // Seleccionar el primer atributo por defecto
-        if (productData?.product_attributes?.length > 0) {
-          const firstAttribute = productData.product_attributes[0];
-          setSelectedAttribute(firstAttribute);
-
-          // Establecer las imágenes del primer atributo
-          const images =
-            firstAttribute.uploaded_images?.map((img) => {
-              // Asegurarse de que la URL de la imagen sea completa
-              if (img.image.startsWith("http")) {
-                return img.image;
-              } else {
-                return `${import.meta.env.VITE_BASE_URL}${img.image}`;
-              }
-            }) || [];
-
-          setProductImages(images.length > 0 ? images : ["/placeholder.jpg"]);
-        }
       } catch (error) {
         console.error("Error fetching product:", error);
         setProduct(null);
@@ -71,13 +72,13 @@ const ProductDetailPage = () => {
     }
   }, [id]);
 
-  const handleAttributeSelect = (attribute) => {
-    console.log("handleAttributeSelect llamado con atributo:", attribute);
-    setSelectedAttribute(attribute);
+  const handleVariantSelect = (variant) => {
+    console.log("Variante seleccionada:", variant);
+    setSelectedVariant(variant);
 
-    // Actualizar las imágenes cuando se selecciona un nuevo atributo
-    const attributeImages =
-      attribute.uploaded_images?.map((img) => {
+    // Actualizar las imágenes cuando se selecciona una nueva variante
+    const variantImages =
+      variant.uploaded_images?.map((img) => {
         if (img.image.startsWith("http")) {
           return img.image;
         } else {
@@ -86,8 +87,34 @@ const ProductDetailPage = () => {
       }) || [];
 
     setProductImages(
-      attributeImages.length > 0 ? attributeImages : ["/placeholder.jpg"]
+      variantImages.length > 0 ? variantImages : ["/placeholder.jpg"]
     );
+  };
+
+  const handleAttributeSelection = (selectedAttributes) => {
+    console.log("Atributos seleccionados:", selectedAttributes);
+
+    // Buscar la variante que coincida con los atributos seleccionados
+    const matchingVariant = availableVariants.find((variant) => {
+      const variantAttributes = variant.attributes || [];
+
+      // Verificar si todos los atributos seleccionados coinciden con esta variante
+      return Object.entries(selectedAttributes).every(
+        ([attributeId, optionId]) => {
+          if (!optionId) return true; // Si no hay opción seleccionada, no filtrar
+
+          return variantAttributes.some(
+            (attr) =>
+              attr.attribute_id.toString() === attributeId.toString() &&
+              attr.option_id.toString() === optionId.toString()
+          );
+        }
+      );
+    });
+
+    if (matchingVariant) {
+      handleVariantSelect(matchingVariant);
+    }
   };
 
   if (!product) {
@@ -108,15 +135,17 @@ const ProductDetailPage = () => {
         <div className="grid grid-cols-1 grid-rows-1 md:grid-cols-3 gap-8">
           <div className="rounded-lg p-4 col-span-1 md:col-span-2">
             <CarouselOfImages
-              key={selectedAttribute?.id}
+              key={selectedVariant?.id}
               images={productImages}
             />
           </div>
           <div className="col-span-1 md:col-span-1">
             <ProductInfoCard
               product={product}
-              onAttributeSelect={handleAttributeSelect}
-              selectedAttribute={selectedAttribute}
+              selectedVariant={selectedVariant}
+              availableVariants={availableVariants}
+              onVariantSelect={handleVariantSelect}
+              onAttributeSelection={handleAttributeSelection}
             />
           </div>
         </div>

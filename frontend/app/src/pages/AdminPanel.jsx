@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/Button";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { StatCard } from "../components/ui/Card";
+import { Plus, Edit, Trash2, Package } from "lucide-react";
 
 import ProductForm from "../components/formComponents/ProductForm";
 import { getProducts, deleteProduct } from "../api/products.api";
@@ -67,20 +68,27 @@ const AdminPanel = () => {
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Total de Productos</h3>
-          <p className="text-3xl font-bold text-blue-600">{products.length}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Total de Categorías</h3>
-          <p className="text-3xl font-bold text-green-600">
-            {categories.length}
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Total de Usuarios</h3>
-          <p className="text-3xl font-bold text-purple-600">{users.length}</p>
-        </div>
+        <StatCard
+          title="Total de Productos"
+          value={products.length}
+          icon={<Package size={24} className="text-blue-600" />}
+        />
+        <StatCard
+          title="Productos Activos"
+          value={products.filter((p) => p.status === "ACTIVE").length}
+          icon={<Package size={24} className="text-green-600" />}
+        />
+        <StatCard
+          title="Productos con Stock"
+          value={
+            products.filter(
+              (p) =>
+                p.product_attributes &&
+                p.product_attributes.some((attr) => attr.stock > 0)
+            ).length
+          }
+          icon={<Package size={24} className="text-purple-600" />}
+        />
       </div>
 
       {/* Acciones Rápidas */}

@@ -6,6 +6,7 @@ import { Button } from "../ui/Button";
 
 const RegisterForm = ({ register }) => {
   const [status, setStatus] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -31,11 +32,13 @@ const RegisterForm = ({ register }) => {
     e.preventDefault();
 
     try {
+      setLoading(true);
       await register(email, username, password1, password2);
-
       navigate("../"); // Redirecciona luego de registrarse
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 

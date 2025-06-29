@@ -6,22 +6,34 @@ import { Button } from "../components/ui/Button";
 
 const ResetPasswordConfirm = ({ resetPasswordConfirm }) => {
   const [status, setStatus] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { uid, token } = useParams();
   const [formData, setFormData] = useState({
     new_password1: "",
     new_password2: "",
   });
   const { new_password1, new_password2 } = formData;
+
   const handleInput = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    resetPasswordConfirm(new_password1, new_password2, uid, token);
-    setStatus(true);
+    try {
+      setLoading(true);
+      await resetPasswordConfirm(new_password1, new_password2, uid, token);
+      setStatus(true);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
+
   if (status) {
     return <Navigate to={"../login/"}></Navigate>;
   }
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
       <div className="bg-white shadow-md rounded-2xl p-6 w-full max-w-md">

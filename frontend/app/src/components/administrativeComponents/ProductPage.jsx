@@ -16,6 +16,7 @@ import {
 import ProductForm from "../formComponents/ProductForm";
 import { getProducts, deleteProduct } from "../../api/products.api";
 import { Button } from "../ui/Button";
+import { StatCard, ContentCard } from "../ui/Card";
 
 const ProductPage = ({ onAddProduct, onEditProduct }) => {
   const [products, setProducts] = useState([]);
@@ -223,7 +224,7 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
       </div>
 
       {/* Filtros y búsqueda */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <ContentCard className="mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search
@@ -257,15 +258,13 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
             </select>
           </div>
         </div>
-      </div>
+      </ContentCard>
 
       {/* Lista de productos */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Lista de Productos
-          </h2>
-          {filteredProducts.length > 0 && (
+      <ContentCard
+        title="Lista de Productos"
+        headerActions={
+          filteredProducts.length > 0 ? (
             <div className="flex gap-2">
               <span className="text-sm text-gray-500 flex items-center">
                 {expandedProducts.size} de {filteredProducts.length} expandidos
@@ -291,9 +290,9 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
                 Contraer todo
               </Button>
             </div>
-          )}
-        </div>
-
+          ) : null
+        }
+      >
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <Package size={48} className="mx-auto mb-4 text-gray-300" />
@@ -619,94 +618,60 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
             })}
           </div>
         )}
-      </div>
+      </ContentCard>
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">
-                Total de Productos
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {products.length}
-              </p>
-            </div>
-            <Package size={24} className="text-blue-500" />
-          </div>
-        </div>
+        <StatCard
+          title="Total de Productos"
+          value={products.length}
+          icon={<Package size={24} className="text-blue-500" />}
+        />
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">
-                Productos Activos
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {products.filter((p) => p.status === "ACTIVE").length}
-              </p>
-            </div>
-            <PackageOpen size={24} className="text-green-500" />
-          </div>
-        </div>
+        <StatCard
+          title="Productos Activos"
+          value={products.filter((p) => p.status === "ACTIVE").length}
+          icon={<PackageOpen size={24} className="text-green-500" />}
+        />
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Con Stock</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {
-                  products.filter(
-                    (p) =>
-                      p.product_attributes &&
-                      p.product_attributes.some((attr) => attr.stock > 0)
-                  ).length
-                }
-              </p>
-            </div>
-            <Package size={24} className="text-purple-500" />
-          </div>
-        </div>
+        <StatCard
+          title="Con Stock"
+          value={
+            products.filter(
+              (p) =>
+                p.product_attributes &&
+                p.product_attributes.some((attr) => attr.stock > 0)
+            ).length
+          }
+          icon={<Package size={24} className="text-purple-500" />}
+        />
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Sin Stock</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {
-                  products.filter(
-                    (p) =>
-                      !p.product_attributes ||
-                      p.product_attributes.every((attr) => attr.stock === 0)
-                  ).length
-                }
-              </p>
-            </div>
-            <Package size={24} className="text-red-500" />
-          </div>
-        </div>
+        <StatCard
+          title="Sin Stock"
+          value={
+            products.filter(
+              (p) =>
+                !p.product_attributes ||
+                p.product_attributes.every((attr) => attr.stock === 0)
+            ).length
+          }
+          icon={<Package size={24} className="text-red-500" />}
+        />
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Con Variantes</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {
-                  products.filter(
-                    (p) =>
-                      p.product_attributes &&
-                      p.product_attributes.length > 0 &&
-                      p.product_attributes.some(
-                        (attr) => attr.attributes && attr.attributes.length > 0
-                      )
-                  ).length
-                }
-              </p>
-            </div>
-            <Tag size={24} className="text-purple-500" />
-          </div>
-        </div>
+        <StatCard
+          title="Con Variantes"
+          value={
+            products.filter(
+              (p) =>
+                p.product_attributes &&
+                p.product_attributes.length > 0 &&
+                p.product_attributes.some(
+                  (attr) => attr.attributes && attr.attributes.length > 0
+                )
+            ).length
+          }
+          icon={<Tag size={24} className="text-purple-500" />}
+        />
       </div>
     </div>
   );

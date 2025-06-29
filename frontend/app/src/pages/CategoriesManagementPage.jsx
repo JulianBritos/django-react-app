@@ -16,6 +16,7 @@ import {
   deleteCategory,
 } from "../api/categories.api";
 import { Button } from "../components/ui/Button";
+import { StatCard } from "../components/ui/Card";
 
 const CategoriesManagementPage = () => {
   const [categories, setCategories] = useState([]);
@@ -237,45 +238,23 @@ const CategoriesManagementPage = () => {
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">
-                Total de Categorías
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {categories.length}
-              </p>
-            </div>
-            <Folder size={24} className="text-blue-500" />
-          </div>
-        </div>
+        <StatCard
+          title="Total de Categorías"
+          value={categories.length}
+          icon={<Folder size={24} className="text-blue-500" />}
+        />
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">
-                Categorías Principales
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {categories.filter((cat) => !cat.parent_id).length}
-              </p>
-            </div>
-            <FolderOpen size={24} className="text-green-500" />
-          </div>
-        </div>
+        <StatCard
+          title="Categorías Principales"
+          value={categories.filter((cat) => !cat.parent_id).length}
+          icon={<FolderOpen size={24} className="text-green-500" />}
+        />
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Subcategorías</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {categories.filter((cat) => cat.parent_id).length}
-              </p>
-            </div>
-            <Folder size={24} className="text-purple-500" />
-          </div>
-        </div>
+        <StatCard
+          title="Subcategorías"
+          value={categories.filter((cat) => cat.parent_id).length}
+          icon={<Folder size={24} className="text-purple-500" />}
+        />
       </div>
     </div>
   );

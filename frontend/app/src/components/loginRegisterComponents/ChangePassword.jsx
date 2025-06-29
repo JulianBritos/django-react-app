@@ -6,6 +6,7 @@ import { changePassword } from "../../reducer/Actions";
 import { Button } from "../ui/Button";
 
 const ChangePassword = ({ isAuthenticated, changePassword }) => {
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     new_password1: "",
     new_password2: "",
@@ -16,9 +17,16 @@ const ChangePassword = ({ isAuthenticated, changePassword }) => {
   const handlingInput = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handlingSubmit = (e) => {
+  const handlingSubmit = async (e) => {
     e.preventDefault();
-    changePassword(new_password1, new_password2, old_password);
+    try {
+      setLoading(true);
+      await changePassword(new_password1, new_password2, old_password);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isAuthenticated && !localStorage.getItem("access")) {

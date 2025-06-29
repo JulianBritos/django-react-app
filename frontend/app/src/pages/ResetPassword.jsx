@@ -7,17 +7,28 @@ import { Button } from "../components/ui/Button";
 
 const ResetPassword = ({ resetPassword }) => {
   const [status, setStatus] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
   });
   const { email } = formData;
+
   const handleInput = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    resetPassword(email);
-    setStatus(true);
+    try {
+      setLoading(true);
+      await resetPassword(email);
+      setStatus(true);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
+
   if (status) {
     return <Navigate to={"../"}></Navigate>;
   }

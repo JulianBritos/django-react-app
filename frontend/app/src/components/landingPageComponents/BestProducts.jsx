@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getProducts } from "../../api/products.api";
 import { Button } from "../ui/Button";
+import { ProductCardHero } from "../ProductCards";
 
 const BestProducts = () => {
   const [products, setProducts] = useState([]);
@@ -43,26 +44,9 @@ const BestProducts = () => {
           </div>
 
           {/* Grid de productos */}
-          <div className="w-full md:w-2/3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="w-full md:w-2/3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.slice(0, 3).map((product) => (
-              <div
-                key={product.id}
-                className="bg-white shadow rounded-lg overflow-hidden"
-              >
-                <img
-                  src={
-                    product.product_attributes?.[0]?.uploaded_images?.[0]?.image
-                      ? product.product_attributes[0].uploaded_images[0].image
-                      : "/placeholder.jpg"
-                  }
-                  alt={product.name}
-                  className="w-full h-64 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold">{product.name}</h3>
-                  <p className="text-gray-500">₱ {product.price}</p>
-                </div>
-              </div>
+              <ProductCardHero key={product.id} product={product} />
             ))}
           </div>
         </div>

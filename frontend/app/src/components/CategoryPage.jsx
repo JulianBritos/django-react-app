@@ -4,12 +4,15 @@ import { useOutletContext } from "react-router-dom";
 import ScrollableNavBar from "../components/ScrollableNavVar";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/Button";
+import { ProductCard } from "./ProductCards";
+import { useCart } from "../hooks/useCart";
 
 function CategoryPage() {
   const { categoryName } = useParams();
   const { products, categories } = useOutletContext();
   const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(false);
+  const { addToCart } = useCart();
 
   const filteredProducts =
     categoryName === "allproducts"
@@ -18,10 +21,6 @@ function CategoryPage() {
 
   const handleCategoryClick = (category) => {
     navigate(`/products/${category.name}`);
-  };
-
-  const handleProductClick = (productId) => {
-    navigate(`/product/${productId}`);
   };
 
   return (
@@ -46,37 +45,11 @@ function CategoryPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
-            <div
+            <ProductCard
               key={product.id}
-              className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => handleProductClick(product.id)}
-            >
-              <img
-                src={
-                  product.product_attributes?.[0]?.uploaded_images?.[0]?.image
-                    ? product.product_attributes[0].uploaded_images[0].image
-                    : "/placeholder.jpg"
-                }
-                alt={product.name}
-                className="w-full h-64 object-cover"
-              />
-
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  {product.name}
-                </h3>
-                <p className="text-gray-600">${product.price}</p>
-                <button
-                  className="w-full mt-4 bg-thirdary-500 text-white py-2 rounded-md hover:bg-thirdary-600 transition"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    alert(`Agregaste ${product.name} al carrito`);
-                  }}
-                >
-                  Agregar al carrito
-                </button>
-              </div>
-            </div>
+              product={product}
+              addToCart={addToCart}
+            />
           ))}
         </div>
       </div>

@@ -4,6 +4,7 @@ import { getCategories } from "../../api/categories.api";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser, logout } from "../../reducer/Actions";
+import { Button } from "../ui/Button";
 
 function Header() {
   const navigate = useNavigate();
@@ -110,12 +111,15 @@ function Header() {
         {/* Iconos e Iniciar Sesión */}
         <div className="flex items-center space-x-6">
           {isAuthenticated && (
-            <Link
+            <Button
+              variant="success"
+              size="default"
+              as={Link}
               to="/owner2"
-              className="hidden md:flex items-center bg-thirdary-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-thirdary-700 shadow-md transition text-base"
+              className="hidden md:flex items-center"
             >
               <Shield className="w-5 h-5 mr-2" /> Admin Panel
-            </Link>
+            </Button>
           )}
           <div className="flex items-center space-x-6 relative">
             <Link to="/cart" className="text-black">
@@ -152,12 +156,15 @@ function Header() {
                 )}
               </div>
             ) : (
-              <Link
+              <Button
+                variant="outline"
+                size="default"
+                as={Link}
                 to="/login"
-                className="hidden md:inline-block shadow-md shadow-primary-300 bg-white text-primary-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+                className="hidden md:inline-block bg-white text-primary-700 hover:bg-gray-200"
               >
                 Iniciar Sesión
-              </Link>
+              </Button>
             )}
 
             <button
@@ -248,13 +255,16 @@ function Header() {
             Iniciar Sesión
           </Link>
           {isAuthenticated && (
-            <Link
+            <Button
+              variant="primary"
+              size="default"
+              as={Link}
               to="/owner"
-              className="bg-thirdary-600 text-white px-5 py-2 rounded-md text-center font-bold hover:bg-thirdary-700 transition text-base"
+              className="bg-thirdary-600 hover:bg-thirdary-700"
               onClick={() => toggleState("menuOpen")}
             >
               <Shield className="inline-block w-5 h-5 mr-2" /> Admin Panel
-            </Link>
+            </Button>
           )}
         </nav>
       </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "../ui/Button";
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -50,12 +51,9 @@ const ContactForm = () => {
           className="w-full p-3 shadow-md border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-700"
           required
         />
-        <button
-          type="submit"
-          className="mt-4 shadow-md shadow-primary-300 bg-white text-primary-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
-        >
+        <Button type="submit" variant="outline" size="default" className="mt-4">
           Send Message
-        </button>
+        </Button>
       </form>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "../ui/Button";
 
 const HeroSection = () => {
   const [showMore, setShowMore] = useState(false);
@@ -15,18 +16,23 @@ const HeroSection = () => {
           profesionales de la salud y familias.
         </p>
         <div className="flex justify-center lg:justify-start gap-4">
-          <a
+          <Button
+            variant="outline"
+            size="lg"
+            as="a"
             href="/products"
-            className="bg-white text-secondary-600 font-semibold py-3 px-6 rounded-lg shadow-xl hover:bg-secondary-100 transition"
+            className=""
           >
             Ver productos
-          </a>
-          <button
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
             onClick={() => setShowMore(!showMore)}
-            className="bg-transparent border border-white text-white font-semibold py-3 px-6 rounded-lg shadow-xl hover:bg-white hover:text-secondary-600 transition"
+            className=""
           >
             {showMore ? "Ver menos" : "Conocé más"}
-          </button>
+          </Button>
         </div>
 
         {/* Sección expandible */}

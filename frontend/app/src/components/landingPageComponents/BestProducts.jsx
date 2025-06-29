@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getProducts } from "../../api/products.api";
+import { Button } from "../ui/Button";
 
 const BestProducts = () => {
   const [products, setProducts] = useState([]);
@@ -28,13 +29,16 @@ const BestProducts = () => {
             </p>
 
             <div className="flex flex-col items-start">
-              <a
+              <Button
+                variant="outline"
+                size="default"
+                as="a"
                 href="/products"
-                className="mt-4 text-starts items-start inline-flex shadow-md shadow-primary-300 bg-white text-primary-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200 transition"
+                className="mt-4"
               >
                 Ver más
                 <span className="ml-2">→</span>
-              </a>
+              </Button>
             </div>
           </div>
 

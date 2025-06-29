@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { register } from "../../reducer/Actions";
 import { connect } from "react-redux";
+import { Button } from "../ui/Button";
 
 const RegisterForm = ({ register }) => {
   const [status, setStatus] = useState(false);
@@ -76,12 +77,15 @@ const RegisterForm = ({ register }) => {
               required
             />
           </div>
-          <button
+          <Button
             type="submit"
-            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2 px-4 rounded-md transition duration-200 disabled:opacity-50"
+            variant="primary"
+            fullWidth
+            disabled={loading}
+            isLoading={loading}
           >
-            Registrarse
-          </button>
+            {loading ? "Registrando..." : "Registrarse"}
+          </Button>
         </form>
       </div>
     </div>

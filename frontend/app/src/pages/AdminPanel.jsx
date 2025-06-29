@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
+import { Button } from "../components/ui/Button";
 import { Plus, Edit, Trash2 } from "lucide-react";
 
 import ProductForm from "../components/formComponents/ProductForm";
@@ -52,16 +55,75 @@ const AdminPanel = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Panel de Administración</h1>
-        <button
-          onClick={() => {
-            setEditingProduct(null);
-            setShowProductForm(true);
-          }}
-          className="flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600"
-        >
-          <Plus size={18} />
-          <span>Nuevo Producto</span>
-        </button>
+        <div className="flex space-x-4">
+          <Button variant="primary" as={Link} to="/owner">
+            Gestionar Productos
+          </Button>
+          <Button variant="outline" as={Link} to="/categories">
+            Gestionar Categorías
+          </Button>
+        </div>
+      </div>
+
+      {/* Estadísticas */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold mb-2">Total de Productos</h3>
+          <p className="text-3xl font-bold text-blue-600">{products.length}</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold mb-2">Total de Categorías</h3>
+          <p className="text-3xl font-bold text-green-600">
+            {categories.length}
+          </p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold mb-2">Total de Usuarios</h3>
+          <p className="text-3xl font-bold text-purple-600">{users.length}</p>
+        </div>
+      </div>
+
+      {/* Acciones Rápidas */}
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h3 className="text-lg font-semibold mb-4">Acciones Rápidas</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Button
+            variant="outline"
+            as={Link}
+            to="/owner"
+            className="h-20 flex flex-col items-center justify-center"
+          >
+            <span className="text-lg">➕</span>
+            <span className="text-sm mt-1">Nuevo Producto</span>
+          </Button>
+          <Button
+            variant="outline"
+            as={Link}
+            to="/categories"
+            className="h-20 flex flex-col items-center justify-center"
+          >
+            <span className="text-lg">📁</span>
+            <span className="text-sm mt-1">Nueva Categoría</span>
+          </Button>
+          <Button
+            variant="outline"
+            as={Link}
+            to="/users"
+            className="h-20 flex flex-col items-center justify-center"
+          >
+            <span className="text-lg">👥</span>
+            <span className="text-sm mt-1">Gestionar Usuarios</span>
+          </Button>
+          <Button
+            variant="outline"
+            as={Link}
+            to="/orders"
+            className="h-20 flex flex-col items-center justify-center"
+          >
+            <span className="text-lg">📦</span>
+            <span className="text-sm mt-1">Ver Pedidos</span>
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

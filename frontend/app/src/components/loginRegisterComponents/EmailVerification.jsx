@@ -2,15 +2,23 @@ import React, { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { connect } from "react-redux";
 import { emailVerification } from "../../reducer/Actions";
+import { Button } from "../ui/Button";
 
 const EmailVerification = ({ emailVerification }) => {
   const [status, setStatus] = useState(false);
   const { key } = useParams();
+  const [loading, setLoading] = useState(false);
 
   const handleVerify = (e) => {
     e.preventDefault();
     emailVerification(key);
     setStatus(true);
+  };
+
+  const handleResendEmail = () => {
+    // Implement the logic to resend email
+    setLoading(true);
+    // After resending, setLoading(false)
   };
 
   if (status) {
@@ -23,13 +31,23 @@ const EmailVerification = ({ emailVerification }) => {
         <h2 className="text-2xl font-semibold mb-4">Verificación de correo</h2>
         <p className="mb-6">Haz clic en el botón para verificar tu cuenta.</p>
         <form onSubmit={handleVerify}>
-          <button
-            type="submit"
-            className="bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2 px-6 rounded-md transition duration-200 disabled:opacity-50"
+          <Button
+            variant="primary"
+            onClick={handleVerify}
+            disabled={loading}
+            isLoading={loading}
           >
             Verificar
-          </button>
+          </Button>
         </form>
+        <Button
+          variant="primary"
+          onClick={handleResendEmail}
+          disabled={loading}
+          isLoading={loading}
+        >
+          {loading ? "Enviando..." : "Reenviar Email"}
+        </Button>
       </div>
     </div>
   );

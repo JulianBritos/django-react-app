@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Button } from "./ui/Button";
 
 const ProductCard = ({ product, addToCart }) => {
   return (
@@ -23,15 +24,17 @@ const ProductCard = ({ product, addToCart }) => {
       </Link>
 
       {/* Botón flotante: no navega, solo agrega al carrito */}
-      <button
+      <Button
+        variant="success"
+        size="sm"
         onClick={(e) => {
           e.preventDefault(); // evita que el click del botón también active el Link
           addToCart(product);
         }}
-        className="absolute top-2 right-2 bg-thirdary-500 text-white px-3 py-1 rounded shadow-md hover:bg-thirdary-600 z-10"
+        className="absolute top-2 right-2 z-10"
       >
         Agregar al Carrito
-      </button>
+      </Button>
     </div>
   );
 };

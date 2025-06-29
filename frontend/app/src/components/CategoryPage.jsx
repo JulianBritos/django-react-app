@@ -1,12 +1,15 @@
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useOutletContext } from "react-router-dom";
 import ScrollableNavBar from "../components/ScrollableNavVar";
 import { useNavigate } from "react-router-dom";
+import { Button } from "./ui/Button";
 
 function CategoryPage() {
   const { categoryName } = useParams();
   const { products, categories } = useOutletContext();
   const navigate = useNavigate();
+  const [showFilters, setShowFilters] = useState(false);
 
   const filteredProducts =
     categoryName === "allproducts"
@@ -32,6 +35,14 @@ function CategoryPage() {
         <h1 className="text-3xl font-bold text-gray-800 mb-6">
           {categoryName === "allproducts" ? "Nuestros Productos" : categoryName}
         </h1>
+
+        <Button
+          variant="outline"
+          onClick={() => setShowFilters(!showFilters)}
+          className="mb-4"
+        >
+          {showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
+        </Button>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (

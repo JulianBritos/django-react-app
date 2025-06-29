@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Button } from "./Button";
 
 // Recibe los atributos como prop con sus opciones ya incluidas
 const AttributeSelector = ({ attributes = [], onSelectionChange }) => {

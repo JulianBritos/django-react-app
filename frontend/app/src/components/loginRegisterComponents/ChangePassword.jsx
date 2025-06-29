@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { connect } from "react-redux";
 import { changePassword } from "../../reducer/Actions";
+import { Button } from "../ui/Button";
 
 const ChangePassword = ({ isAuthenticated, changePassword }) => {
   const [formData, setFormData] = useState({
@@ -74,12 +75,15 @@ const ChangePassword = ({ isAuthenticated, changePassword }) => {
             />
           </div>
           <div className="d-grid gap-4">
-            <button
+            <Button
               type="submit"
-              className="w-full py-3 bg-violet-600 text-white font-semibold rounded-xl hover:bg-violet-700 transition duration-300"
+              variant="primary"
+              fullWidth
+              disabled={loading}
+              isLoading={loading}
             >
-              Cambiar Contraseña
-            </button>
+              {loading ? "Cambiando..." : "Cambiar Contraseña"}
+            </Button>
           </div>
         </form>
       </div>

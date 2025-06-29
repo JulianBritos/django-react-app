@@ -4,6 +4,7 @@ import {
   createAttribute,
   createAttributeOption,
 } from "../../api/attributes.api";
+import { Button } from "../ui/Button";
 
 const AttributeManager = ({
   attributes,
@@ -110,14 +111,14 @@ const AttributeManager = ({
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium">Atributos y variantes</h3>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleAddClick}
-            className="inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+            disabled={!newAttributeName.trim()}
           >
-            <Plus className="h-5 w-5" />
             Agregar atributo
-          </button>
+          </Button>
         </div>
 
         {/* Lista de atributos seleccionados */}
@@ -144,25 +145,29 @@ const AttributeManager = ({
                           className="inline-flex items-center gap-1 bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-sm font-medium"
                         >
                           <span>{opt.name}</span>
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() =>
                               handleRemoveOption(pa.attribute, opt.id)
                             }
-                            className="text-primary-500 hover:text-red-500 ml-1"
+                            className=" ml-1"
                             title="Quitar opción"
                           >
                             <X className="h-4 w-4" />
-                          </button>
+                          </Button>
                         </div>
                       ))}
                     </div>
                   </div>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => removeAttribute(index)}
-                    className="text-gray-400 hover:text-red-500 transition-colors duration-200"
+                    className="transition-colors duration-200"
                   >
                     <X className="h-5 w-5" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             );
@@ -183,12 +188,14 @@ const AttributeManager = ({
               <h3 className="text-xl font-semibold text-gray-900">
                 Agregar atributo
               </h3>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={handleClosePanel}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="transition-colors"
               >
                 <X className="h-6 w-6" />
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -203,18 +210,18 @@ const AttributeManager = ({
                     : "Seleccionar atributo"}
                 </label>
 
-                <button
-                  type="button"
+                <Button
+                  variant="link"
                   onClick={() => {
                     setCreatingNewAttribute(true);
                     setSelectedAttribute("");
                     setSelectedAttributeName("");
                     setSelectedOptions([]);
                   }}
-                  className="text-primary-700 rounded-lg transition-all duration-200"
+                  className="transition-all duration-200"
                 >
                   Crear nuevo atributo
-                </button>
+                </Button>
               </div>
               <div>
                 {!creatingNewAttribute && !selectedAttribute && (
@@ -240,16 +247,17 @@ const AttributeManager = ({
                           (a) => a.id === parseInt(selectedAttribute, 10)
                         )?.name || selectedAttributeName}
                       </span>
-                      <button
+                      <Button
+                        variant="link"
                         onClick={() => {
                           setSelectedAttribute("");
                           setSelectedAttributeName("");
                           setSelectedOptions([]);
                         }}
-                        className="text-sm text-primary-600 hover:text-primary-800"
+                        className="text-sm"
                       >
                         Cambiar
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -290,34 +298,34 @@ const AttributeManager = ({
                             placeholder={`Ej: opción ${index + 1}`}
                           />
                           {index === newOptionNames.length - 1 && (
-                            <button
-                              type="button"
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() =>
                                 setNewOptionNames([...newOptionNames, ""])
                               }
-                              className="text-primary-600 hover:text-primary-800"
+                              className=""
                             >
                               <Plus className="w-5 h-5" />
-                            </button>
+                            </Button>
                           )}
                         </div>
                       ))}
                     </div>
                     <div className="flex gap-4">
-                      <button
-                        type="button"
-                        className="flex-1 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg transition-colors"
+                      <Button
+                        variant="outline"
                         onClick={() => {
                           setCreatingNewAttribute(false);
                           setNewAttributeName("");
                           setNewOptionNames([""]);
                         }}
+                        fullWidth
                       >
                         Cancelar
-                      </button>
-                      <button
-                        type="button"
-                        className="flex-1 w-full bg-thirdary-500 hover:bg-thirdary-600 text-white py-2 rounded-lg"
+                      </Button>
+                      <Button
+                        variant="success"
                         onClick={async () => {
                           try {
                             const newAttr = await createAttribute({
@@ -347,9 +355,10 @@ const AttributeManager = ({
                             );
                           }
                         }}
+                        fullWidth
                       >
                         Guardar
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -389,14 +398,14 @@ const AttributeManager = ({
 
           {/* Footer */}
           <div className="px-6 py-4 border-t bg-gray-50">
-            <button
+            <Button
+              variant="primary"
               onClick={handleSaveOptions}
               disabled={!selectedAttribute || selectedOptions.length === 0}
-              className="w-full bg-primary-500 text-white py-2.5 px-4 rounded-lg hover:bg-primary-600 
-                disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
+              fullWidth
             >
               Agregar opciones
-            </button>
+            </Button>
           </div>
         </div>
       </div>

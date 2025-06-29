@@ -128,30 +128,34 @@ function Header() {
 
             {isAuthenticated ? (
               <div className="relative">
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => toggleState("userDropdownOpen")}
                   className="text-black focus:outline-none"
                 >
                   <User className="w-6 h-6 cursor-pointer" />
-                </button>
+                </Button>
                 {userDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg z-10">
                     <p className="px-4 py-2 text-gray-700">
                       Hola, {user?.first_name || "Usuario"}
                     </p>
                     <hr className="border-gray-200" />
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={() => navigate("/profile")}
                       className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                     >
                       Editar Información
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                     >
                       Cerrar Sesión
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -167,12 +171,14 @@ function Header() {
               </Button>
             )}
 
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               className="md:hidden text-black focus:outline-none"
               onClick={() => toggleState("menuOpen")}
             >
               {menuOpen ? <X size={28} /> : <Menu size={28} />}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -184,12 +190,14 @@ function Header() {
         } md:hidden`}
       >
         <div className="p-4 flex justify-end">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => toggleState("menuOpen")}
             className="text-black"
           >
             <X size={28} />
-          </button>
+          </Button>
         </div>
         <nav className="flex flex-col space-y-4 p-4">
           <Link
@@ -200,7 +208,8 @@ function Header() {
             Inicio
           </Link>
           <div>
-            <button
+            <Button
+              variant="ghost"
               className="text-black hover:text-gray-600 flex items-center w-full text-left"
               onClick={() => toggleState("dropdownOpen")}
             >
@@ -210,7 +219,7 @@ function Header() {
                   dropdownOpen ? "rotate-180" : "rotate-0"
                 }`}
               />
-            </button>
+            </Button>
             {dropdownOpen && (
               <div className="pl-4 mt-2 space-y-2">
                 <Link

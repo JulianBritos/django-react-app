@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "./ui/Button";
 
 const ScrollableNavbar = ({ categories }) => {
   const scrollRef = useRef(null);
@@ -26,7 +27,9 @@ const ScrollableNavbar = ({ categories }) => {
       const scrollAmount = clientWidth * 0.25;
       const start = scrollLeft;
       const end =
-        direction === "left" ? scrollLeft - scrollAmount : scrollLeft + scrollAmount;
+        direction === "left"
+          ? scrollLeft - scrollAmount
+          : scrollLeft + scrollAmount;
       const duration = 800;
       const startTime = performance.now();
 
@@ -49,19 +52,21 @@ const ScrollableNavbar = ({ categories }) => {
 
   return (
     <div className="relative w-full bg-white flex items-center px-4 py-2">
-      {showScrollButtons && (
-        <button
-          className="hidden md:flex bg-gray-200 p-1 rounded-full z-10 transition-transform transform hover:scale-150 duration-300"
-          onClick={() => scroll("left")}
-        >
-          <ChevronLeft className="w-6 h-6 text-gray-600" />
-        </button>
-      )}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => scroll("left")}
+        className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full p-2"
+      >
+        <ChevronLeft className="w-6 h-6 text-gray-600" />
+      </Button>
 
       <div
         ref={scrollRef}
         className={`flex overflow-x-auto scrollbar-hide px-4 w-full items-center ${
-          showScrollButtons ? "justify-start space-x-8" : "justify-center space-x-6"
+          showScrollButtons
+            ? "justify-start space-x-8"
+            : "justify-center space-x-6"
         }`}
         style={{
           scrollSnapType: "x mandatory",
@@ -81,14 +86,14 @@ const ScrollableNavbar = ({ categories }) => {
         ))}
       </div>
 
-      {showScrollButtons && (
-        <button
-          className="hidden md:flex bg-gray-200 p-1 rounded-full z-10 transition-transform transform hover:scale-150 duration-300"
-          onClick={() => scroll("right")}
-        >
-          <ChevronRight className="w-6 h-6 text-gray-600" />
-        </button>
-      )}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => scroll("right")}
+        className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full p-2"
+      >
+        <ChevronRight className="w-6 h-6 text-gray-600" />
+      </Button>
     </div>
   );
 };

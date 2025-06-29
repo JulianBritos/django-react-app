@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import { connect } from "react-redux";
 import { login, verify, getUser } from "../../reducer/Actions";
 import { useEffect } from "react";
+import { Button } from "../ui/Button";
 
 const LoginForm = ({ login, isAuthenticated }) => {
   const [formData, setFormData] = useState({
@@ -70,13 +71,15 @@ const LoginForm = ({ login, isAuthenticated }) => {
               required
             />
           </div>
-          <button
+          <Button
             type="submit"
-            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2 px-4 rounded-md transition duration-200 disabled:opacity-50"
+            variant="primary"
+            fullWidth
             disabled={loading}
+            isLoading={loading}
           >
             {loading ? "Ingresando..." : "Entrar"}
-          </button>
+          </Button>
         </form>
         <div className="mt-6 text-center text-sm text-gray-600">
           <p className="mb-2">

@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Button } from "./ui/Button";
 
 const CarouselOfImages = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -118,21 +119,40 @@ const CarouselOfImages = ({ images }) => {
             >
               <X className="text-white w-10 h-10" />
             </button>
-            <button
-              className="absolute left-4 bg-black bg-opacity-50 w-12 h-12 flex items-center justify-center rounded shadow-md"
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => navigateOverlay(-1)}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg"
             >
-              <ChevronLeft className="text-white w-10 h-10" />
-            </button>
-            <button
-              className="absolute right-4 bg-black bg-opacity-50 w-12 h-12 flex items-center justify-center rounded shadow-md"
+              ←
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => navigateOverlay(1)}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg"
             >
-              <ChevronRight className="text-white w-10 h-10" />
-            </button>
+              →
+            </Button>
           </div>
         </div>
       )}
+
+      {/* Indicadores */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        {images.map((_, index) => (
+          <Button
+            key={index}
+            variant={currentIndex === index ? "primary" : "ghost"}
+            size="icon"
+            onClick={() => setCurrentIndex(index)}
+            className={`w-3 h-3 rounded-full ${
+              currentIndex === index ? "bg-white" : "bg-white/50"
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 };

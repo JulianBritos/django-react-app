@@ -1,46 +1,20 @@
-import { Save } from "lucide-react";
+import React from "react";
+import { Button } from "../ui/Button";
 
-const FormFooter = ({ onCancel, onSave, isLoading }) => {
+const FormFooter = ({ onCancel, onSave, loading = false }) => {
   return (
-    <div className="flex justify-end gap-2 p-4 border-t">
-      <button
-        onClick={onCancel}
-        className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-200 transition"
-        disabled={isLoading}
-      >
+    <div className="flex justify-end space-x-4 mt-6">
+      <Button variant="outline" onClick={onCancel}>
         Cancelar
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="success"
         onClick={onSave}
-        disabled={isLoading}
-        className="px-4 py-2 rounded-lg bg-primary-500 text-white hover:bg-primary-600 flex items-center gap-2 transition"
+        disabled={loading}
+        isLoading={loading}
       >
-        {isLoading ? (
-          <svg
-            className="animate-spin h-5 w-5 mr-1 text-white"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v8H4z"
-            />
-          </svg>
-        ) : (
-          <Save size={16} />
-        )}
         Guardar
-      </button>
+      </Button>
     </div>
   );
 };

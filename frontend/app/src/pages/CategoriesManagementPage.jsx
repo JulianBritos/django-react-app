@@ -15,6 +15,7 @@ import {
   updateCategory,
   deleteCategory,
 } from "../api/categories.api";
+import { Button } from "../components/ui/Button";
 
 const CategoriesManagementPage = () => {
   const [categories, setCategories] = useState([]);
@@ -190,16 +191,20 @@ const CategoriesManagementPage = () => {
             Administra las categorías de productos de tu tienda
           </p>
         </div>
-        <button
-          onClick={() => {
-            setEditingCategory(null);
-            setShowCategoryForm(true);
-          }}
-          className="flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
-        >
-          <Plus size={18} />
-          <span>Nueva Categoría</span>
-        </button>
+        <div className="flex space-x-4">
+          <Button
+            variant="primary"
+            onClick={() => {
+              setEditingCategory(null);
+              setShowCategoryForm(true);
+            }}
+          >
+            Nueva Categoría
+          </Button>
+          <Button variant="outline" onClick={() => setShowCategoryForm(false)}>
+            Cancelar
+          </Button>
+        </div>
       </div>
 
       {showCategoryForm && (

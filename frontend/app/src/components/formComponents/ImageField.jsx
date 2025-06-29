@@ -1,5 +1,6 @@
 import { Trash2, Plus } from "lucide-react";
 import { useRef } from "react";
+import { Button } from "../ui/Button";
 
 const ImageField = ({ images, onChange, imagePreviews }) => {
   const inputRef = useRef();
@@ -23,13 +24,17 @@ const ImageField = ({ images, onChange, imagePreviews }) => {
     if (droppedFiles.length) handleFiles(droppedFiles);
   };
 
+  const handleFileSelect = () => {
+    inputRef.current?.click();
+  };
+
   return (
     <div className="p-4 bg-white shadow-lg rounded-lg">
       <label className="block text-xl font-semibold mb-3">Fotos</label>
 
       <div
         className="w-full p-6 border-2 border-dashed border-primary-400 rounded-lg bg-gray-50 text-center text-primary-600 cursor-pointer hover:bg-primary-100 transition relative"
-        onClick={() => inputRef.current?.click()}
+        onClick={handleFileSelect}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
       >
@@ -81,6 +86,10 @@ const ImageField = ({ images, onChange, imagePreviews }) => {
           ))}
         </div>
       )}
+
+      <Button variant="outline" onClick={handleFileSelect} className="mt-2">
+        Seleccionar Imagen
+      </Button>
     </div>
   );
 };

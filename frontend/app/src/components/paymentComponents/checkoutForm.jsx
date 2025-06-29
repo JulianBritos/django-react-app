@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Button } from "../ui/Button";
 
 const CheckoutForm = () => {
   const [paymentMethod, setPaymentMethod] = useState("creditCard");
@@ -124,9 +125,9 @@ const CheckoutForm = () => {
 
       {/* Botón de Confirmación */}
       <div className="text-center">
-        <button className="w-full bg-thirdary-500 text-white p-3 rounded-lg hover:bg-thirdary-600 focus:outline-none focus:ring-2 focus:ring-thirdary-400">
+        <Button variant="success" fullWidth>
           Confirmar Pedido
-        </button>
+        </Button>
       </div>
     </div>
   );

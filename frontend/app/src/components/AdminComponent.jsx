@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FiFilter, FiEdit, FiSearch, FiPlus } from "react-icons/fi";
 import ProductForm from "./formComponents/ProductForm";
+import { Button } from "./ui/Button";
 
 function AdminComponent({ products, categories }) {
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -9,6 +10,8 @@ function AdminComponent({ products, categories }) {
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
 
   // 🔧 Actualizar productos filtrados cuando cambian los productos originales
   useEffect(() => {
@@ -51,6 +54,20 @@ function AdminComponent({ products, categories }) {
   const handleCloseProductForm = () => {
     setIsProductFormOpen(false);
     setSelectedProduct(null);
+  };
+
+  const handleEdit = (id) => {
+    setSelectedProductId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = (id) => {
+    // Implement the delete logic here
+  };
+
+  const confirmDelete = () => {
+    // Implement the confirm delete logic here
+    setShowDeleteModal(false);
   };
 
   return (
@@ -134,12 +151,22 @@ function AdminComponent({ products, categories }) {
                   {product.name}
                 </h3>
                 <p className="text-gray-600">${product.price}</p>
-                <button
-                  onClick={() => handleOpenProductForm(product)}
-                  className="w-full mt-4 bg-primary-500 text-white py-2 rounded-md hover:bg-primary-600 transition flex items-center justify-center gap-2"
-                >
-                  <FiEdit /> Editar producto
-                </button>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(product.id)}
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete(product.id)}
+                  >
+                    Eliminar
+                  </Button>
+                </div>
               </div>
             </div>
           ))
@@ -160,6 +187,28 @@ function AdminComponent({ products, categories }) {
           }}
           onCancel={handleCloseProductForm}
         />
+      )}
+
+      {/* Modal de confirmación */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">
+              ¿Estás seguro de que quieres eliminar este producto?
+            </h3>
+            <div className="flex space-x-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={confirmDelete}>
+                Eliminar
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

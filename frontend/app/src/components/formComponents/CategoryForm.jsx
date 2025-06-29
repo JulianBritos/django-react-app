@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, Save, Loader2 } from "lucide-react";
+import { Button } from "../ui/Button";
 
 const CategoryForm = ({ category, categories, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -169,31 +170,18 @@ const CategoryForm = ({ category, categories, onSave, onCancel }) => {
           </div>
 
           {/* Botones */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
+          <div className="flex space-x-4">
+            <Button variant="outline" onClick={onCancel}>
               Cancelar
-            </button>
-            <button
-              type="submit"
+            </Button>
+            <Button
+              variant="success"
+              onClick={handleSubmit}
               disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              isLoading={isLoading}
             >
-              {isLoading ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <Save size={18} />
-                  Guardar
-                </>
-              )}
-            </button>
+              {isLoading ? "Guardando..." : "Guardar Categoría"}
+            </Button>
           </div>
         </form>
       </div>

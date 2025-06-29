@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Heart, ChevronDown, Package, AlertCircle } from "lucide-react";
 import AttributeSelector from "./ui/AttributeSelector";
+import { Button } from "./ui/Button";
 
 const ProductInfoCard = ({
   product,

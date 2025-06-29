@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "../ui/Button";
 
 const CheckoutButton = ({ cartItems, userEmail }) => {
   const handleCheckout = async () => {
@@ -16,7 +17,8 @@ const CheckoutButton = ({ cartItems, userEmail }) => {
               unit_price: item.price,
             })),
             payer: { email: userEmail },
-            back_urls: { // OJO CON ESTOS ENDPOINTS. Deberia ir: import.meta.env.VITE_BASE_URL + "/success/"
+            back_urls: {
+              // OJO CON ESTOS ENDPOINTS. Deberia ir: import.meta.env.VITE_BASE_URL + "/success/"
               success: "http://localhost:3000/success",
               failure: "http://localhost:3000/failure",
               pending: "http://localhost:3000/pending",
@@ -36,7 +38,11 @@ const CheckoutButton = ({ cartItems, userEmail }) => {
     }
   };
 
-  return <button onClick={handleCheckout}>Pagar con MercadoPago</button>;
+  return (
+    <Button variant="success" onClick={handleCheckout}>
+      Pagar con MercadoPago
+    </Button>
+  );
 };
 
 export default CheckoutButton;

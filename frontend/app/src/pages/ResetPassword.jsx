@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useState } from "react";
 import { connect } from "react-redux";
 import { resetPassword } from "../reducer/Actions";
+import { Button } from "../components/ui/Button";
 
 const ResetPassword = ({ resetPassword }) => {
   const [status, setStatus] = useState(false);
@@ -40,12 +41,15 @@ const ResetPassword = ({ resetPassword }) => {
               required
             />
           </div>
-          <button
+          <Button
             type="submit"
-            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2 px-4 rounded-md transition duration-200 disabled:opacity-50"
+            variant="primary"
+            fullWidth
+            disabled={loading}
+            isLoading={loading}
           >
-            Enviar código
-          </button>
+            {loading ? "Enviando..." : "Enviar Email de Restablecimiento"}
+          </Button>
         </form>
       </div>
     </div>

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import ProductForm from "../formComponents/ProductForm";
 import { getProducts, deleteProduct } from "../../api/products.api";
+import { Button } from "../ui/Button";
 
 const ProductPage = ({ onAddProduct, onEditProduct }) => {
   const [products, setProducts] = useState([]);
@@ -162,16 +163,17 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
     return (
       <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
-          <button
+          <Button
+            variant="ghost"
             onClick={() => {
               setShowProductForm(false);
               setEditingProduct(null);
             }}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+            className="flex items-center gap-2 transition-colors"
           >
             <ArrowLeft size={20} />
             <span>Volver a productos</span>
-          </button>
+          </Button>
         </div>
 
         <div className="bg-gray-50 rounded-lg p-6">
@@ -207,16 +209,17 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
             Administra los productos de tu tienda
           </p>
         </div>
-        <button
+        <Button
+          variant="primary"
           onClick={() => {
             setEditingProduct(null);
             setShowProductForm(true);
           }}
-          className="flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+          className="flex items-center gap-2"
         >
           <Plus size={18} />
           <span>Nuevo Producto</span>
-        </button>
+        </Button>
       </div>
 
       {/* Filtros y búsqueda */}
@@ -267,22 +270,26 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
               <span className="text-sm text-gray-500 flex items-center">
                 {expandedProducts.size} de {filteredProducts.length} expandidos
               </span>
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={expandAllProducts}
-                className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                className="flex items-center gap-2"
                 title="Expandir todos los productos"
               >
                 <ChevronDown size={16} />
                 Expandir todo
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={collapseAllProducts}
-                className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex items-center gap-2"
                 title="Contraer todos los productos"
               >
                 <ChevronRight size={16} />
                 Contraer todo
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -374,9 +381,11 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => toggleProductExpansion(product.id)}
-                        className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="p-2 transition-colors"
                         title={
                           isExpanded ? "Contraer detalles" : "Expandir detalles"
                         }
@@ -386,24 +395,28 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
                         ) : (
                           <ChevronRight size={20} />
                         )}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => {
                           setEditingProduct(product);
                           setShowProductForm(true);
                         }}
-                        className="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                        className=" p-2  transition-colors"
                         title="Editar"
                       >
                         <Edit size={16} />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => handleDeleteProduct(product.id)}
-                        className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                        className=" p-2 transition-colors"
                         title="Eliminar"
                       >
                         <Trash2 size={16} />
-                      </button>
+                      </Button>
                     </div>
                   </div>
 

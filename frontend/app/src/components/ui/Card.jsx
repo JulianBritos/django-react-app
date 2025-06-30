@@ -1,4 +1,6 @@
 import clsx from "clsx";
+import ProductImage from "./ProductImage";
+import ProductBadges from "./ProductBadges";
 
 const Card = ({
   children,
@@ -146,6 +148,34 @@ const ContentCard = ({
   );
 };
 
+// Utilidad para calcular badges de producto
+function getProductBadges(product, firstVariant) {
+  const sellingPrice = firstVariant?.selling_price || product.price || 0;
+  const offerPrice = firstVariant?.offer_price;
+  const stock = firstVariant?.stock || 0;
+  const badges = [];
+  // Descuento
+  if (offerPrice && offerPrice < sellingPrice) {
+    const discountPercentage = Math.round(
+      ((sellingPrice - offerPrice) / sellingPrice) * 100
+    );
+    badges.push({ text: `${discountPercentage}% OFF`, type: "discount" });
+  }
+  // Stock
+  if (stock === 0) badges.push({ text: "Agotado", type: "out-of-stock" });
+  else if (stock <= 5)
+    badges.push({ text: "Últimas unidades", type: "low-stock" });
+  // Nuevo
+  if (product.created_at) {
+    const createdDate = new Date(product.created_at);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    if (createdDate > thirtyDaysAgo)
+      badges.push({ text: "Nuevo", type: "new" });
+  }
+  return badges;
+}
+
 // Componente especializado para tarjetas de productos básicas
 const ProductCard = ({
   image,
@@ -224,24 +254,7 @@ const ProductCardFull = ({ product, addToCart, className = "", ...props }) => {
   const displayPrice = hasDiscount ? offerPrice : sellingPrice;
 
   // Determinar badges
-  const badges = [];
-  if (hasDiscount)
-    badges.push({ text: `${discountPercentage}% OFF`, type: "discount" });
-  if (stock === 0) badges.push({ text: "Agotado", type: "out-of-stock" });
-  else if (stock <= 5)
-    badges.push({ text: "Últimas unidades", type: "low-stock" });
-
-  // Detectar si es un producto nuevo
-  const isNew =
-    product.created_at &&
-    (() => {
-      const createdDate = new Date(product.created_at);
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      return createdDate > thirtyDaysAgo;
-    })();
-
-  if (isNew) badges.push({ text: "Nuevo", type: "new" });
+  const badges = getProductBadges(product, firstVariant);
 
   // Verificar si el producto tiene variantes
   const hasVariants =
@@ -255,24 +268,7 @@ const ProductCardFull = ({ product, addToCart, className = "", ...props }) => {
       {...props}
     >
       {/* Badges */}
-      <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
-        {badges.map((badge, index) => (
-          <span
-            key={index}
-            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-              badge.type === "discount"
-                ? "bg-red-500 text-white"
-                : badge.type === "out-of-stock"
-                ? "bg-gray-500 text-white"
-                : badge.type === "low-stock"
-                ? "bg-orange-500 text-white"
-                : "bg-green-500 text-white"
-            }`}
-          >
-            {badge.text}
-          </span>
-        ))}
-      </div>
+      <ProductBadges badges={badges} className="absolute top-3 left-3 z-10" />
 
       {/* Botón de favoritos */}
       <button className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors shadow-sm">
@@ -293,19 +289,19 @@ const ProductCardFull = ({ product, addToCart, className = "", ...props }) => {
 
       {/* Imagen del producto */}
       <div className="relative aspect-square overflow-hidden bg-gray-50">
-        <img
+        <ProductImage
           src={productImage}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "/placeholder.png";
-          }}
         />
 
-        {/* Overlay con botones de acción */}
+        {/* Overlay con botón de ver detalles */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
+          <a
+            href={`/product/${product.id}`}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors">
               <svg
                 className="w-4 h-4 text-gray-700"
@@ -327,29 +323,7 @@ const ProductCardFull = ({ product, addToCart, className = "", ...props }) => {
                 />
               </svg>
             </button>
-            <button
-              className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                addToCart(product);
-              }}
-            >
-              <svg
-                className="w-4 h-4 text-gray-700"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"
-                />
-              </svg>
-            </button>
-          </div>
+          </a>
         </div>
       </div>
 
@@ -548,24 +522,7 @@ const ProductCardCompact = ({
   const displayPrice = hasDiscount ? offerPrice : sellingPrice;
 
   // Determinar badges
-  const badges = [];
-  if (hasDiscount)
-    badges.push({ text: `${discountPercentage}% OFF`, type: "discount" });
-  if (stock === 0) badges.push({ text: "Agotado", type: "out-of-stock" });
-  else if (stock <= 5)
-    badges.push({ text: "Últimas unidades", type: "low-stock" });
-
-  // Detectar si es un producto nuevo
-  const isNew =
-    product.created_at &&
-    (() => {
-      const createdDate = new Date(product.created_at);
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      return createdDate > thirtyDaysAgo;
-    })();
-
-  if (isNew) badges.push({ text: "Nuevo", type: "new" });
+  const badges = getProductBadges(product, firstVariant);
 
   return (
     <Card
@@ -576,78 +533,49 @@ const ProductCardCompact = ({
       {...props}
     >
       {/* Badges */}
-      <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
-        {badges.map((badge, index) => (
-          <span
-            key={index}
-            className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${
-              badge.type === "discount"
-                ? "bg-red-500 text-white"
-                : badge.type === "out-of-stock"
-                ? "bg-gray-500 text-white"
-                : badge.type === "low-stock"
-                ? "bg-orange-500 text-white"
-                : "bg-green-500 text-white"
-            }`}
-          >
-            {badge.text}
-          </span>
-        ))}
-      </div>
-
-      {/* Botón de favoritos */}
-      <button className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors shadow-sm">
-        <svg
-          className="w-3.5 h-3.5 text-gray-600 hover:text-red-500 transition-colors"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-          />
-        </svg>
-      </button>
+      <ProductBadges
+        badges={badges}
+        className="absolute top-2 left-2 z-10"
+        size="sm"
+      />
 
       {/* Imagen del producto */}
       <div className="relative aspect-square overflow-hidden bg-gray-50">
-        <img
+        <ProductImage
           src={productImage}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "/placeholder.png";
-          }}
         />
 
-        {/* Overlay con botón de carrito */}
+        {/* Overlay con botón de ver detalles */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 flex items-center justify-center">
-          <button
-            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              addToCart(product);
-            }}
+          <a
+            href={`/product/${product.id}`}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            onClick={(e) => e.stopPropagation()}
           >
-            <svg
-              className="w-4 h-4 text-gray-700"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"
-              />
-            </svg>
-          </button>
+            <button className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors">
+              <svg
+                className="w-4 h-4 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            </button>
+          </a>
         </div>
       </div>
 
@@ -764,24 +692,7 @@ const ProductCardHero = ({ product, className = "", ...props }) => {
   const displayPrice = hasDiscount ? offerPrice : sellingPrice;
 
   // Determinar badges (solo los más importantes)
-  const badges = [];
-  if (hasDiscount)
-    badges.push({ text: `${discountPercentage}% OFF`, type: "discount" });
-  if (stock === 0) badges.push({ text: "Agotado", type: "out-of-stock" });
-  else if (stock <= 5)
-    badges.push({ text: "Últimas unidades", type: "low-stock" });
-
-  // Detectar si es un producto nuevo
-  const isNew =
-    product.created_at &&
-    (() => {
-      const createdDate = new Date(product.created_at);
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      return createdDate > thirtyDaysAgo;
-    })();
-
-  if (isNew) badges.push({ text: "Nuevo", type: "new" });
+  const badges = getProductBadges(product, firstVariant);
 
   return (
     <Card
@@ -794,24 +705,7 @@ const ProductCardHero = ({ product, className = "", ...props }) => {
       {...props}
     >
       {/* Badges */}
-      <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
-        {badges.map((badge, index) => (
-          <span
-            key={index}
-            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-bold ${
-              badge.type === "discount"
-                ? "bg-red-500 text-white shadow-lg"
-                : badge.type === "out-of-stock"
-                ? "bg-gray-500 text-white"
-                : badge.type === "low-stock"
-                ? "bg-orange-500 text-white shadow-lg"
-                : "bg-green-500 text-white shadow-lg"
-            }`}
-          >
-            {badge.text}
-          </span>
-        ))}
-      </div>
+      <ProductBadges badges={badges} className="absolute top-3 left-3 z-10" />
 
       {/* Botón de favoritos */}
       <button className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white transition-colors shadow-sm hover:shadow-md">
@@ -832,19 +726,19 @@ const ProductCardHero = ({ product, className = "", ...props }) => {
 
       {/* Imagen del producto */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-        <img
+        <ProductImage
           src={productImage}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "/placeholder.png";
-          }}
         />
 
         {/* Overlay con botón de ver detalles */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
+          <a
+            href={`/product/${product.id}`}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button className="p-3 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors">
               <svg
                 className="w-5 h-5 text-gray-700"
@@ -866,7 +760,7 @@ const ProductCardHero = ({ product, className = "", ...props }) => {
                 />
               </svg>
             </button>
-          </div>
+          </a>
         </div>
       </div>
 
@@ -969,33 +863,12 @@ const ProductCardMinimal = ({ product, className = "", ...props }) => {
         </div>
       )}
 
-      {/* Botón de favoritos */}
-      <button className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors shadow-sm">
-        <svg
-          className="w-3.5 h-3.5 text-gray-600 hover:text-red-500 transition-colors"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-          />
-        </svg>
-      </button>
-
       {/* Imagen del producto */}
       <div className="relative aspect-square overflow-hidden bg-gray-50">
-        <img
+        <ProductImage
           src={productImage}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "/placeholder.png";
-          }}
         />
       </div>
 
@@ -1062,24 +935,7 @@ const ProductCardHorizontal = ({
   const displayPrice = hasDiscount ? offerPrice : sellingPrice;
 
   // Determinar badges
-  const badges = [];
-  if (hasDiscount)
-    badges.push({ text: `${discountPercentage}% OFF`, type: "discount" });
-  if (stock === 0) badges.push({ text: "Agotado", type: "out-of-stock" });
-  else if (stock <= 5)
-    badges.push({ text: "Últimas unidades", type: "low-stock" });
-
-  // Detectar si es un producto nuevo
-  const isNew =
-    product.created_at &&
-    (() => {
-      const createdDate = new Date(product.created_at);
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      return createdDate > thirtyDaysAgo;
-    })();
-
-  if (isNew) badges.push({ text: "Nuevo", type: "new" });
+  const badges = getProductBadges(product, firstVariant);
 
   return (
     <Card
@@ -1091,35 +947,17 @@ const ProductCardHorizontal = ({
       <div className="flex">
         {/* Imagen del producto */}
         <div className="relative w-32 h-32 flex-shrink-0">
-          <img
+          <ProductImage
             src={productImage}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "/placeholder.png";
-            }}
           />
 
           {/* Badges */}
-          <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
-            {badges.map((badge, index) => (
-              <span
-                key={index}
-                className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${
-                  badge.type === "discount"
-                    ? "bg-red-500 text-white"
-                    : badge.type === "out-of-stock"
-                    ? "bg-gray-500 text-white"
-                    : badge.type === "low-stock"
-                    ? "bg-orange-500 text-white"
-                    : "bg-green-500 text-white"
-                }`}
-              >
-                {badge.text}
-              </span>
-            ))}
-          </div>
+          <ProductBadges
+            badges={badges}
+            className="absolute top-2 left-2 z-10"
+          />
 
           {/* Botón de favoritos */}
           <button className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors shadow-sm">

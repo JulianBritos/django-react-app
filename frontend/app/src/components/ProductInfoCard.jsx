@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Heart, ChevronDown, Package, AlertCircle } from "lucide-react";
 import AttributeSelector from "./ui/AttributeSelector";
 import { Button } from "./ui/Button";
+import ProductImage from "./ui/ProductImage";
+import ProductBadges from "./ui/ProductBadges";
 
 const ProductInfoCard = ({
   product,
@@ -81,6 +83,37 @@ const ProductInfoCard = ({
     ? `/products/${product.category}`
     : "/products";
 
+  // Copiar la función getProductBadges aquí (idéntica a la de Card.jsx)
+  function getProductBadges(product, firstVariant) {
+    const sellingPrice = firstVariant?.selling_price || product.price || 0;
+    const offerPrice = firstVariant?.offer_price;
+    const stock = firstVariant?.stock || 0;
+    const badges = [];
+    // Descuento
+    if (offerPrice && offerPrice < sellingPrice) {
+      const discountPercentage = Math.round(
+        ((sellingPrice - offerPrice) / sellingPrice) * 100
+      );
+      badges.push({ text: `${discountPercentage}% OFF`, type: "discount" });
+    }
+    // Stock
+    if (stock === 0) badges.push({ text: "Agotado", type: "out-of-stock" });
+    else if (stock <= 5)
+      badges.push({ text: "Últimas unidades", type: "low-stock" });
+    // Nuevo
+    if (product.created_at) {
+      const createdDate = new Date(product.created_at);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      if (createdDate > thirtyDaysAgo)
+        badges.push({ text: "Nuevo", type: "new" });
+    }
+    return badges;
+  }
+
+  const firstVariant = product.product_attributes?.[0] || selectedVariant;
+  const badges = getProductBadges(product, firstVariant);
+
   return (
     <div className="p-6 border rounded-lg shadow-lg bg-white max-w-md text-left">
       <div className="flex justify-between items-center mb-4">
@@ -103,6 +136,23 @@ const ProductInfoCard = ({
       </div>
 
       <div className="space-y-6">
+        {/* Imagen y badges del producto */}
+        <div className="relative w-full aspect-square max-w-xs mx-auto">
+          <ProductImage
+            src={
+              selectedVariant?.uploaded_images?.[0]?.image ||
+              product.image ||
+              "/placeholder.png"
+            }
+            alt={product.name}
+            className="w-full h-full object-cover rounded-lg"
+          />
+          <ProductBadges
+            badges={badges}
+            className="absolute top-2 left-2 z-10"
+          />
+        </div>
+
         {/* Nombre del producto */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">

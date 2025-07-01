@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import ProductImage from "./ProductImage";
 import ProductBadges from "./ProductBadges";
+import { Link } from "react-router-dom";
 
 const Card = ({
   children,
@@ -800,9 +801,13 @@ const ProductCardHero = ({ product, className = "", ...props }) => {
 
         {/* Call to action sutil */}
         <div className="text-center">
-          <span className="text-xs text-primary-600 font-medium group-hover:text-primary-700 transition-colors">
+          <Link
+            to={`/product/${product.id}`}
+            className="text-xs text-primary-600 font-medium group-hover:text-primary-700 transition-colors"
+            onClick={e => e.stopPropagation()}
+          >
             Ver detalles →
-          </span>
+          </Link>
         </div>
       </div>
     </Card>

@@ -1,18 +1,8 @@
-import { useEffect, useState } from "react";
-import { getProducts } from "../../api/products.api";
 import { Button } from "../ui/Button";
 import { ProductCardHero } from "../ProductCards";
 
-const BestProducts = () => {
-  const [products, setProducts] = useState([]);
+const BestProducts = ({products}) => {
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const data = await getProducts();
-      setProducts(data);
-    };
-    fetchProducts();
-  }, []);
 
   return (
     <section className="w-full max-w-7xl mx-auto mt-6 p-6 rounded-2xl flex flex-col">

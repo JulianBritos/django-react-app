@@ -58,12 +58,14 @@ function Header() {
       <div className="container mx-auto flex justify-between items-center px-4 py-4">
         {/* Logo + Menú Desktop */}
         <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2">
+          
             <div className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-lg">C</span>
             </div>
             <h1 className="text-xl font-bold tracking-wide">Cosmo Play</h1>
-          </div>
+          
+          </Link>
 
           <nav className="hidden md:flex space-x-6">
             <Link to="/" className="text-black font-medium hover:text-gray-600">

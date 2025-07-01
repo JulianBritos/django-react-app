@@ -4,8 +4,32 @@ import AboutUs from "../components/landingPageComponents/AboutUs";
 import Testimonials from "../components/landingPageComponents/Testimonials";
 import BestProducts from "../components/landingPageComponents/BestProducts";
 import ContactForm from "../components/landingPageComponents/ContactForm";
+import { getProducts } from "../api/products.api";
+import { getCategories } from "../api/categories.api";
+import { useEffect, useState } from "react";
 
 const HomePage = () => {
+
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    loadProducts();
+    loadCategories();
+  }, []);
+
+  const loadProducts = async () => {
+    const data = await getProducts();
+    setProducts(data);
+  };
+
+  const loadCategories = async () => {
+    const data = await getCategories();
+    setCategories(data);
+  };
+
+  console.log("Categories:", categories);
+
   return (
     <div className="">
       <div className="py-4 ">
@@ -15,12 +39,12 @@ const HomePage = () => {
       </div>
       <div className="py-4 ">
         <div className="m-4">
-          <BestProducts />
+          <BestProducts products={products}/>
         </div>
       </div>
       <div className="py-4">
         <div className="m-4">
-          <Categories />
+          <Categories categories={categories} />
         </div>
       </div>
       <div className="py-4  ">

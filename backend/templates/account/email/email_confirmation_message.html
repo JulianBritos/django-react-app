@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirmación de Email</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f4f4f4;
+      }
+      .container {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #8b5cf6;
+        margin-bottom: 10px;
+      }
+      .title {
+        color: #333;
+        font-size: 20px;
+        margin-bottom: 20px;
+      }
+      .content {
+        margin-bottom: 30px;
+      }
+      .button {
+        display: inline-block;
+        background-color: #8b5cf6;
+        color: white;
+        padding: 12px 30px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        margin: 20px 0;
+      }
+      .button:hover {
+        background-color: #7c3aed;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        color: #666;
+        font-size: 14px;
+      }
+      .warning {
+        background-color: #fef3c7;
+        border: 1px solid #f59e0b;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">🛍️ Tu Tienda Online</div>
+        <h1 class="title">¡Bienvenido a nuestra comunidad!</h1>
+      </div>
+
+      <div class="content">
+        <p>Hola <strong>{{ user.first_name }}</strong>,</p>
+
+        <p>
+          ¡Gracias por registrarte en nuestra plataforma! Para completar tu
+          registro y activar tu cuenta, necesitamos verificar tu dirección de
+          email.
+        </p>
+
+        <p>Haz clic en el botón de abajo para confirmar tu email:</p>
+
+        <div style="text-align: center">
+          <a href="{{ activate_url }}" class="button">Confirmar mi Email</a>
+        </div>
+
+        <div class="warning">
+          <strong>⚠️ Importante:</strong> Este enlace expirará en 3 días por
+          razones de seguridad.
+        </div>
+
+        <p>
+          Si el botón no funciona, puedes copiar y pegar este enlace en tu
+          navegador:
+        </p>
+        <p style="word-break: break-all; color: #8b5cf6">{{ activate_url }}</p>
+      </div>
+
+      <div class="footer">
+        <p>Si no solicitaste esta cuenta, puedes ignorar este email.</p>
+        <p>© 2024 Tu Tienda Online. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </body>
+</html>

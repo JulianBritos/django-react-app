@@ -196,6 +196,7 @@ REST_AUTH = {
     'OLD_PASSWORD_FIELD_ENABLED': True,
     }
 
+# Configuración de email
 EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST=env('EMAIL_HOST')
 EMAIL_USE_TLS=env('EMAIL_USE_TLS', default=True)
@@ -203,4 +204,11 @@ EMAIL_PORT=env('EMAIL_PORT', default=587)
 EMAIL_HOST_USER=env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD=env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL=env('DEFAULT_FROM_EMAIL')
+
+# Configuración de email adicional
+EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
+EMAIL_TIMEOUT = 20
+
+# Configuración mínima para plantillas de email personalizadas
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Tu Tienda Online] "
 

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ejemplo de Personalización</title>
+    <style>
+      /* 
+        EJEMPLO DE PERSONALIZACIÓN DE COLORES
+        Cambia estos colores según tu marca:
+        
+        Opción 1: Azul corporativo
+        --primary-color: #2563eb;
+        --secondary-color: #1d4ed8;
+        --accent-color: #3b82f6;
+        
+        Opción 2: Verde naturaleza
+        --primary-color: #059669;
+        --secondary-color: #047857;
+        --accent-color: #10b981;
+        
+        Opción 3: Naranja energía
+        --primary-color: #ea580c;
+        --secondary-color: #dc2626;
+        --accent-color: #f97316;
+        
+        Opción 4: Rosa moderno
+        --primary-color: #ec4899;
+        --secondary-color: #db2777;
+        --accent-color: #f472b6;
+        */
+
+      :root {
+        --primary-color: #8b5cf6; /* Color principal */
+        --secondary-color: #7c3aed; /* Color secundario */
+        --accent-color: #a855f7; /* Color de acento */
+        --success-color: #10b981; /* Color de éxito */
+        --warning-color: #f59e0b; /* Color de advertencia */
+        --danger-color: #dc2626; /* Color de peligro */
+        --info-color: #3b82f6; /* Color de información */
+        --text-color: #333333; /* Color de texto */
+        --light-bg: #f4f4f4; /* Fondo claro */
+        --white: #ffffff; /* Blanco */
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: var(--light-bg);
+      }
+
+      .container {
+        background-color: var(--white);
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+      }
+
+      .title {
+        color: var(--text-color);
+        font-size: 20px;
+        margin-bottom: 20px;
+      }
+
+      .content {
+        margin-bottom: 30px;
+      }
+
+      .button {
+        display: inline-block;
+        background-color: var(--primary-color);
+        color: var(--white);
+        padding: 12px 30px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        margin: 20px 0;
+        transition: background-color 0.3s ease;
+      }
+
+      .button:hover {
+        background-color: var(--secondary-color);
+      }
+
+      .button-danger {
+        background-color: var(--danger-color);
+      }
+
+      .button-danger:hover {
+        background-color: #b91c1c;
+      }
+
+      .button-success {
+        background-color: var(--success-color);
+      }
+
+      .button-success:hover {
+        background-color: #059669;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        color: #666;
+        font-size: 14px;
+      }
+
+      .warning {
+        background-color: #fef3c7;
+        border: 1px solid var(--warning-color);
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+
+      .success {
+        background-color: #d1fae5;
+        border: 1px solid var(--success-color);
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+
+      .info {
+        background-color: #dbeafe;
+        border: 1px solid var(--info-color);
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+
+      .danger {
+        background-color: #fee2e2;
+        border: 1px solid var(--danger-color);
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <!-- CAMBIA ESTO: Logo y nombre de tu empresa -->
+        <div class="logo">🛍️ Tu Marca Personalizada</div>
+        <h1 class="title">¡Bienvenido a nuestra comunidad!</h1>
+      </div>
+
+      <div class="content">
+        <p>Hola <strong>{{ user.first_name }}</strong>,</p>
+
+        <p>
+          ¡Gracias por registrarte en nuestra plataforma! Para completar tu
+          registro y activar tu cuenta, necesitamos verificar tu dirección de
+          email.
+        </p>
+
+        <p>Haz clic en el botón de abajo para confirmar tu email:</p>
+
+        <div style="text-align: center">
+          <a href="{{ activate_url }}" class="button">Confirmar mi Email</a>
+        </div>
+
+        <div class="warning">
+          <strong>⚠️ Importante:</strong> Este enlace expirará en 3 días por
+          razones de seguridad.
+        </div>
+
+        <div class="info">
+          <strong>ℹ️ Información:</strong> Si tienes problemas, contacta a
+          nuestro equipo de soporte.
+        </div>
+
+        <p>
+          Si el botón no funciona, puedes copiar y pegar este enlace en tu
+          navegador:
+        </p>
+        <p style="word-break: break-all; color: var(--primary-color)">
+          {{ activate_url }}
+        </p>
+      </div>
+
+      <div class="footer">
+        <!-- CAMBIA ESTO: Información de tu empresa -->
+        <p>Si no solicitaste esta cuenta, puedes ignorar este email.</p>
+        <p>© 2024 Tu Marca Personalizada. Todos los derechos reservados.</p>
+        <p>
+          📍 Dirección de tu empresa | 📧 contacto@tumarca.com | 📞 +1 234 567
+          890
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

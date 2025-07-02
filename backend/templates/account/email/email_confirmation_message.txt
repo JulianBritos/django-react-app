@@ -1,0 +1,14 @@
+¡Bienvenido a Tu Tienda Online!
+
+Hola {{ user.first_name }},
+
+¡Gracias por registrarte en nuestra plataforma! Para completar tu registro y activar tu cuenta, necesitamos verificar tu dirección de email.
+
+Para confirmar tu email, visita este enlace:
+{{ activate_url }}
+
+IMPORTANTE: Este enlace expirará en 3 días por razones de seguridad.
+
+Si no solicitaste esta cuenta, puedes ignorar este email.
+
+© 2024 Tu Tienda Online. Todos los derechos reservados. 

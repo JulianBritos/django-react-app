@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { connect } from "react-redux";
 import { emailVerification } from "../../reducer/Actions";
@@ -11,14 +11,9 @@ const EmailVerification = ({ emailVerification }) => {
 
   const handleVerify = (e) => {
     e.preventDefault();
+    setLoading(true);
     emailVerification(key);
     setStatus(true);
-  };
-
-  const handleResendEmail = () => {
-    // Implement the logic to resend email
-    setLoading(true);
-    // After resending, setLoading(false)
   };
 
   if (status) {
@@ -37,17 +32,9 @@ const EmailVerification = ({ emailVerification }) => {
             disabled={loading}
             isLoading={loading}
           >
-            Verificar
+            {loading ? "Verificando..." : "Verificar"}
           </Button>
         </form>
-        <Button
-          variant="primary"
-          onClick={handleResendEmail}
-          disabled={loading}
-          isLoading={loading}
-        >
-          {loading ? "Enviando..." : "Reenviar Email"}
-        </Button>
       </div>
     </div>
   );

@@ -6,6 +6,11 @@ from rest_framework import permissions
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from apps.users.views import email_confirmation, reset_password_confirm
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+def is_staff_user(user):
+    """Verifica si el usuario es staff o superusuario"""
+    return user.is_staff or user.is_superuser
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -14,8 +19,8 @@ schema_view = get_schema_view(
         description="Documentación de la API para el proyecto Django-React",
         terms_of_service="https://www.google.com/policies/terms/",
     ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
+    public=False,  # Cambiar a False para requerir autenticación
+    permission_classes=(permissions.IsAuthenticated,),  # Requerir autenticación
     
 )
 
@@ -24,7 +29,8 @@ urlpatterns = [
     path('apps/products/', include('apps.products.urls')),
     path('accounts/', include('allauth.socialaccount.urls')),
     path('apps/payments/', include('apps.payments.urls')),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    # Restringir acceso a Swagger solo a usuarios autenticados y staff
+    path('swagger/', login_required(user_passes_test(is_staff_user)(schema_view.with_ui('swagger', cache_timeout=0))), name='schema-swagger-ui'),
     path('dj_rest_auth/', include('dj_rest_auth.urls')),
     path('dj_rest_auth/registration/account-confirm-email/<str:key>/', email_confirmation),
     path('dj_rest_auth/registration/', include('dj_rest_auth.registration.urls')),

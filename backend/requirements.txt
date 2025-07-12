@@ -10,7 +10,7 @@ pip==25.1.1
 django_extensions
 dj_rest_auth
 django-cors-headers
-django-allauth
+django-allauth==65.9.0
 django-import-export
 psycopg2-binary
 cryptography

@@ -210,7 +210,7 @@ EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
 EMAIL_TIMEOUT = 20
 
 # Configuración mínima para plantillas de email personalizadas
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Tu Tienda Online] "
+ACCOUNT_EMAIL_SUBJECT_PREFIX = 'Cosmo play'
 
 # Configuraciones de seguridad adicionales
 SECURE_BROWSER_XSS_FILTER = True

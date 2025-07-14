@@ -51,6 +51,19 @@ function Header() {
     navigate("/login");
   };
 
+  // --- Delay para cerrar el menú de productos ---
+  let dropdownTimeout = null;
+
+  const handleDropdownEnter = () => {
+    if (dropdownTimeout) clearTimeout(dropdownTimeout);
+    setState((prev) => ({ ...prev, dropdownOpen: true }));
+  };
+  const handleDropdownLeave = () => {
+    dropdownTimeout = setTimeout(() => {
+      setState((prev) => ({ ...prev, dropdownOpen: false }));
+    }, 180); // 180ms delay
+  };
+
   const { menuOpen, dropdownOpen, userDropdownOpen, categories } = state;
 
   return (
@@ -72,9 +85,9 @@ function Header() {
               Inicio
             </Link>
             <div
-              className="relative"
-              onMouseEnter={() => toggleState("dropdownOpen")}
-              onMouseLeave={() => toggleState("dropdownOpen")}
+              className="relative group"
+              onMouseEnter={handleDropdownEnter}
+              onMouseLeave={handleDropdownLeave}
             >
               <Link
                 to="/products/allproducts"
@@ -88,7 +101,10 @@ function Header() {
                 />
               </Link>
               {dropdownOpen && (
-                <div className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10">
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10"
+                  onMouseEnter={handleDropdownEnter}
+                  onMouseLeave={handleDropdownLeave}
+                >
                   {categories.map((category) => (
                     <Link
                       key={category.name}

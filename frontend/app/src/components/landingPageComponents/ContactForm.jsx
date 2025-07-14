@@ -23,7 +23,7 @@ const ContactForm = () => {
       <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
         Contact Us
       </h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col justify-between gap-4">
         <input
           type="text"
           name="name"

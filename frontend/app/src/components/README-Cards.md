@@ -365,3 +365,150 @@ Todos los componentes están optimizados para diferentes tamaños de pantalla:
 - Filtros avanzados
 - Búsqueda en tiempo real
 - Wishlist personalizada
+
+# ClientDetailCard Component
+
+## Descripción
+
+El componente `ClientDetailCard` es una tarjeta modal que muestra todos los detalles disponibles de un cliente cuando se presiona el botón "Ver detalles" en la lista de clientes.
+
+## Características
+
+### Visualización de Datos
+
+- **Información Personal**: Nombre, apellido, nombre de usuario, fecha de nacimiento
+- **Información de Contacto**: Email (solo lectura), teléfono
+- **Dirección**: Dirección completa, ciudad, país
+- **Información de Cuenta**: Estado (activo/inactivo), rol
+- **Fechas**: Fecha de registro, último acceso
+
+### Funcionalidades de Edición
+
+- **Permisos**: Solo usuarios superusuarios o administradores pueden editar
+- **Campos Editables**: Todos los campos excepto email (por seguridad)
+- **Validación**: Formulario con validación básica
+- **Guardado**: Actualización en tiempo real de la lista de clientes
+
+### Interfaz de Usuario
+
+- **Modal Responsivo**: Se adapta a diferentes tamaños de pantalla
+- **Iconos Intuitivos**: Uso de iconos de Lucide React para mejor UX
+- **Estados de Carga**: Indicadores visuales durante operaciones
+- **Manejo de Errores**: Alertas para errores de actualización
+
+## Uso
+
+### Integración con ClientsList
+
+```jsx
+import ClientDetailCard from "./ClientDetailCard";
+
+// En el componente padre
+const [selectedClient, setSelectedClient] = useState(null);
+
+const handleViewDetails = (client) => {
+  setSelectedClient(client);
+};
+
+const handleCloseDetails = () => {
+  setSelectedClient(null);
+};
+
+const handleClientUpdate = (updatedClient) => {
+  // Actualizar la lista local
+  setClients((prevClients) =>
+    prevClients.map((client) =>
+      client.id === updatedClient.id ? updatedClient : client
+    )
+  );
+};
+
+// En el JSX
+{
+  selectedClient && (
+    <ClientDetailCard
+      client={selectedClient}
+      onClose={handleCloseDetails}
+      onUpdate={handleClientUpdate}
+    />
+  );
+}
+```
+
+### Props
+
+| Prop       | Tipo     | Descripción                                          |
+| ---------- | -------- | ---------------------------------------------------- |
+| `client`   | Object   | Objeto con todos los datos del cliente               |
+| `onClose`  | Function | Función para cerrar el modal                         |
+| `onUpdate` | Function | Función para actualizar el cliente en la lista padre |
+
+### Estructura de Datos del Cliente
+
+```javascript
+{
+  id: number,
+  email: string,
+  first_name: string,
+  last_name: string,
+  username: string,
+  phone: string,
+  birth_date: string,
+  address: string,
+  city: string,
+  country: string,
+  is_active: boolean,
+  role: string,
+  date_joined: string,
+  last_login: string,
+  profile_picture: string
+}
+```
+
+## Permisos de Edición
+
+### Usuarios que pueden editar:
+
+- **Superusuarios**: `is_superuser: true`
+- **Administradores**: `role: "admin"`
+
+### Usuarios que NO pueden editar:
+
+- **Vendedores**: `role: "vendedor"`
+- **Clientes**: `role: "cliente"`
+
+## API Endpoints Utilizados
+
+- `GET /api/users/me/` - Obtener usuario actual para verificar permisos
+- `PATCH /api/users/{id}/` - Actualizar datos del cliente
+
+## Estilos
+
+El componente utiliza Tailwind CSS con las siguientes clases principales:
+
+- **Modal**: `fixed inset-0 bg-black bg-opacity-50`
+- **Card**: `bg-white rounded-lg shadow-xl`
+- **Responsive**: `max-w-2xl w-full max-h-[90vh]`
+- **Grid**: `grid grid-cols-1 md:grid-cols-2`
+
+## Manejo de Estados
+
+1. **Estado de Edición**: `isEditing` controla si el formulario está en modo edición
+2. **Estado de Carga**: `loading` muestra spinner durante guardado
+3. **Usuario Actual**: `currentUser` almacena datos del usuario logueado
+4. **Datos del Formulario**: `formData` mantiene los valores editables
+
+## Validaciones
+
+- **Campos Requeridos**: Nombre es obligatorio
+- **Formato de Email**: Validación automática del backend
+- **Permisos**: Verificación de rol antes de permitir edición
+- **Errores de API**: Manejo de errores de red y servidor
+
+## Mejoras Futuras
+
+1. **Validación en Frontend**: Agregar validación más robusta
+2. **Historial de Cambios**: Registrar cambios realizados
+3. **Notificaciones**: Sistema de notificaciones más elegante
+4. **Imagen de Perfil**: Permitir subir/cambiar imagen de perfil
+5. **Exportar Datos**: Opción para exportar información del cliente

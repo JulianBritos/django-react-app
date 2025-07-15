@@ -7,18 +7,22 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
-    setLoading(false); // Ensure loading is set to false after checking token
+    const accessToken = localStorage.getItem("access");
+    setIsAuthenticated(!!accessToken);
+    setLoading(false);
   }, []);
 
-  const login = (token) => {
-    localStorage.setItem("token", token);
+  const login = (accessToken, refreshToken) => {
+    localStorage.setItem("access", accessToken);
+    if (refreshToken) {
+      localStorage.setItem("refresh", refreshToken);
+    }
     setIsAuthenticated(true);
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
     setIsAuthenticated(false);
   };
 

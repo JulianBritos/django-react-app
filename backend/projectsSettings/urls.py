@@ -26,6 +26,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include('apps.users.urls')),
     path('apps/products/', include('apps.products.urls')),
     path('accounts/', include('allauth.socialaccount.urls')),
     path('apps/payments/', include('apps.payments.urls')),
@@ -36,9 +37,7 @@ urlpatterns = [
     path('dj_rest_auth/registration/', include('dj_rest_auth.registration.urls')),
     path('reset/password/confirm/<uid>/<str:token>', reset_password_confirm, name='password_reset_confirm'),
     path('records/', include('apps.importer.urls')),  
-    
-
-
 ]
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

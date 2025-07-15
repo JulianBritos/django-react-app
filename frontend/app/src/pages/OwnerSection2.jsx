@@ -3,6 +3,7 @@ import Sidebar from "../components/administrativeComponents/Sidebar";
 import NewProduct from "../components/administrativeComponents/NewProduct";
 import ProductPage from "../components/administrativeComponents/ProductPage";
 import CategoriesManagementPage from "./CategoriesManagementPage";
+import ClientsList from "../components/administrativeComponents/ClientsList";
 
 const OwnerSection2 = () => {
   const [currentPage, setCurrentPage] = useState(null); // Estado para la página actual
@@ -19,6 +20,8 @@ const OwnerSection2 = () => {
         return <NewProduct />;
       case "Categorías":
         return <CategoriesManagementPage />;
+      case "Listado":
+        return <ClientsList />;
       default:
         return <div>Selecciona una opción desde la barra lateral</div>;
     }

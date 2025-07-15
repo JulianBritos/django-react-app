@@ -1,5 +1,5 @@
 const ContactBanner = () => (
-  <div className="relative w-full h-48 md:h-64 flex items-center justify-center mb-8 overflow-hidden shadow-xl bg-gradient-to-r from-secondary-400 to-primary-300">
+  <div className="relative w-full h-48 md:h-64 flex items-center justify-center overflow-hidden shadow-xl bg-gradient-to-r from-secondary-400 to-primary-300">
     <img
       src="/banner-contact.jpg" // Cambia por la ruta de tu imagen
       alt="Banner Contacto"

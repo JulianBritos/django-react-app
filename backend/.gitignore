@@ -125,7 +125,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-
+# Logs
+logs/
+*.log
 
 # Media files
 media/

@@ -3,6 +3,7 @@ from django.test import RequestFactory
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken
 from apps.users.middleware import JWTAuthenticationMiddleware, RoleBasedAccessMiddleware, GuestUserMiddleware
+from apps.users.constants import PUBLIC_PATHS, GUEST_ALLOWED_PATHS
 
 User = get_user_model()
 
@@ -73,7 +74,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f'  ❌ Error con token válido: {response.status_code}'))
             
         # Test 2: Ruta pública
-        request = factory.get('/api/users/test/')
+        request = factory.get(PUBLIC_PATHS[0])  # Usar constante
         response = middleware.process_request(request)
         
         if response is None:
@@ -82,7 +83,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f'  ❌ Error en ruta pública: {response.status_code}'))
             
         # Test 3: Guest checkout
-        request = factory.get('/apps/payments/create_preference/')
+        request = factory.get(GUEST_ALLOWED_PATHS[0])  # Usar constante
         response = middleware.process_request(request)
         
         if response is None:
@@ -139,7 +140,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR('  ❌ Vendedor no fue denegado correctamente'))
             
         # Test 3: Ruta pública
-        request = factory.get('/apps/products/products/')
+        request = factory.get(PUBLIC_PATHS[4])  # Usar constante
         response = middleware.process_request(request)
         
         if response is None:
@@ -220,7 +221,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR('  ❌ Error en cadena completa admin'))
             
         # Test 2: Cadena completa para guest
-        request = factory.get('/apps/payments/create_preference/')
+        request = factory.get(GUEST_ALLOWED_PATHS[0])  # Usar constante
         request.session = {}
         
         response1 = jwt_middleware.process_request(request)
@@ -235,7 +236,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR('  ❌ Error en cadena completa guest'))
             
         # Test 3: Productos públicos
-        request = factory.get('/apps/products/products/')
+        request = factory.get(PUBLIC_PATHS[4])  # Usar constante
         request.session = {}
         
         response1 = jwt_middleware.process_request(request)

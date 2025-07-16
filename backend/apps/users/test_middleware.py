@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken
 from .middleware import JWTAuthenticationMiddleware, RoleBasedAccessMiddleware, GuestUserMiddleware
 from .models import CustomUserModel
+from .constants import PUBLIC_PATHS, GUEST_ALLOWED_PATHS
 
 User = get_user_model()
 
@@ -46,14 +47,14 @@ class JWTAuthenticationMiddlewareTest(TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_public_path(self):
-        request = self.factory.get('/api/users/test/')
+        request = self.factory.get(PUBLIC_PATHS[0])  # Usar constante
         
         response = self.middleware.process_request(request)
         
         self.assertIsNone(response)  # No debe procesar rutas públicas
 
     def test_guest_checkout_path(self):
-        request = self.factory.get('/apps/payments/create_preference/')
+        request = self.factory.get(GUEST_ALLOWED_PATHS[0])  # Usar constante
         
         response = self.middleware.process_request(request)
         
@@ -61,7 +62,7 @@ class JWTAuthenticationMiddlewareTest(TestCase):
         self.assertEqual(request.user_role, 'guest')
 
     def test_guest_checkout_with_valid_token(self):
-        request = self.factory.get('/apps/payments/create_preference/')
+        request = self.factory.get(GUEST_ALLOWED_PATHS[0])  # Usar constante
         request.META['HTTP_AUTHORIZATION'] = f'Bearer {self.token}'
         
         response = self.middleware.process_request(request)
@@ -71,7 +72,7 @@ class JWTAuthenticationMiddlewareTest(TestCase):
         self.assertEqual(request.user_role, 'admin')
 
     def test_guest_checkout_with_invalid_token(self):
-        request = self.factory.get('/apps/payments/create_preference/')
+        request = self.factory.get(GUEST_ALLOWED_PATHS[0])  # Usar constante
         request.META['HTTP_AUTHORIZATION'] = 'Bearer invalid_token'
         
         response = self.middleware.process_request(request)
@@ -132,14 +133,14 @@ class RoleBasedAccessMiddlewareTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_public_path_access(self):
-        request = self.factory.get('/apps/products/products/')
+        request = self.factory.get(PUBLIC_PATHS[4])  # Usar constante
         
         response = self.middleware.process_request(request)
         
         self.assertIsNone(response)  # Debe permitir acceso público
 
     def test_guest_checkout_access(self):
-        request = self.factory.get('/apps/payments/create_preference/')
+        request = self.factory.get(GUEST_ALLOWED_PATHS[0])  # Usar constante
         
         response = self.middleware.process_request(request)
         
@@ -228,7 +229,7 @@ class MiddlewareIntegrationTest(TestCase):
         self.assertEqual(request.user_role, 'admin')
 
     def test_full_middleware_chain_guest(self):
-        request = self.factory.get('/apps/payments/create_preference/')
+        request = self.factory.get(GUEST_ALLOWED_PATHS[0])  # Usar constante
         request.session = {}
         
         # Simular cadena de middleware
@@ -243,7 +244,7 @@ class MiddlewareIntegrationTest(TestCase):
         self.assertIsNotNone(request.guest_session_id)
 
     def test_public_product_access(self):
-        request = self.factory.get('/apps/products/products/')
+        request = self.factory.get(PUBLIC_PATHS[4])  # Usar constante
         request.session = {}
         
         # Simular cadena de middleware

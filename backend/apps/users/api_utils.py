@@ -2,32 +2,8 @@ from functools import wraps
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.response import Response
-
-def get_user_info(request):
-    """
-    Obtiene información del usuario actual (autenticado o guest)
-    """
-    if hasattr(request, 'user') and request.user:
-        return {
-            'user': request.user,
-            'role': getattr(request, 'user_role', 'unknown'),
-            'permissions': getattr(request, 'user_permissions', {}),
-            'is_authenticated': True,
-            'is_guest': False
-        }
-    else:
-        return {
-            'user': None,
-            'role': 'guest',
-            'permissions': {
-                'is_admin': False,
-                'is_vendedor': False,
-                'is_cliente': False,
-                'is_guest': True,
-            },
-            'is_authenticated': False,
-            'is_guest': True
-        }
+from .constants import GUEST_PERMISSIONS, ERROR_MESSAGES
+from .utils import get_user_info, create_error_response, set_guest_user
 
 def require_auth(view_func):
     """
@@ -37,10 +13,7 @@ def require_auth(view_func):
     def wrapper(request, *args, **kwargs):
         user_info = get_user_info(request)
         if not user_info['is_authenticated']:
-            return JsonResponse({
-                'error': 'Autenticación requerida',
-                'detail': 'Debe estar autenticado para acceder a este recurso'
-            }, status=status.HTTP_401_UNAUTHORIZED)
+            return create_error_response('authentication_required')
         return view_func(request, *args, **kwargs)
     return wrapper
 
@@ -53,16 +26,10 @@ def require_role(roles):
         def wrapper(request, *args, **kwargs):
             user_info = get_user_info(request)
             if not user_info['is_authenticated']:
-                return JsonResponse({
-                    'error': 'Autenticación requerida',
-                    'detail': 'Debe estar autenticado para acceder a este recurso'
-                }, status=status.HTTP_401_UNAUTHORIZED)
+                return create_error_response('authentication_required')
                 
             if user_info['role'] not in roles and not getattr(user_info['user'], 'is_superuser', False):
-                return JsonResponse({
-                    'error': 'Permisos insuficientes',
-                    'detail': f'Se requieren roles: {", ".join(roles)}'
-                }, status=status.HTTP_403_FORBIDDEN)
+                return create_error_response('insufficient_permissions', 403)
                 
             return view_func(request, *args, **kwargs)
         return wrapper
@@ -82,18 +49,12 @@ def require_vendedor(view_func):
     def wrapper(request, *args, **kwargs):
         user_info = get_user_info(request)
         if not user_info['is_authenticated']:
-            return JsonResponse({
-                'error': 'Autenticación requerida',
-                'detail': 'Debe estar autenticado para acceder a este recurso'
-            }, status=status.HTTP_401_UNAUTHORIZED)
+            return create_error_response('authentication_required')
             
         if not (user_info['permissions']['is_vendedor'] or 
                 user_info['permissions']['is_admin'] or 
                 getattr(user_info['user'], 'is_superuser', False)):
-            return JsonResponse({
-                'error': 'Permisos insuficientes',
-                'detail': 'Se requieren permisos de vendedor o administrador'
-            }, status=status.HTTP_403_FORBIDDEN)
+            return create_error_response('vendedor_required', 403)
             
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -106,14 +67,7 @@ def allow_guest(view_func):
     def wrapper(request, *args, **kwargs):
         # Si no hay usuario, crear uno anónimo
         if not hasattr(request, 'user') or not request.user:
-            request.user = None
-            request.user_role = 'guest'
-            request.user_permissions = {
-                'is_admin': False,
-                'is_vendedor': False,
-                'is_cliente': False,
-                'is_guest': True,
-            }
+            set_guest_user(request)
         return view_func(request, *args, **kwargs)
     return wrapper
 
@@ -125,14 +79,7 @@ def require_auth_or_guest(view_func):
     def wrapper(request, *args, **kwargs):
         # Si no hay usuario, crear uno anónimo
         if not hasattr(request, 'user') or not request.user:
-            request.user = None
-            request.user_role = 'guest'
-            request.user_permissions = {
-                'is_admin': False,
-                'is_vendedor': False,
-                'is_cliente': False,
-                'is_guest': True,
-            }
+            set_guest_user(request)
         return view_func(request, *args, **kwargs)
     return wrapper
 

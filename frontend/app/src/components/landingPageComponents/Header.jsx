@@ -364,7 +364,7 @@ function Header() {
               >
                 Iniciar Sesión
               </Link>
-              {isAuthenticated && (
+              {hasAdminAccess() && (
                 <Button
                   variant="primary"
                   size="default"

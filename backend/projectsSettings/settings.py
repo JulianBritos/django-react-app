@@ -220,6 +220,7 @@ REST_AUTH = {
     'JWT_AUTH_HTTPONLY': True,
     'SESSION_LOGIN': False,
     'OLD_PASSWORD_FIELD_ENABLED': True,
+    'USER_DETAILS_SERIALIZER': 'apps.users.serializer.UserSerializer',
     }
 
 # Configuración de email

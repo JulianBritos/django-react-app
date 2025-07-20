@@ -24,6 +24,12 @@ function Header() {
     categories: [],
   });
 
+  // Función para verificar si el usuario tiene permisos de administrador
+  const hasAdminAccess = () => {
+    if (!isAuthenticated || !user) return false;
+    return user.role === "admin" || user.role === "vendedor";
+  };
+
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -110,7 +116,7 @@ function Header() {
 
         {/* Iconos e Iniciar Sesión */}
         <div className="flex items-center space-x-6">
-          {isAuthenticated && (
+          {hasAdminAccess() && (
             <Button
               variant="success"
               size="default"
@@ -263,7 +269,7 @@ function Header() {
           >
             Iniciar Sesión
           </Link>
-          {isAuthenticated && (
+          {hasAdminAccess() && (
             <Button
               variant="primary"
               size="default"

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import CartItem from "./cart-item";
@@ -27,7 +28,8 @@ const cartItemsData = [
   },
 ];
 
-export default function Cart() {
+const Cart = () => {
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState(
     cartItemsData.map((item) => ({ ...item, checked: true }))
   );
@@ -74,6 +76,11 @@ export default function Cart() {
   const hasChecked = cartItems.some((item) => item.checked);
   const shipping = hasChecked ? 4.99 : 0;
   const total = subtotal + shipping;
+
+  const handleFinalizePurchase = () => {
+    // Acá podrías enviar el subtotal con navigate si usás state:
+    navigate('/checkout', { state: { subtotal, shipping, total } });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -155,10 +162,11 @@ export default function Cart() {
             </div>
 
             <Button
-              className="w-full bg-thirdary-600 hover:bg-thirdary-700"
+              className="w-full bg-thirdary-600 hover:bg-thirdary-700 text-white font-semibold"
               disabled={cartItems.length === 0 || !hasChecked}
+              onClick={handleFinalizePurchase}
             >
-              Proceder al Pago
+              Finalizar Compra
             </Button>
 
             <div className="mt-4 text-xs text-gray-500">
@@ -175,4 +183,6 @@ export default function Cart() {
       </div>
     </div>
   );
-}
+};
+
+export default Cart;

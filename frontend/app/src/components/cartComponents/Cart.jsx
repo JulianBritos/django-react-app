@@ -1,10 +1,10 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-
 import CartItem from "./cart-item";
 
-// Datos dummy para el carrito
-const cartItems = [
+const cartItemsData = [
   {
     id: 1,
     name: "Camiseta Premium",
@@ -28,13 +28,59 @@ const cartItems = [
   },
 ];
 
-export default function Cart() {
+const Cart = () => {
+  const navigate = useNavigate();
+  const [cartItems, setCartItems] = useState(
+    cartItemsData.map((item) => ({ ...item, checked: true }))
+  );
+
+  const handleRemove = (id) => {
+    setCartItems((items) => items.filter((item) => item.id !== id));
+  };
+
+  const handleCheck = (id) => {
+    setCartItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      )
+    );
+  };
+
+  const handleIncrease = (id) => {
+    setCartItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    );
+  };
+
+  const handleDecrease = (id) => {
+    setCartItems((items) =>
+      items.map((item) =>
+        item.id === id && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      )
+    );
+  };
+
+  const handleClearCart = () => {
+    setCartItems([]);
+  };
+
   const subtotal = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) => (item.checked ? total + item.price * item.quantity : total),
     0
   );
-  const shipping = 4.99;
+
+  const hasChecked = cartItems.some((item) => item.checked);
+  const shipping = hasChecked ? 4.99 : 0;
   const total = subtotal + shipping;
+
+  const handleFinalizePurchase = () => {
+    // Acá podrías enviar el subtotal con navigate si usás state:
+    navigate('/checkout', { state: { subtotal, shipping, total } });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -43,25 +89,29 @@ export default function Cart() {
       </h1>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sección: Lista de productos */}
         <div className="lg:w-2/3">
           <div className="bg-white rounded-lg shadow-md p-6 mb-4">
-            {/* Cabecera para desktop */}
-            <div className="hidden md:grid md:grid-cols-5 gap-4 mb-4 text-sm font-semibold text-gray-600">
-              <div className="col-span-2">Producto</div>
-              <div className="text-center">Precio</div>
-              <div className="text-center">Cantidad</div>
-              <div className="text-center">Total</div>
-            </div>
-
-            {/* Productos */}
             <div className="divide-y divide-gray-200">
-              {cartItems.map((item) => (
-                <CartItem key={item.id} item={item} />
-              ))}
+              {cartItems.length === 0 ? (
+                <div className="py-8 text-center text-gray-500">
+                  No hay productos en el carrito.
+                </div>
+              ) : (
+                cartItems.map((item, index) => (
+                  <CartItem
+                    key={item.id}
+                    item={item}
+                    checked={item.checked}
+                    onCheck={() => handleCheck(item.id)}
+                    onIncrease={() => handleIncrease(item.id)}
+                    onDecrease={() => handleDecrease(item.id)}
+                    onRemove={() => handleRemove(item.id)}
+                    isFirstItem={index === 0}
+                  />
+                ))
+              )}
             </div>
 
-            {/* Código de descuento + Vaciar carrito */}
             <div className="mt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="flex items-center space-x-2">
                 <label className="block mb-1 font-medium">Email</label>
@@ -77,6 +127,8 @@ export default function Cart() {
                 variant="ghost"
                 size="sm"
                 className="text-red-500 flex items-center"
+                onClick={handleClearCart}
+                disabled={cartItems.length === 0}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
                 <span>Vaciar carrito</span>
@@ -84,14 +136,12 @@ export default function Cart() {
             </div>
           </div>
 
-          {/* Acciones inferiores */}
           <div className="flex justify-between mt-4">
             <Button variant="outline">Continuar Comprando</Button>
             <Button variant="outline">Actualizar Carrito</Button>
           </div>
         </div>
 
-        {/* Sección: Resumen de compra */}
         <div className="lg:w-1/3">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-lg font-semibold mb-4">Resumen de Compra</h2>
@@ -111,11 +161,14 @@ export default function Cart() {
               </div>
             </div>
 
-            <Button className="w-full bg-thirdary-600 hover:bg-thirdary-700">
-              Proceder al Pago
+            <Button
+              className="w-full bg-thirdary-600 hover:bg-thirdary-700 text-white font-semibold"
+              disabled={cartItems.length === 0 || !hasChecked}
+              onClick={handleFinalizePurchase}
+            >
+              Finalizar Compra
             </Button>
 
-            {/* Métodos de pago (placeholder visual) */}
             <div className="mt-4 text-xs text-gray-500">
               <p>Métodos de pago aceptados:</p>
               <div className="flex space-x-2 mt-2">
@@ -130,4 +183,6 @@ export default function Cart() {
       </div>
     </div>
   );
-}
+};
+
+export default Cart;

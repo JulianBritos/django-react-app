@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "../ui/Button";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   const [showMore, setShowMore] = useState(false);
@@ -19,8 +20,8 @@ const HeroSection = () => {
           <Button
             variant="outline"
             size="lg"
-            as="a"
-            href="/products"
+            as={Link}
+            to="/products/allproducts"
             className=""
           >
             Ver productos

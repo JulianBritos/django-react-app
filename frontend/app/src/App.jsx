@@ -25,6 +25,7 @@ import OwnerSection2 from "./pages/OwnerSection2";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmation from "./components/orderConfirmationComponenets/OrderConfirmation";
 import PaymentMethodsPage from "./pages/PaymentMethodsPage";
+import ContactPage from "./pages/ContactPage";
 
 function App() {
   return (
@@ -62,6 +63,7 @@ function App() {
             <Route path="/products" element={<ProductsSection />}>
               <Route path=":categoryName" element={<CategoryPage />} />
             </Route>
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/changePassword" element={<ChangePasswordPage />} />

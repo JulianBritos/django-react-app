@@ -103,8 +103,13 @@ const ContactPage = () => {
     <>
       <ContactBanner />
       <div className="max-w-7xl mx-auto w-full px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-        <div className="col-span-1 h-full"><ContactForm className="h-full"/></div>
-        <div className="col-span-2 h-full"><BranchMap branches={demoBranches} /></div>
+        {/* Mobile: Banner, luego mapa, luego formulario */}
+        <div className="md:col-span-2 w-full">
+          <BranchMap branches={demoBranches} />
+        </div>
+        <div className="md:col-span-1 w-full">
+          <ContactForm className="w-full" />
+        </div>
       </div>
     </>
   )

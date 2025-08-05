@@ -111,12 +111,7 @@ const AttributeManager = ({
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium">Atributos y variantes</h3>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAddClick}
-            disabled={!newAttributeName.trim()}
-          >
+          <Button variant="outline" size="sm" onClick={handleAddClick}>
             Agregar atributo
           </Button>
         </div>

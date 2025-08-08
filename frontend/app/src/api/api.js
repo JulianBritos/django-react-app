@@ -1,6 +1,7 @@
 // Función para obtener el token del localStorage
 const getAuthToken = () => {
-  return localStorage.getItem("access_token");
+  // Corregir: usar "access" en lugar de "access_token"
+  return localStorage.getItem("access");
 };
 
 // Función para hacer requests autenticados
@@ -24,8 +25,8 @@ const authenticatedRequest = async (url, options = {}) => {
 
     if (response.status === 401) {
       // Token expirado o inválido
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
       window.location.href = "/login";
       return;
     }
@@ -335,16 +336,16 @@ export const isTokenExpired = () => {
 
 // Función para limpiar datos de autenticación
 export const clearAuth = () => {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
+  localStorage.removeItem("access");
+  localStorage.removeItem("refresh");
   localStorage.removeItem("user");
 };
 
 // Función para guardar datos de autenticación
 export const saveAuth = (accessToken, refreshToken, userData) => {
-  localStorage.setItem("access_token", accessToken);
+  localStorage.setItem("access", accessToken);
   if (refreshToken) {
-    localStorage.setItem("refresh_token", refreshToken);
+    localStorage.setItem("refresh", refreshToken);
   }
   if (userData) {
     localStorage.setItem("user", JSON.stringify(userData));

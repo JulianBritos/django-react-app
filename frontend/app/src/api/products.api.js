@@ -2,6 +2,35 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_BASE_URL + "/apps/products/";
 
+// Configurar axios para incluir el token automáticamente
+axios.interceptors.request.use(
+  (config) => {
+    // Corregir: usar "access" en lugar de "access_token"
+    const token = localStorage.getItem("access");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para manejar errores de autenticación
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expirado o inválido
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const getProducts = async () => {
   const response = await axios.get(`${API_URL}products/`);
   return response.data;

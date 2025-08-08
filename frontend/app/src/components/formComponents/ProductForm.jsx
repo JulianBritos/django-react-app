@@ -35,7 +35,6 @@ const ProductForm = ({ product, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     name: product?.name || "",
     description: product?.description || "",
-    price: product?.price || 0,
     category: product?.category || "",
     images: product?.uploaded_images || [],
     status: product?.status || "",
@@ -171,6 +170,13 @@ const ProductForm = ({ product, onSave, onCancel }) => {
   };
 
   const handleSave = async () => {
+    // Verificar autenticación
+    const token = localStorage.getItem("access");
+    if (!token) {
+      toast.error("Debes iniciar sesión para crear productos");
+      return;
+    }
+
     setIsLoading(true);
 
     if (!validateForm()) {
@@ -248,7 +254,12 @@ const ProductForm = ({ product, onSave, onCancel }) => {
       // Solo mostrar el toast y llamar a onSave si todo salió bien
     } catch (err) {
       console.error(err);
-      toast.error("Error al guardar el producto.");
+      if (err.response?.status === 401) {
+        toast.error("Sesión expirada. Por favor, inicia sesión nuevamente.");
+        window.location.href = "/login";
+      } else {
+        toast.error("Error al guardar el producto.");
+      }
       return;
     } finally {
       setIsLoading(false);

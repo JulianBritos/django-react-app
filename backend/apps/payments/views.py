@@ -4,7 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from apps.orders.models import Order, Purchase
+from apps.orders.models import Order
+from apps.payments.models import Payment, PaymentMethod
 import mercadopago
 import json
 import environ
@@ -23,35 +24,31 @@ def create_preference(request):
             data = json.loads(request.body)
             sdk = mercadopago.SDK(env("MERCADOPAGO_ACCESS_TOKEN"))
 
-            # Crear un registro en la base de datos
+            # Crear un registro de orden en la base de datos
             order = Order.objects.create(
-                product_id=data["id"],
-                product_title=data["title"],
-                quantity=data["quantity"],
-                unit_price=data["unit_price"],
-                total_price=data["quantity"] * data["unit_price"],
-                buyer_email=data["payer"]["email"],
-                external_reference=f"pedido_{data['id']}"
+                guest_email=data["payer"]["email"],
+                subtotal=data["quantity"] * data["unit_price"],
+                total_amount=data["quantity"] * data["unit_price"]
             )
 
             # Datos para MercadoPago
             preference_data = {
                 "items": [
                     {
-                        "id": order.product_id,
-                        "title": order.product_title,
+                        "id": data["id"],
+                        "title": data["title"],
                         "currency_id": "ARS",
-                        "quantity": order.quantity,
-                        "unit_price": order.unit_price
+                        "quantity": data["quantity"],
+                        "unit_price": data["unit_price"]
                     }
                 ],
                 "payer": {
-                    "email": order.buyer_email,
+                    "email": order.guest_email,
                 },
                 "back_urls": data["back_urls"],
                 "auto_return": "approved",
                 "notification_url": "https://www.tusitio.com/webhook-mercadopago",
-                "external_reference": order.external_reference,
+                "external_reference": order.order_number,
                 "expires": True
             }
 
@@ -74,8 +71,14 @@ def webhook_mercadopago(request):
 
             # Buscar el pedido en la base de datos y actualizar su estado
             try:
-                order = Order.objects.get(external_reference=external_reference)
-                order.payment_status = payment_status
+                order = Order.objects.get(order_number=external_reference)
+                # Mapear estados de MercadoPago a nuestros estados
+                status_mapping = {
+                    'approved': 'confirmed',
+                    'pending': 'pending', 
+                    'rejected': 'cancelled'
+                }
+                order.status = status_mapping.get(payment_status, 'pending')
                 order.save()
             except Order.DoesNotExist:
                 return JsonResponse({"error": "Pedido no encontrado"}, status=404)
@@ -102,14 +105,39 @@ def payment_notification(request):
                 "total_amount": 100.0
             }
 
-            # Guardar la compra en la base de datos
-            Purchase.objects.create(
-                payment_id=payment_info["id"],
-                status=payment_info["status"],
-                email=payment_info["payer_email"],
-                items=payment_info["items"],
-                total_amount=payment_info["total_amount"]
-            )
+            # Buscar la orden asociada (necesitarás implementar la lógica para encontrarla)
+            # Por ahora, creamos un pago básico
+            try:
+                # Obtener método de pago de MercadoPago (crear si no existe)
+                payment_method, created = PaymentMethod.objects.get_or_create(
+                    code='mercado_pago',
+                    defaults={
+                        'name': 'MercadoPago',
+                        'payment_type': 'mercado_pago',
+                        'is_active': True
+                    }
+                )
+                
+                # Crear una orden temporal para el pago
+                # En una implementación real, deberías encontrar la orden existente
+                temp_order = Order.objects.create(
+                    guest_email=payment_info["payer_email"],
+                    subtotal=payment_info["total_amount"],
+                    total_amount=payment_info["total_amount"]
+                )
+                
+                # Crear el registro de pago
+                payment = Payment.objects.create(
+                    order=temp_order,
+                    external_payment_id=payment_info["id"],
+                    payment_method=payment_method,
+                    amount=payment_info["total_amount"],
+                    status='completed' if payment_info["status"] == 'approved' else 'failed',
+                    gateway_response=payment_info
+                )
+                
+            except Exception as e:
+                return JsonResponse({"error": f"Error al crear el pago: {str(e)}"}, status=400)
 
             return JsonResponse({"message": "Compra guardada exitosamente"}, status=201)
 

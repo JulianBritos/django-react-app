@@ -46,6 +46,11 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.payments',
     'apps.orders',
+    'apps.carts',
+    'apps.shipping',
+    'apps.promotions',
+    'apps.notifications',
+    'apps.analytics',
     'apps.importer',
     'drf_yasg',
     'import_export'

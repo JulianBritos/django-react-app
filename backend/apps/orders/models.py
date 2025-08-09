@@ -1,46 +1,162 @@
 from django.db import models
-from apps.payments.models import Payment
-from apps.products.models import Product
+from django.conf import settings
+from django.utils import timezone
+from apps.products.models import Product, ProductAttribute
+
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ("pending", "Pendiente"),
-        ("approved", "Aprobado"),
-        ("rejected", "Rechazado"),
+        ('pending', 'Pendiente'),
+        ('confirmed', 'Confirmado'),
+        ('processing', 'Procesando'),
+        ('shipped', 'Enviado'),
+        ('delivered', 'Entregado'),
+        ('cancelled', 'Cancelado'),
+        ('refunded', 'Reembolsado'),
     ]
 
-    product_id = models.CharField(max_length=100, null=True, blank=True)  # Permite valores nulos
-    product_title = models.CharField(max_length=255, null=True, blank=True)
-    quantity = models.IntegerField(null=True, blank=True)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    buyer_email = models.EmailField(null=True, blank=True)
-    payment_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
-    external_reference = models.CharField(max_length=100, unique=True, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    # Identificación
+    id = models.AutoField(primary_key=True)
+    order_number = models.CharField(max_length=20, unique=True, db_index=True, null=True, blank=True)
+    
+    # Usuario (nullable para guest checkout)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='orders'
+    )
+    
+    # Datos de guest checkout
+    guest_email = models.EmailField(null=True, blank=True)
+    guest_phone = models.CharField(max_length=20, null=True, blank=True)
+    guest_name = models.CharField(max_length=255, null=True, blank=True)
+    
+    # Estado y montos
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    shipping_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    currency = models.CharField(max_length=3, default='ARS')
+    
+    # Metadatos
+    notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['order_number']),
+            models.Index(fields=['user', 'status']),
+            models.Index(fields=['guest_email', 'status']),
+            models.Index(fields=['created_at']),
+        ]
 
     def __str__(self):
-        return f"Pedido {self.external_reference} - {self.payment_status}"
-    
+        return f"Orden {self.order_number} - {self.get_status_display()}"
 
-class Purchase(models.Model):
-    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True, blank=True)
-    status = models.CharField(max_length=50)
-    email = models.EmailField()
-    items = models.JSONField()
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            # Generar número de orden único
+            import uuid
+            self.order_number = f"ORD-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
 
-    def __str__(self):
-        return f"Compra {self.payment_id} - {self.status}"
-    
+    @property
+    def customer_email(self):
+        """Retorna el email del cliente (usuario registrado o guest)"""
+        return self.user.email if self.user else self.guest_email
 
-class Cart(models.Model):
-    session_id = models.CharField(max_length=255, db_index=True)  # ID único de sesión
+    @property
+    def customer_name(self):
+        """Retorna el nombre del cliente (usuario registrado o guest)"""
+        if self.user:
+            return f"{self.user.first_name} {self.user.last_name}".strip()
+        return self.guest_name
+
+
+class OrderItem(models.Model):
+    # Relaciones
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product_attribute = models.ForeignKey(
+        ProductAttribute, 
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="Variante específica del producto"
+    )
+    
+    # Snapshots al momento de la compra (para mantener historial)
+    product_name = models.CharField(max_length=255, null=True, blank=True)
+    product_sku = models.CharField(max_length=255, null=True, blank=True)
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    
+    # Cantidad y cálculos
     quantity = models.PositiveIntegerField(default=1)
-    selected_variant = models.JSONField(null=True, blank=True)  # Para manejar variantes como color/talla
-    added_at = models.DateTimeField(auto_now_add=True)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    
+    # Atributos seleccionados (JSON para flexibilidad)
+    product_attributes_snapshot = models.JSONField(
+        null=True, 
+        blank=True,
+        help_text="Snapshot de los atributos seleccionados al momento de la compra"
+    )
+    
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['order', 'product']),
+        ]
 
     def __str__(self):
-        return f"Carrito {self.session_id} - {self.product.title} ({self.quantity})"
+        return f"{self.product_name} x{self.quantity} - Orden {self.order.order_number}"
+
+    def save(self, *args, **kwargs):
+        # Calcular subtotal automáticamente
+        self.subtotal = self.unit_price * self.quantity
+        
+        # Guardar snapshot de información del producto
+        if not self.product_name and self.product:
+            self.product_name = self.product.name
+        
+        if not self.product_sku and self.product_attribute:
+            self.product_sku = self.product_attribute.sku
+        
+        super().save(*args, **kwargs)
+
+
+class OrderStatusHistory(models.Model):
+    # Relación con la orden
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='status_history')
+    
+    # Cambio de estado
+    previous_status = models.CharField(max_length=20, null=True, blank=True)
+    new_status = models.CharField(max_length=20, null=True, blank=True)
+    
+    # Usuario que hizo el cambio (puede ser automático)
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='order_status_changes'
+    )
+    
+    # Información adicional
+    notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['order', 'created_at']),
+        ]
+
+    def __str__(self):
+        return f"Orden {self.order.order_number}: {self.previous_status} → {self.new_status}"

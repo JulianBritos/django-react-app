@@ -295,13 +295,18 @@ const ProductInfoCard = ({
 
           <button
             className="w-full bg-primary-100 text-primary-600 py-3 px-4 rounded-lg hover:bg-primary-200 transition-colors font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-            onClick={() => {
+            onClick={async () => {
               if (selectedVariant && availableStock > 0) {
-                addToCart({
-                  ...product,
-                  selectedVariant,
-                  quantity,
-                });
+                try {
+                  await addToCart(
+                    product,
+                    selectedVariant,
+                    quantity,
+                    null // selectedAttributes - puede ser null por ahora
+                  );
+                } catch (error) {
+                  console.error("Error al agregar al carrito:", error);
+                }
               }
             }}
             disabled={!selectedVariant || availableStock === 0}

@@ -1,41 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import CartItem from "./cart-item";
-
-const cartItemsData = [
-  {
-    id: 1,
-    name: "Camiseta Premium",
-    price: 29.99,
-    quantity: 2,
-    image: "/placeholder.svg?height=80&width=80",
-  },
-  {
-    id: 2,
-    name: "Zapatillas Deportivas",
-    price: 89.99,
-    quantity: 1,
-    image: "/placeholder.svg?height=80&width=80",
-  },
-  {
-    id: 3,
-    name: "Reloj Inteligente",
-    price: 199.99,
-    quantity: 1,
-    image: "/placeholder.svg?height=80&width=80",
-  },
-];
+import { useCart } from "../../hooks/useCart";
+import toast from "react-hot-toast";
 
 const Cart = () => {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState(
-    cartItemsData.map((item) => ({ ...item, checked: true }))
-  );
+  const { cart, loading, error, updateQuantity, removeFromCart, clearCart } =
+    useCart();
+  const [cartItems, setCartItems] = useState([]);
 
-  const handleRemove = (id) => {
-    setCartItems((items) => items.filter((item) => item.id !== id));
+  // Sincronizar cartItems con el cart del contexto
+  useEffect(() => {
+    if (cart.items) {
+      setCartItems(cart.items.map((item) => ({ ...item, checked: true })));
+    }
+  }, [cart.items]);
+
+  const handleRemove = async (id) => {
+    try {
+      await removeFromCart(id);
+    } catch (error) {
+      console.error("Error al eliminar item:", error);
+    }
   };
 
   const handleCheck = (id) => {
@@ -46,30 +35,40 @@ const Cart = () => {
     );
   };
 
-  const handleIncrease = (id) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+  const handleIncrease = async (id) => {
+    const item = cartItems.find((item) => item.id === id);
+    if (item) {
+      try {
+        await updateQuantity(id, item.quantity + 1);
+      } catch (error) {
+        console.error("Error al aumentar cantidad:", error);
+      }
+    }
   };
 
-  const handleDecrease = (id) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
+  const handleDecrease = async (id) => {
+    const item = cartItems.find((item) => item.id === id);
+    if (item && item.quantity > 1) {
+      try {
+        await updateQuantity(id, item.quantity - 1);
+      } catch (error) {
+        console.error("Error al disminuir cantidad:", error);
+      }
+    }
   };
 
-  const handleClearCart = () => {
-    setCartItems([]);
+  const handleClearCart = async () => {
+    try {
+      await clearCart();
+    } catch (error) {
+      console.error("Error al vaciar carrito:", error);
+    }
   };
 
+  // Calcular valores usando items marcados
   const subtotal = cartItems.reduce(
-    (total, item) => (item.checked ? total + item.price * item.quantity : total),
+    (total, item) =>
+      item.checked ? total + item.price * item.quantity : total,
     0
   );
 
@@ -77,10 +76,58 @@ const Cart = () => {
   const shipping = hasChecked ? 4.99 : 0;
   const total = subtotal + shipping;
 
+  // Usar valores del backend si están disponibles
+  const displaySubtotal = cart.subtotal || subtotal;
+  const displayShipping = cart.shipping || shipping;
+  const displayTotal = cart.total || total;
+
   const handleFinalizePurchase = () => {
-    // Acá podrías enviar el subtotal con navigate si usás state:
-    navigate('/checkout', { state: { subtotal, shipping, total } });
+    const checkedItems = cartItems.filter((item) => item.checked);
+    if (checkedItems.length === 0) {
+      toast.error("Selecciona al menos un producto para continuar");
+      return;
+    }
+
+    navigate("/checkout", {
+      state: {
+        cartId: cart.id,
+        items: checkedItems,
+        subtotal: displaySubtotal,
+        shipping: displayShipping,
+        total: displayTotal,
+      },
+    });
   };
+
+  // Mostrar loading spinner
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Cargando carrito...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar error si existe
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">Error: {error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="mt-2"
+            variant="outline"
+          >
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -128,9 +175,13 @@ const Cart = () => {
                 size="sm"
                 className="text-red-500 flex items-center"
                 onClick={handleClearCart}
-                disabled={cartItems.length === 0}
+                disabled={cartItems.length === 0 || loading}
               >
-                <Trash2 className="h-4 w-4 mr-1" />
+                {loading ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4 mr-1" />
+                )}
                 <span>Vaciar carrito</span>
               </Button>
             </div>
@@ -149,24 +200,31 @@ const Cart = () => {
             <div className="space-y-3 mb-4">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>${displaySubtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Envío</span>
-                <span>${shipping.toFixed(2)}</span>
+                <span>${displayShipping.toFixed(2)}</span>
               </div>
               <div className="border-t pt-3 flex justify-between font-semibold">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>${displayTotal.toFixed(2)}</span>
               </div>
             </div>
 
             <Button
               className="w-full bg-thirdary-600 hover:bg-thirdary-700 text-white font-semibold"
-              disabled={cartItems.length === 0 || !hasChecked}
+              disabled={cartItems.length === 0 || !hasChecked || loading}
               onClick={handleFinalizePurchase}
             >
-              Finalizar Compra
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Procesando...
+                </>
+              ) : (
+                "Finalizar Compra"
+              )}
             </Button>
 
             <div className="mt-4 text-xs text-gray-500">

@@ -19,6 +19,10 @@ GUEST_ALLOWED_PATHS = [
     '/apps/payments/create_preference/',  # Crear preferencia de pago (guest checkout)
     '/apps/payments/webhook-mercadopago/',  # Webhook de MercadoPago
     '/apps/payments/payment_notification/',  # Notificaciones de pago
+    '/apps/carts/api/',  # APIs de carrito (guest checkout)
+    '/apps/orders/api/orders/checkout/',  # Checkout para guest
+    '/apps/orders/api/orders/test_checkout/',  # Test checkout para guest
+    '/apps/orders/api/orders/my_orders/',  # Órdenes de guest por sesión
 ]
 
 # Rutas que requieren permisos de administrador

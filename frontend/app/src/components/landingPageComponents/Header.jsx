@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Shield,
   ChevronRight,
+  ChevronRight,
 } from "lucide-react";
 import { getCategories } from "../../api/categories.api";
 import { Link, useNavigate } from "react-router-dom";
@@ -197,7 +198,7 @@ function Header() {
                                 (subCat) => (
                                   <Link
                                     key={subCat.id}
-                                    to={`/products/${category.name}/${subCat.name}`}
+                                    to={`/products/${subCat.name}`}
                                     className="block px-4 py-2 text-black hover:bg-gray-100"
                                   >
                                     {subCat.name}

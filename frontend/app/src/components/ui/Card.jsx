@@ -391,16 +391,7 @@ const ProductCardFull = ({ product, addToCart, className = "", ...props }) => {
         {/* Información adicional */}
         <div className="space-y-1 mb-4">
           {/* Stock */}
-          <div className="flex items-center gap-1">
-            <div
-              className={`w-2 h-2 rounded-full ${
-                stock > 0 ? "bg-green-500" : "bg-red-500"
-              }`}
-            ></div>
-            <span className="text-xs text-gray-600">
-              {stock > 0 ? `${stock} disponibles` : "Sin stock"}
-            </span>
-          </div>
+          
 
           {/* Variantes */}
           {hasVariants && (
@@ -476,11 +467,7 @@ const ProductCardFull = ({ product, addToCart, className = "", ...props }) => {
                 </svg>
                 Agregar al carrito
               </button>
-              <a href={`/product/${product.id}`}>
-                <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm">
-                  Ver detalles
-                </button>
-              </a>
+              
             </>
           ) : (
             <button
@@ -623,16 +610,7 @@ const ProductCardCompact = ({
         </div>
 
         {/* Stock */}
-        <div className="flex items-center gap-1 mb-3">
-          <div
-            className={`w-1.5 h-1.5 rounded-full ${
-              stock > 0 ? "bg-green-500" : "bg-red-500"
-            }`}
-          ></div>
-          <span className="text-xs text-gray-600">
-            {stock > 0 ? `${stock} disponibles` : "Sin stock"}
-          </span>
-        </div>
+        
 
         {/* Botón de acción */}
         {stock > 0 ? (
@@ -800,15 +778,7 @@ const ProductCardHero = ({ product, className = "", ...props }) => {
         </div>
 
         {/* Call to action sutil */}
-        <div className="text-center">
-          <Link
-            to={`/product/${product.id}`}
-            className="text-xs text-primary-600 font-medium group-hover:text-primary-700 transition-colors"
-            onClick={e => e.stopPropagation()}
-          >
-            Ver detalles →
-          </Link>
-        </div>
+        
       </div>
     </Card>
   );
@@ -1081,16 +1051,7 @@ const ProductCardHorizontal = ({
               )}
 
               {/* Stock */}
-              <div className="flex items-center gap-1 mt-1">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    stock > 0 ? "bg-green-500" : "bg-red-500"
-                  }`}
-                ></div>
-                <span className="text-xs text-gray-600">
-                  {stock > 0 ? `${stock} disponibles` : "Sin stock"}
-                </span>
-              </div>
+              
             </div>
 
             {/* Botones de acción */}
@@ -1119,11 +1080,7 @@ const ProductCardHorizontal = ({
                     </svg>
                     Agregar al carrito
                   </button>
-                  <a href={`/product/${product.id}`}>
-                    <button className="bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm">
-                      Ver detalles
-                    </button>
-                  </a>
+                  
                 </>
               ) : (
                 <button

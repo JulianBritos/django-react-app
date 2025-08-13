@@ -162,7 +162,7 @@ function Header() {
 
               {dropdownOpen && (
                 <div
-                  className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex"
+                  className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex flex"
                   onMouseEnter={handleDropdownEnter}
                   onMouseLeave={handleDropdownLeave}
                 >
@@ -197,7 +197,7 @@ function Header() {
                                 (subCat) => (
                                   <Link
                                     key={subCat.id}
-                                    to={`/products/${category.name}/${subCat.name}`}
+                                    to={`/products/${subCat.name}`}
                                     className="block px-4 py-2 text-black hover:bg-gray-100"
                                   >
                                     {subCat.name}

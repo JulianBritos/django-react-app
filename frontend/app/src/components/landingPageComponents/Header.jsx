@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useRef, useRef } from "react";
+import { useState, useEffect, useRef, useRef, useRef, useRef } from "react";
 import {
   Menu,
   X,
@@ -6,6 +6,7 @@ import {
   User,
   ChevronDown,
   Shield, ChevronRight, ChevronRight,
+  ChevronRight,
   ChevronRight,
 } from "lucide-react";
 import { getCategories } from "../../api/categories.api";
@@ -31,8 +32,6 @@ function Header() {
     userDropdownOpen: false,
     categories: [],
     hoveredParentId: null, // para trackear la categoría padre sobre la que está el mouse
-  
-    
   });
 
   // Estado para expandir submenús en mobile
@@ -88,6 +87,7 @@ function Header() {
     setMobileMenu("subcategories");
   };
   const backToProductsMenu = () => setMobileMenu("products");
+
 
   // Función para verificar si el usuario tiene permisos de administrador
   const hasAdminAccess = () => {
@@ -241,7 +241,7 @@ function Header() {
                                 (subCat) => (
                                   <Link
                                     key={subCat.id}
-                                    to={`/products/${category.name}/${subCat.name}`}
+                                    to={`/products/${subCat.name}`}
                                     className="block px-4 py-2 text-black hover:bg-gray-100"
                                   >
                                     {subCat.name}

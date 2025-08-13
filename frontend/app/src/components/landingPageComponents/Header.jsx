@@ -1,5 +1,13 @@
-import { useState, useEffect, useRef, useRef } from "react";
-import { Menu, X, ShoppingCart, User, ChevronDown, Shield, ChevronRight, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef, useRef, useRef } from "react";
+import {
+  Menu,
+  X,
+  ShoppingCart,
+  User,
+  ChevronDown,
+  Shield, ChevronRight, ChevronRight,
+  ChevronRight,
+} from "lucide-react";
 import { getCategories } from "../../api/categories.api";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,6 +30,7 @@ function Header() {
     dropdownOpen: false,
     userDropdownOpen: false,
     categories: [],
+    hoveredParentId: null, // para trackear la categoría padre sobre la que está el mouse
     hoveredParentId: null, // para trackear la categoría padre sobre la que está el mouse
     hoveredParentId: null, // para trackear la categoría padre sobre la que está el mouse
   });
@@ -66,6 +75,9 @@ function Header() {
     return user.role === "admin" || user.role === "vendedor";
   };
 
+  // Ref para el timeout de cierre del menú (evitar cierres abruptos)
+  const dropdownTimeout = useRef(null);
+
   // Función para verificar si el usuario tiene permisos de administrador
   const hasAdminAccess = () => {
     if (!isAuthenticated || !user) return false;
@@ -100,13 +112,18 @@ function Header() {
   };
 
   // --- Funciones para menú desplegable ---
+  // --- Funciones para menú desplegable ---
   const handleDropdownEnter = () => {
-    if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
+    if (dropdownTimeout.current.current) clearTimeout(dropdownTimeout.current.current);
     setState((prev) => ({ ...prev, dropdownOpen: true }));
   };
   const handleDropdownLeave = () => {
-    dropdownTimeout.current = setTimeout(() => {
-      setState((prev) => ({ ...prev, dropdownOpen: false, hoveredParentId: null }));
+    dropdownTimeout.current.current = setTimeout(() => {
+      setState((prev) => ({
+        ...prev,
+        dropdownOpen: false,
+        hoveredParentId: null,
+     , hoveredParentId: null }));
     }, 180); // 180ms delay
   };
 
@@ -133,7 +150,10 @@ function Header() {
 
   // Agrupar subcategorías por parent_id para acceso rápido
   const subCategoriesByParent = subCategories.reduce((acc, subCat) => {
-    const key = typeof subCat.parent_id === "object" ? subCat.parent_id.id : subCat.parent_id;
+    const key =
+      typeof subCat.parent_id === "object"
+        ? subCat.parent_id.id
+        : subCat.parent_id;
     if (!acc[key]) acc[key] = [];
     acc[key].push(subCat);
     return acc;
@@ -170,22 +190,27 @@ function Header() {
               </Link>
 
 
+
               {dropdownOpen && (
                 <div
                  
-                  className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex flex"
+                 
+                  className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex flex flex"
                   onMouseEnter={handleDropdownEnter}
                   onMouseLeave={handleDropdownLeave}
                 >
                   {/* Menú principal: categorías padres */}
                   <div className="w-48">
                     {parentCategories.map((category) => {
-                      const hasSubs = subCategoriesByParent[category.id]?.length > 0;
+                      const hasSubs =
+                        subCategoriesByParent[category.id]?.length > 0;
                       return (
                         <div
                           key={category.id}
                           className="relative group"
-                          onMouseEnter={() => handleParentMouseEnter(category.id)}
+                          onMouseEnter={() =>
+                            handleParentMouseEnter(category.id)
+                          }
                           onMouseLeave={handleParentMouseLeave}
                         >
                           <Link
@@ -201,15 +226,17 @@ function Header() {
                           {/* Submenú: solo si el hoveredParentId coincide y tiene subcategorías */}
                           {hasSubs && hoveredParentId === category.id && (
                             <div className="absolute top-0 left-full mt-0 w-48 bg-white shadow-lg rounded-lg z-20">
-                              {subCategoriesByParent[category.id].map((subCat) => (
-                                <Link
-                                  key={subCat.id}
-                                  to={`/products/${category.name}/${subCat.name}`}
-                                  className="block px-4 py-2 text-black hover:bg-gray-100"
-                                >
-                                  {subCat.name}
-                                </Link>
-                              ))}
+                              {subCategoriesByParent[category.id].map(
+                                (subCat) => (
+                                  <Link
+                                    key={subCat.id}
+                                    to={`/products/${subCat.name}`}
+                                    className="block px-4 py-2 text-black hover:bg-gray-100"
+                                  >
+                                    {subCat.name}
+                                  </Link>
+                                )
+                              )}
                             </div>
                           )}
                         </div>
@@ -219,6 +246,7 @@ function Header() {
                 </div>
               )}
             </div>
+
 
             <Link
               to="/contact"

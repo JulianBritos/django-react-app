@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Menu, X, ShoppingCart, User, ChevronDown, Shield, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef, useRef } from "react";
+import { Menu, X, ShoppingCart, User, ChevronDown, Shield, ChevronRight, ChevronRight } from "lucide-react";
 import { getCategories } from "../../api/categories.api";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,6 +23,7 @@ function Header() {
     userDropdownOpen: false,
     categories: [],
     hoveredParentId: null, // para trackear la categoría padre sobre la que está el mouse
+    hoveredParentId: null, // para trackear la categoría padre sobre la que está el mouse
   });
 
   // Estado para expandir submenús en mobile
@@ -41,6 +42,9 @@ function Header() {
     setMobileMenu("subcategories");
   };
   const backToProductsMenu = () => setMobileMenu("products");
+
+  // Ref para el timeout de cierre del menú (evitar cierres abruptos)
+  const dropdownTimeout = useRef(null);
 
   // Función para verificar si el usuario tiene permisos de administrador
   const hasAdminAccess = () => {
@@ -145,9 +149,11 @@ function Header() {
                 />
               </Link>
 
+
               {dropdownOpen && (
                 <div
-                  className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex"
+                 
+                  className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex flex"
                   onMouseEnter={handleDropdownEnter}
                   onMouseLeave={handleDropdownLeave}
                 >
@@ -178,7 +184,7 @@ function Header() {
                               {subCategoriesByParent[category.id].map((subCat) => (
                                 <Link
                                   key={subCat.id}
-                                  to={`/products/${category.name}/${subCat.name}`}
+                                  to={`/products/${subCat.name}`}
                                   className="block px-4 py-2 text-black hover:bg-gray-100"
                                 >
                                   {subCat.name}

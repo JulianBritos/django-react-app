@@ -1,5 +1,13 @@
-import { useState, useEffect } from "react";
-import { Menu, X, ShoppingCart, User, ChevronDown, Shield } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import {
+  Menu,
+  X,
+  ShoppingCart,
+  User,
+  ChevronDown,
+  Shield,
+  ChevronRight,
+} from "lucide-react";
 import { getCategories } from "../../api/categories.api";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,7 +30,11 @@ function Header() {
     dropdownOpen: false,
     userDropdownOpen: false,
     categories: [],
+    hoveredParentId: null, // para trackear la categoría padre sobre la que está el mouse
   });
+
+  // Ref para el timeout de cierre del menú (evitar cierres abruptos)
+  const dropdownTimeout = useRef(null);
 
   // Función para verificar si el usuario tiene permisos de administrador
   const hasAdminAccess = () => {
@@ -57,20 +69,52 @@ function Header() {
     navigate("/login");
   };
 
-  // --- Delay para cerrar el menú de productos ---
-  let dropdownTimeout = null;
-
+  // --- Funciones para menú desplegable ---
   const handleDropdownEnter = () => {
-    if (dropdownTimeout) clearTimeout(dropdownTimeout);
+    if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
     setState((prev) => ({ ...prev, dropdownOpen: true }));
   };
   const handleDropdownLeave = () => {
-    dropdownTimeout = setTimeout(() => {
-      setState((prev) => ({ ...prev, dropdownOpen: false }));
+    dropdownTimeout.current = setTimeout(() => {
+      setState((prev) => ({
+        ...prev,
+        dropdownOpen: false,
+        hoveredParentId: null,
+      }));
     }, 180); // 180ms delay
   };
 
-  const { menuOpen, dropdownOpen, userDropdownOpen, categories } = state;
+  // Para submenú por categoría padre
+  const handleParentMouseEnter = (parentId) => {
+    setState((prev) => ({ ...prev, hoveredParentId: parentId }));
+  };
+
+  const handleParentMouseLeave = () => {
+    setState((prev) => ({ ...prev, hoveredParentId: null }));
+  };
+
+  const {
+    menuOpen,
+    dropdownOpen,
+    userDropdownOpen,
+    categories,
+    hoveredParentId,
+  } = state;
+
+  // Filtrar categorías padres y subcategorías
+  const parentCategories = categories.filter((cat) => !cat.parent_id);
+  const subCategories = categories.filter((cat) => cat.parent_id);
+
+  // Agrupar subcategorías por parent_id para acceso rápido
+  const subCategoriesByParent = subCategories.reduce((acc, subCat) => {
+    const key =
+      typeof subCat.parent_id === "object"
+        ? subCat.parent_id.id
+        : subCat.parent_id;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(subCat);
+    return acc;
+  }, {});
 
   return (
     <header className="bg-primary-50 shadow-sm">
@@ -78,18 +122,13 @@ function Header() {
         {/* Logo + Menú Desktop */}
         <div className="flex items-center space-x-6">
           <Link to="/" className="flex items-center space-x-2">
-          
             <div className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-lg">C</span>
             </div>
             <h1 className="text-xl font-bold tracking-wide">Cosmo Play</h1>
-          
           </Link>
 
           <nav className="hidden md:flex space-x-6">
-            <Link to="/" className="text-black font-medium hover:text-gray-600">
-              Inicio
-            </Link>
             <div
               className="relative group"
               onMouseEnter={handleDropdownEnter}
@@ -106,23 +145,61 @@ function Header() {
                   }`}
                 />
               </Link>
+
               {dropdownOpen && (
-                <div className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10"
+                <div
+                  className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex"
                   onMouseEnter={handleDropdownEnter}
                   onMouseLeave={handleDropdownLeave}
                 >
-                  {categories.map((category) => (
-                    <Link
-                      key={category.name}
-                      to={`/products/${category.name}`}
-                      className="block px-4 py-2 text-black hover:bg-gray-100"
-                    >
-                      {category.name}
-                    </Link>
-                  ))}
+                  {/* Menú principal: categorías padres */}
+                  <div className="w-48">
+                    {parentCategories.map((category) => {
+                      const hasSubs =
+                        subCategoriesByParent[category.id]?.length > 0;
+                      return (
+                        <div
+                          key={category.id}
+                          className="relative group"
+                          onMouseEnter={() =>
+                            handleParentMouseEnter(category.id)
+                          }
+                          onMouseLeave={handleParentMouseLeave}
+                        >
+                          <Link
+                            to={`/products/${category.name}`}
+                            className="block px-4 py-2 text-black hover:bg-gray-100 flex justify-between items-center"
+                          >
+                            {category.name}
+                            {hasSubs && (
+                              <ChevronRight className="w-4 h-4 ml-2 text-gray-600" />
+                            )}
+                          </Link>
+
+                          {/* Submenú: solo si el hoveredParentId coincide y tiene subcategorías */}
+                          {hasSubs && hoveredParentId === category.id && (
+                            <div className="absolute top-0 left-full mt-0 w-48 bg-white shadow-lg rounded-lg z-20">
+                              {subCategoriesByParent[category.id].map(
+                                (subCat) => (
+                                  <Link
+                                    key={subCat.id}
+                                    to={`/products/${subCat.name}`}
+                                    className="block px-4 py-2 text-black hover:bg-gray-100"
+                                  >
+                                    {subCat.name}
+                                  </Link>
+                                )
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
+
             <Link
               to="/contact"
               className="text-black font-medium hover:text-gray-600"

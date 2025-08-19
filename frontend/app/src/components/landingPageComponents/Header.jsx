@@ -31,8 +31,8 @@ function Header() {
     userDropdownOpen: false,
     categories: [],
     hoveredParentId: null, // para trackear la categoría padre sobre la que está el mouse
-    hoveredParentId: null, // para trackear la categoría padre sobre la que está el mouse
-    hoveredParentId: null, // para trackear la categoría padre sobre la que está el mouse
+  
+    
   });
 
   // Estado para expandir submenús en mobile
@@ -77,6 +77,17 @@ function Header() {
 
   // Ref para el timeout de cierre del menú (evitar cierres abruptos)
   const dropdownTimeout = useRef(null);
+
+  const [mobileMenu, setMobileMenu] = useState("main"); // "main", "products", "subcategories"
+  const [selectedParent, setSelectedParent] = useState(null);
+
+  const openProductsMenu = () => setMobileMenu("products");
+  const backToMainMenu = () => setMobileMenu("main");
+  const openSubcategoriesMenu = (category) => {
+    setSelectedParent(category);
+    setMobileMenu("subcategories");
+  };
+  const backToProductsMenu = () => setMobileMenu("products");
 
   // Función para verificar si el usuario tiene permisos de administrador
   const hasAdminAccess = () => {
@@ -195,7 +206,7 @@ function Header() {
                 <div
                  
                  
-                  className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex flex flex"
+                  className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex"
                   onMouseEnter={handleDropdownEnter}
                   onMouseLeave={handleDropdownLeave}
                 >
@@ -230,7 +241,7 @@ function Header() {
                                 (subCat) => (
                                   <Link
                                     key={subCat.id}
-                                    to={`/products/${subCat.name}`}
+                                    to={`/products/${category.name}/${subCat.name}`}
                                     className="block px-4 py-2 text-black hover:bg-gray-100"
                                   >
                                     {subCat.name}
@@ -350,80 +361,136 @@ function Header() {
           </Button>
         </div>
         <nav className="flex flex-col space-y-4 p-4">
-          <Link
-            to="/"
-            className="text-black hover:text-gray-600"
-            onClick={() => toggleState("menuOpen")}
-          >
-            Inicio
-          </Link>
-          <div>
-            <Button
-              variant="ghost"
-              className="text-black hover:text-gray-600 flex items-center w-full text-left"
-              onClick={() => toggleState("dropdownOpen")}
-            >
-              Productos
-              <ChevronDown
-                className={`w-4 h-4 ml-1 transition-transform ${
-                  dropdownOpen ? "rotate-180" : "rotate-0"
-                }`}
-              />
-            </Button>
-            {dropdownOpen && (
-              <div className="pl-4 mt-2 space-y-2">
-                <Link
-                  to="/products/allproducts"
-                  className="block text-black hover:text-gray-600"
-                  onClick={() => toggleState("menuOpen")}
+          {mobileMenu === "main" && (
+            <>
+              <Link
+                to="/"
+                className="text-black hover:text-gray-600"
+                onClick={() => {
+                  toggleState("menuOpen");
+                  setMobileMenu("main");
+                }}
+              >
+                Inicio
+              </Link>
+              <button
+                className="flex items-center justify-between w-full text-black font-medium hover:text-gray-600"
+                onClick={openProductsMenu}
+              >
+                <span>Productos</span>
+                <ChevronRight className="w-4 h-4 ml-2 text-gray-600" />
+              </button>
+              <Link
+                to="/contact"
+                className="text-black hover:text-gray-600"
+                onClick={() => {
+                  toggleState("menuOpen");
+                  setMobileMenu("main");
+                }}
+              >
+                Contacto
+              </Link>
+              <Link
+                to="/cart"
+                className="text-black hover:text-gray-600"
+                onClick={() => {
+                  toggleState("menuOpen");
+                  setMobileMenu("main");
+                }}
+              >
+                Carrito
+              </Link>
+              <Link
+                to="/login"
+                className="text-primary-600 font-medium hover:text-primary-800"
+                onClick={() => {
+                  toggleState("menuOpen");
+                  setMobileMenu("main");
+                }}
+              >
+                Iniciar Sesión
+              </Link>
+              {hasAdminAccess() && (
+                <Button
+                  variant="primary"
+                  size="default"
+                  as={Link}
+                  to="/owner"
+                  className="bg-thirdary-600 hover:bg-thirdary-700"
+                  onClick={() => {
+                    toggleState("menuOpen");
+                    setMobileMenu("main");
+                  }}
                 >
-                  Todos los productos
-                </Link>
-                {categories.map((category) => (
+                  <Shield className="inline-block w-5 h-5 mr-2" /> Admin Panel
+                </Button>
+              )}
+            </>
+          )}
+
+          {mobileMenu === "products" && (
+            <div>
+              <div className="flex items-center mb-4">
+                <button onClick={backToMainMenu} className="mr-2">
+                  <ChevronRight className="w-5 h-5 rotate-180" />
+                </button>
+                <span className="font-bold text-lg">Productos</span>
+              </div>
+              <div className="flex flex-col space-y-2">
+                {parentCategories.map((category) => {
+                  const hasSubs =
+                    subCategoriesByParent[category.id]?.length > 0;
+                  return hasSubs ? (
+                    <button
+                      key={category.id}
+                      className="flex items-center justify-between w-full px-2 py-2 text-black hover:bg-gray-100 rounded"
+                      onClick={() => openSubcategoriesMenu(category)}
+                    >
+                      <span>{category.name}</span>
+                      <ChevronRight className="w-4 h-4 ml-2 text-gray-600" />
+                    </button>
+                  ) : (
+                    <Link
+                      key={category.id}
+                      to={`/products/${category.name}`}
+                      className="block px-2 py-2 text-black hover:bg-gray-100 rounded"
+                      onClick={() => {
+                        toggleState("menuOpen");
+                        setMobileMenu("main");
+                      }}
+                    >
+                      {category.name}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {mobileMenu === "subcategories" && selectedParent && (
+            <div>
+              <div className="flex items-center mb-4">
+                <button onClick={backToProductsMenu} className="mr-2">
+                  <ChevronRight className="w-5 h-5 rotate-180" />
+                </button>
+                <span className="font-bold text-lg">{selectedParent.name}</span>
+              </div>
+              <div className="flex flex-col space-y-2">
+                {subCategoriesByParent[selectedParent.id]?.map((subCat) => (
                   <Link
-                    key={category.name}
-                    to={`/products/${category.name}`}
-                    className="block text-black hover:text-gray-600"
-                    onClick={() => toggleState("menuOpen")}
+                    key={subCat.id}
+                    to={`/products/${selectedParent.name}/${subCat.name}`}
+                    className="block px-2 py-2 text-black hover:bg-gray-100 rounded"
+                    onClick={() => {
+                      toggleState("menuOpen");
+                      setMobileMenu("main");
+                    }}
                   >
-                    {category.name}
+                    {subCat.name}
                   </Link>
                 ))}
               </div>
-            )}
-          </div>
-          <Link
-            to="/contact"
-            className="text-black hover:text-gray-600"
-            onClick={() => toggleState("menuOpen")}
-          >
-            Contacto
-          </Link>
-          <Link
-            to="/cart"
-            className="text-black hover:text-gray-600"
-            onClick={() => toggleState("menuOpen")}
-          >
-            Carrito
-          </Link>
-          <Link
-            to="/login"
-            className="text-primary-600 font-medium hover:text-primary-800"
-            onClick={() => toggleState("menuOpen")}
-          >
-            Iniciar Sesión
-          </Link>
-          {hasAdminAccess() && (
-            <Button
-              variant="primary"
-              size="default"
-              as={Link}
-              to="/owner"
-              className="bg-thirdary-600 hover:bg-thirdary-700"
-              onClick={() => toggleState("menuOpen")}
-            >
-              <Shield className="inline-block w-5 h-5 mr-2" /> Admin Panel
-            </Button>
+            </div>
           )}
         </nav>
       </div>

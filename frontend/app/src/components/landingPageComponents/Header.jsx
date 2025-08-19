@@ -162,7 +162,7 @@ function Header() {
 
               {dropdownOpen && (
                 <div
-                  className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex flex"
+                  className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex"
                   onMouseEnter={handleDropdownEnter}
                   onMouseLeave={handleDropdownLeave}
                 >
@@ -320,43 +320,50 @@ function Header() {
               <Link
                 to="/"
                 className="text-black hover:text-gray-600"
-                onClick={() => toggleState("menuOpen")}
+                onClick={() => {
+                  toggleState("menuOpen");
+                  setMobileMenu("main");
+                }}
               >
                 Inicio
               </Link>
-              <div>
-                <Button
-                  variant="ghost"
-                  className="text-black hover:text-gray-600 flex items-center w-full text-left"
-                  onClick={openProductsMenu}
-                >
-                  Productos
-                  <ChevronRight className="w-4 h-4 ml-2 text-gray-600" />
-                </Button>
-              </div>
+              <button
+                className="flex items-center justify-between w-full text-black font-medium hover:text-gray-600"
+                onClick={openProductsMenu}
+              >
+                <span>Productos</span>
+                <ChevronRight className="w-4 h-4 ml-2 text-gray-600" />
+              </button>
               <Link
                 to="/contact"
                 className="text-black hover:text-gray-600"
-                onClick={() => toggleState("menuOpen")}
+                onClick={() => {
+                  toggleState("menuOpen");
+                  setMobileMenu("main");
+                }}
               >
                 Contacto
               </Link>
               <Link
                 to="/cart"
                 className="text-black hover:text-gray-600"
-                onClick={() => toggleState("menuOpen")}
+                onClick={() => {
+                  toggleState("menuOpen");
+                  setMobileMenu("main");
+                }}
               >
                 Carrito
               </Link>
-              {!isAuthenticated && (
-                <Link
-                  to="/login"
-                  className="text-primary-600 font-medium hover:text-primary-800"
-                  onClick={() => toggleState("menuOpen")}
-                >
-                  Iniciar Sesión
-                </Link>
-              )}
+              <Link
+                to="/login"
+                className="text-primary-600 font-medium hover:text-primary-800"
+                onClick={() => {
+                  toggleState("menuOpen");
+                  setMobileMenu("main");
+                }}
+              >
+                Iniciar Sesión
+              </Link>
               {hasAdminAccess() && (
                 <Button
                   variant="primary"
@@ -364,7 +371,10 @@ function Header() {
                   as={Link}
                   to="/owner"
                   className="bg-thirdary-600 hover:bg-thirdary-700"
-                  onClick={() => toggleState("menuOpen")}
+                  onClick={() => {
+                    toggleState("menuOpen");
+                    setMobileMenu("main");
+                  }}
                 >
                   <Shield className="inline-block w-5 h-5 mr-2" /> Admin Panel
                 </Button>
@@ -381,16 +391,6 @@ function Header() {
                 <span className="font-bold text-lg">Productos</span>
               </div>
               <div className="flex flex-col space-y-2">
-                <Link
-                  to="/products/allproducts"
-                  className="block px-2 py-2 text-black hover:bg-gray-100 rounded"
-                  onClick={() => {
-                    toggleState("menuOpen");
-                    setMobileMenu("main");
-                  }}
-                >
-                  Todos los productos
-                </Link>
                 {parentCategories.map((category) => {
                   const hasSubs =
                     subCategoriesByParent[category.id]?.length > 0;

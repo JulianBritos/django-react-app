@@ -241,7 +241,7 @@ function Header() {
                                 (subCat) => (
                                   <Link
                                     key={subCat.id}
-                                    to={`/products/${subCat.name}`}
+                                    to={`/products/${category.name}/${subCat.name}`}
                                     className="block px-4 py-2 text-black hover:bg-gray-100"
                                   >
                                     {subCat.name}

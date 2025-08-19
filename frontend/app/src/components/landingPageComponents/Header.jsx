@@ -43,8 +43,22 @@ function Header() {
   };
   const backToProductsMenu = () => setMobileMenu("products");
 
+  // Estado para expandir submenús en mobile
+  const [expandedParentId, setExpandedParentId] = useState(null);
+
   // Ref para el timeout de cierre del menú (evitar cierres abruptos)
   const dropdownTimeout = useRef(null);
+
+  const [mobileMenu, setMobileMenu] = useState("main"); // "main", "products", "subcategories"
+  const [selectedParent, setSelectedParent] = useState(null);
+
+  const openProductsMenu = () => setMobileMenu("products");
+  const backToMainMenu = () => setMobileMenu("main");
+  const openSubcategoriesMenu = (category) => {
+    setSelectedParent(category);
+    setMobileMenu("subcategories");
+  };
+  const backToProductsMenu = () => setMobileMenu("products");
 
   // Función para verificar si el usuario tiene permisos de administrador
   const hasAdminAccess = () => {
@@ -184,7 +198,7 @@ function Header() {
                               {subCategoriesByParent[category.id].map((subCat) => (
                                 <Link
                                   key={subCat.id}
-                                  to={`/products/${subCat.name}`}
+                                  to={`/products/${category.name}/${subCat.name}`}
                                   className="block px-4 py-2 text-black hover:bg-gray-100"
                                 >
                                   {subCat.name}

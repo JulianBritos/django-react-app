@@ -54,6 +54,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
   const [combinations, setCombinations] = useState([]);
   const [attributeOptions, setAttributeOptions] = useState([]);
   const [checkedOptions, setCheckedOptions] = useState({});
+  const [isSaveHidden, setIsSaveHidden] = useState(false);
 
   useEffect(() => {
     if (productAttributes.length === 0) {
@@ -192,7 +193,6 @@ const ProductForm = ({ product, onSave, onCancel }) => {
       productData.append("price", formData.price);
       productData.append("category_id", formData.category);
 
-      // Save base product images
       formData.images.forEach((img) => {
         productData.append("uploaded_images", img);
       });
@@ -201,57 +201,12 @@ const ProductForm = ({ product, onSave, onCancel }) => {
         ? await updateProduct(product.id, productData)
         : await createProduct(productData);
 
-      // Create product attributes with their combinations and images
-      for (const combo of combinations) {
-        // Crear una sola variante por combinación
-        const variantData = new FormData();
-        variantData.append("product", savedProduct.id);
-        variantData.append("stock", combo.stock || 0);
-        variantData.append("selling_price", combo.price || formData.price);
-        variantData.append("sku", combo.sku || "");
+      toast.success("Producto guardado exitosamente.");
+      onSave(savedProduct);
 
-        // Agregar imágenes de la variante
-        combo.images.forEach((imgIndex) => {
-          if (formData.images[imgIndex]) {
-            variantData.append("uploaded_images", formData.images[imgIndex]);
-          }
-        });
-
-        // Crear la variante
-        const savedVariant = await createProductAttribute(variantData);
-
-        // Crear los enlaces de atributos para esta variante específica
-        for (const attr of combo.attributes) {
-          console.log("Procesando atributo:", attr);
-          console.log("Tipo de attributeId:", typeof attr.attributeId);
-          console.log("Tipo de optionId:", typeof attr.optionId);
-
-          const attributeLinkData = {
-            product_attribute: savedVariant.id,
-            attribute: parseInt(attr.attributeId),
-            attributeoption: parseInt(attr.optionId),
-          };
-
-          console.log(
-            "Enviando datos de enlace de atributo:",
-            attributeLinkData
-          );
-          console.log("Combo attributes:", combo.attributes);
-          console.log("Attr individual:", attr);
-
-          // Usar un endpoint específico para crear enlaces de atributos
-          try {
-            const result = await createProductAttributeLink(attributeLinkData);
-            console.log("Enlace de atributo creado exitosamente:", result);
-          } catch (error) {
-            console.error("Error al crear enlace de atributo:", error);
-            console.error("Datos enviados:", attributeLinkData);
-            throw error;
-          }
-        }
-      }
-
-      // Solo mostrar el toast y llamar a onSave si todo salió bien
+      // Oculta el botón Guardar por 5 segundos
+      setIsSaveHidden(true);
+      setTimeout(() => setIsSaveHidden(false), 5000);
     } catch (err) {
       console.error(err);
       if (err.response?.status === 401) {
@@ -264,8 +219,6 @@ const ProductForm = ({ product, onSave, onCancel }) => {
     } finally {
       setIsLoading(false);
     }
-    toast.success("Producto guardado exitosamente.");
-    onSave(savedProduct);
   };
 
   const handleAddAttribute = async () => {
@@ -313,8 +266,6 @@ const ProductForm = ({ product, onSave, onCancel }) => {
 
   return (
     <div className="w-full max-w p-6 space-y-6">
-
-
       <div className="space-y-6">
         <NameField
           value={formData.name}
@@ -362,6 +313,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
         onCancel={onCancel}
         onSave={handleSave}
         isLoading={isLoading}
+        isSaveHidden={isSaveHidden}
       />
     </div>
   );

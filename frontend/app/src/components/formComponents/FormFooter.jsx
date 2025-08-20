@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "../ui/Button";
 
-const FormFooter = ({ onCancel, onSave, loading = false }) => {
+const FormFooter = ({ onCancel, onSave, isLoading = false, isSaveHidden = false }) => {
   return (
     <div className="flex justify-end space-x-4 mt-6">
       <Button variant="outline" onClick={onCancel}>
@@ -10,8 +10,9 @@ const FormFooter = ({ onCancel, onSave, loading = false }) => {
       <Button
         variant="success"
         onClick={onSave}
-        disabled={loading}
-        isLoading={loading}
+        disabled={isLoading}
+        isLoading={isLoading}
+        className={isSaveHidden ? "hidden" : ""}
       >
         Guardar
       </Button>

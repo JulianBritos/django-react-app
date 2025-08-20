@@ -57,7 +57,7 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
     }
   };
 
-  const handleSaveProduct = async (savedProduct) => {
+  const handleSaveProduct = (savedProduct) => {
     try {
       if (editingProduct) {
         setProducts(
@@ -66,8 +66,12 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
       } else {
         setProducts([...products, savedProduct]);
       }
-      setShowProductForm(false);
       setEditingProduct(null);
+
+      // Cierra el formulario después de 5 segundos
+      setTimeout(() => {
+        setShowProductForm(false);
+      }, 5000);
     } catch (error) {
       console.error("Error al guardar producto:", error);
       throw error;

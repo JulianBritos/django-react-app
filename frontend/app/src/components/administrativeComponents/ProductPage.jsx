@@ -223,6 +223,60 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
         </Button>
       </div>
 
+            {/* Estadísticas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-6 mb-6">
+        <StatCard
+          title="Total de Productos"
+          value={products.length}
+          icon={<Package size={24} className="text-blue-500" />}
+        />
+
+        <StatCard
+          title="Productos Activos"
+          value={products.filter((p) => p.status === "ACTIVE").length}
+          icon={<PackageOpen size={24} className="text-green-500" />}
+        />
+
+        <StatCard
+          title="Con Stock"
+          value={
+            products.filter(
+              (p) =>
+                p.product_attributes &&
+                p.product_attributes.some((attr) => attr.stock > 0)
+            ).length
+          }
+          icon={<Package size={24} className="text-purple-500" />}
+        />
+
+        <StatCard
+          title="Sin Stock"
+          value={
+            products.filter(
+              (p) =>
+                !p.product_attributes ||
+                p.product_attributes.every((attr) => attr.stock === 0)
+            ).length
+          }
+          icon={<Package size={24} className="text-red-500" />}
+        />
+
+        <StatCard
+          title="Con Variantes"
+          value={
+            products.filter(
+              (p) =>
+                p.product_attributes &&
+                p.product_attributes.length > 0 &&
+                p.product_attributes.some(
+                  (attr) => attr.attributes && attr.attributes.length > 0
+                )
+            ).length
+          }
+          icon={<Tag size={24} className="text-purple-500" />}
+        />
+      </div>
+
       {/* Filtros y búsqueda */}
       <ContentCard className="mb-6">
         <div className="flex flex-col md:flex-row gap-4">
@@ -620,59 +674,7 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
         )}
       </ContentCard>
 
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-8">
-        <StatCard
-          title="Total de Productos"
-          value={products.length}
-          icon={<Package size={24} className="text-blue-500" />}
-        />
 
-        <StatCard
-          title="Productos Activos"
-          value={products.filter((p) => p.status === "ACTIVE").length}
-          icon={<PackageOpen size={24} className="text-green-500" />}
-        />
-
-        <StatCard
-          title="Con Stock"
-          value={
-            products.filter(
-              (p) =>
-                p.product_attributes &&
-                p.product_attributes.some((attr) => attr.stock > 0)
-            ).length
-          }
-          icon={<Package size={24} className="text-purple-500" />}
-        />
-
-        <StatCard
-          title="Sin Stock"
-          value={
-            products.filter(
-              (p) =>
-                !p.product_attributes ||
-                p.product_attributes.every((attr) => attr.stock === 0)
-            ).length
-          }
-          icon={<Package size={24} className="text-red-500" />}
-        />
-
-        <StatCard
-          title="Con Variantes"
-          value={
-            products.filter(
-              (p) =>
-                p.product_attributes &&
-                p.product_attributes.length > 0 &&
-                p.product_attributes.some(
-                  (attr) => attr.attributes && attr.attributes.length > 0
-                )
-            ).length
-          }
-          icon={<Tag size={24} className="text-purple-500" />}
-        />
-      </div>
     </div>
   );
 };

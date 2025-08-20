@@ -1,6 +1,8 @@
 import React from "react";
 import { Button } from "../ui/Button";
 
+//Este componente esta sin uso
+
 const FormHeader = ({ title, onBack }) => {
   return (
     <div className="flex items-center justify-between mb-6">

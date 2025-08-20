@@ -313,7 +313,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
 
   return (
     <div className="w-full max-w p-6 space-y-6">
-      <FormHeader onCancel={onCancel} product={product} />
+
 
       <div className="space-y-6">
         <NameField

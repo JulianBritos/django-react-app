@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // <-- Agrega esta línea
 import {
   Home,
   BarChart2,
@@ -18,9 +19,9 @@ import {
 
 const sidebarItems = [
   {
-    label: "Inicio",
+    label: "Tu eCommerce",
     icon: <Home size={18} />,
-    key: "inicio",
+    key: "Tu eCommerce",
     children: [],
   },
   {
@@ -70,15 +71,21 @@ const sidebarItems = [
 const Sidebar = ({ onSelect }) => {
   const [openSection, setOpenSection] = useState(null);
   const [activeMainItem, setActiveMainItem] = useState(null);
-  const [activeSubItem, setActiveSubItem] = useState(null); // Estado para el subbotón activo
+  const [activeSubItem, setActiveSubItem] = useState(null);
+  const navigate = useNavigate(); // <-- Agrega esta línea
 
   const handleToggle = (key) => {
-    if (openSection === key) {
-      setOpenSection(null); // Cerrar la sección si ya está abierta
-    } else {
-      setOpenSection(key); // Abrir la sección seleccionada
+    if (key === "Tu eCommerce") {
+      setActiveMainItem(key);
+      navigate("/"); // <-- Navega a la ruta raíz
+      return;
     }
-    setActiveMainItem(key); // Marcar la sección activa
+    if (openSection === key) {
+      setOpenSection(null);
+    } else {
+      setOpenSection(key);
+    }
+    setActiveMainItem(key);
   };
 
   const handleSubItemClick = (subItem) => {

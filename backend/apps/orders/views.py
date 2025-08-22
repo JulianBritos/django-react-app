@@ -101,17 +101,19 @@ class OrderViewSet(viewsets.ModelViewSet):
                 # TODO: Crear dirección de envío
                 # TODO: Procesar pago
                 
-                # Vaciar carrito después de crear la orden
+                # Respuesta con la orden creada
+                response_serializer = OrderSerializer(order)
+                response_data = {
+                    'message': 'Orden creada exitosamente',
+                    'order': response_serializer.data
+                }
+                
+                # Vaciar carrito después de crear la orden (pero antes de enviar la respuesta)
                 cart.items.all().delete()
                 cart.status = 'converted'
                 cart.save()
                 
-                # Respuesta con la orden creada
-                response_serializer = OrderSerializer(order)
-                return Response({
-                    'message': 'Orden creada exitosamente',
-                    'order': response_serializer.data
-                }, status=status.HTTP_201_CREATED)
+                return Response(response_data, status=status.HTTP_201_CREATED)
             
             return Response(order_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         

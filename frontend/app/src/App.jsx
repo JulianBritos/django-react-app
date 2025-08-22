@@ -49,7 +49,10 @@ function App() {
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/orderConfirmation" element={<OrderConfirmation />} />
+            <Route
+              path="/order-confirmation/:orderId"
+              element={<OrderConfirmation />}
+            />
             <Route path="/myorders" element={<UserOrdersPage />} />
             <Route
               path="/myorders/:orderId"

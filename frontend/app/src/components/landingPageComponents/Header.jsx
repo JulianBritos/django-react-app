@@ -13,10 +13,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser, logout } from "../../reducer/Actions";
 import { Button } from "../ui/Button";
+import { useCart } from "../../hooks/useCart";
 
 function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { cart } = useCart();
   const { isAuthenticated, user } = useSelector(
     (state) =>
       state.AuthReducer || {
@@ -237,8 +239,14 @@ function Header() {
             </Button>
           )}
           <div className="flex items-center space-x-6 relative">
-            <Link to="/cart" className="text-black">
+            <Link to="/cart" className="text-black relative">
               <ShoppingCart className="w-6 h-6 cursor-pointer" />
+              {/* Indicador del carrito */}
+              {cart.items && cart.items.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-pulse">
+                  {cart.items.length > 99 ? "99+" : cart.items.length}
+                </span>
+              )}
             </Link>
 
             {isAuthenticated ? (

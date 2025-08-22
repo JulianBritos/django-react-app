@@ -1,5 +1,5 @@
 import { useCart } from "../hooks/useCart";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Heart, ChevronDown, Package, AlertCircle } from "lucide-react";
 import AttributeSelector from "./ui/AttributeSelector";
@@ -15,9 +15,11 @@ const ProductInfoCard = ({
   onAttributeSelection,
 }) => {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Extraer atributos únicos de todas las variantes
   const [uniqueAttributes, setUniqueAttributes] = useState([]);
@@ -277,20 +279,36 @@ const ProductInfoCard = ({
         {/* Botones de acción */}
         <div className="space-y-3">
           <button
-            className="w-full bg-primary-500 text-white py-3 px-4 rounded-lg hover:bg-primary-600 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
-            onClick={() => {
-              if (selectedVariant) {
-                console.log("Comprar ahora", {
-                  product,
-                  selectedVariant,
-                  quantity,
-                });
-                // Aquí iría la lógica de compra
+            className="w-full bg-primary-500 text-white py-3 px-4 rounded-lg hover:bg-primary-600 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
+            onClick={async () => {
+              if (selectedVariant && availableStock > 0) {
+                setIsProcessing(true);
+                try {
+                  // Agregar el producto al carrito
+                  await addToCart(
+                    product,
+                    selectedVariant,
+                    quantity,
+                    null // selectedAttributes - puede ser null por ahora
+                  );
+
+                  // Redirigir al carrito después de agregar exitosamente
+                  navigate("/cart");
+                } catch (error) {
+                  console.error("Error al procesar la compra:", error);
+                  // Aquí podrías mostrar un toast de error si tienes implementado
+                } finally {
+                  setIsProcessing(false);
+                }
               }
             }}
-            disabled={!selectedVariant || availableStock === 0}
+            disabled={!selectedVariant || availableStock === 0 || isProcessing}
           >
-            {availableStock === 0 ? "Agotado" : "Comprar Ahora"}
+            {isProcessing
+              ? "Procesando..."
+              : availableStock === 0
+              ? "Agotado"
+              : "Comprar Ahora"}
           </button>
 
           <button

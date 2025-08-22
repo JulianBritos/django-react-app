@@ -107,12 +107,14 @@ export const formatCartForFrontend = (cartData) => {
     id: cart.id,
     items: cart.items.map((item) => ({
       id: item.id,
-      name: item.name,
+      product_name: item.name || item.product_name,
+      name: item.name || item.product_name,
       price: parseFloat(item.price || item.unit_price),
       quantity: item.quantity,
       image: item.image,
       checked: true, // Por defecto marcado para checkout
       subtotal: parseFloat(item.subtotal),
+      selected_attributes: item.selected_attributes || null,
     })),
     subtotal: parseFloat(cart.subtotal),
     shipping: parseFloat(cart.shipping_cost),

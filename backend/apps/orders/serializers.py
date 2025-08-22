@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from decimal import Decimal
 from .models import Order, OrderItem, OrderStatusHistory
 from apps.products.models import Product, ProductAttribute
 from apps.products.serializer import ProductSerializer, ProductAttributeSerializer
@@ -167,13 +168,28 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         Crear items de la orden desde el carrito
         """
         for cart_item in cart.items.all():
+            # Obtener el precio unitario del carrito o calcularlo
+            unit_price = cart_item.unit_price
+            if not unit_price:
+                if cart_item.product_attribute:
+                    unit_price = cart_item.product_attribute.selling_price or cart_item.product_attribute.offer_price
+                else:
+                    unit_price = cart_item.product.initial_buying_price
+            
+            # Asegurar que el precio sea un Decimal
+            if unit_price is None:
+                unit_price = Decimal('0')
+            else:
+                # Convertir FloatField a Decimal
+                unit_price = Decimal(str(unit_price))
+            
             OrderItem.objects.create(
                 order=order,
                 product=cart_item.product,
                 product_attribute=cart_item.product_attribute,
                 product_name=cart_item.product.name,
                 product_sku=cart_item.product_attribute.sku if cart_item.product_attribute else '',
-                unit_price=cart_item.unit_price,
+                unit_price=unit_price,
                 quantity=cart_item.quantity,
                 product_attributes_snapshot=cart_item.selected_attributes
             )
@@ -196,13 +212,20 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 if not unit_price and product_attribute:
                     unit_price = product_attribute.selling_price or product_attribute.offer_price
                 
+                # Asegurar que el precio sea un Decimal
+                if unit_price is None:
+                    unit_price = Decimal('0')
+                else:
+                    # Convertir FloatField a Decimal
+                    unit_price = Decimal(str(unit_price))
+                
                 OrderItem.objects.create(
                     order=order,
                     product=product,
                     product_attribute=product_attribute,
                     product_name=product.name,
                     product_sku=product_attribute.sku if product_attribute else '',
-                    unit_price=unit_price or 0,
+                    unit_price=unit_price,
                     quantity=item_data.get('quantity', 1),
                     product_attributes_snapshot=item_data.get('selected_attributes')
                 )
@@ -216,9 +239,9 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         subtotal = sum(item.subtotal for item in order.items.all())
         
         # Cálculos básicos (pueden ser más complejos después)
-        tax_amount = subtotal * 0.21  # IVA 21%
-        shipping_cost = 4.99 if subtotal > 0 else 0
-        discount_amount = 0  # Por ahora sin descuentos
+        tax_amount = subtotal * Decimal('0.21')  # IVA 21%
+        shipping_cost = Decimal('4.99') if subtotal > 0 else Decimal('0')
+        discount_amount = Decimal('0')  # Por ahora sin descuentos
         
         total_amount = subtotal + tax_amount + shipping_cost - discount_amount
         

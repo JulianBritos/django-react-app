@@ -112,9 +112,13 @@ class CartSerializer(serializers.ModelSerializer):
 
     def get_subtotal(self, obj):
         """
-        Calcular subtotal del carrito
+        Calcular subtotal del carrito con validación
         """
-        return obj.total_amount
+        try:
+            return obj.total_amount or 0
+        except Exception as e:
+            # logger.error(f"Error calculando subtotal: {e}") # Assuming logger is available
+            return 0
 
     def get_shipping_cost(self, obj):
         """

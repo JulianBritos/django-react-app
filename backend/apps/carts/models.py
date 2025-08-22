@@ -3,6 +3,9 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 from apps.products.models import Product, ProductAttribute
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Cart(models.Model):
@@ -67,11 +70,24 @@ class Cart(models.Model):
         """Calcula el monto total del carrito"""
         total = 0
         for item in self.items.all():
-            if item.product_attribute:
-                total += item.product_attribute.selling_price * item.quantity
-            else:
-                # Si no hay variante específica, usar precio base del producto
-                total += item.product.initial_buying_price * item.quantity
+            try:
+                if item.product_attribute:
+                    # Usar precio del atributo si existe
+                    price = item.product_attribute.selling_price or item.product_attribute.offer_price
+                    if price:
+                        total += price * item.quantity
+                else:
+                    # Usar precio base del producto, con validación
+                    price = item.product.initial_buying_price
+                    if price is not None:
+                        total += price * item.quantity
+                    else:
+                        # Si no hay precio, usar 0
+                        logger.warning(f"Producto {item.product.name} sin precio base")
+                        total += 0
+            except Exception as e:
+                logger.error(f"Error calculando precio para item {item.id}: {e}")
+                total += 0
         return total
 
     def is_expired(self):
@@ -136,11 +152,17 @@ class CartItem(models.Model):
     @property
     def subtotal(self):
         """Calcula el subtotal del item"""
-        price = self.unit_price or (
-            self.product_attribute.selling_price if self.product_attribute 
-            else self.product.initial_buying_price
-        )
-        return price * self.quantity
+        if self.product_attribute:
+            price = self.product_attribute.selling_price or self.product_attribute.offer_price
+        else:
+            price = self.unit_price or self.product.initial_buying_price
+        
+        # Validar que el precio no sea None
+        if price is not None:
+            return price * self.quantity
+        else:
+            logger.warning(f"Item {self.product.name} sin precio válido")
+            return 0
 
 
 class Wishlist(models.Model):

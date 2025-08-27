@@ -11,11 +11,13 @@ const CategoryField = ({ value, onChange, categories, error }) => (
       className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-primary-400 focus:outline-none"
     >
       <option value="">Seleccionar categoría</option>
-      {categories.map((cat) => (
-        <option key={cat.id} value={cat.id}>
-          {cat.name}
-        </option>
-      ))}
+      {categories
+        .filter((cat) => !cat.parent_id) // Solo super categorías
+        .map((cat) => (
+          <option key={cat.id} value={cat.id}>
+            {cat.name}
+          </option>
+        ))}
     </select>
     {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
   </div>

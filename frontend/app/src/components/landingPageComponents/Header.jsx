@@ -1,12 +1,11 @@
-import { useState, useEffect, useRef, useRef, useRef, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Menu,
   X,
   ShoppingCart,
   User,
   ChevronDown,
-  Shield, ChevronRight, ChevronRight,
-  ChevronRight,
+  Shield,
   ChevronRight,
 } from "lucide-react";
 import { getCategories } from "../../api/categories.api";
@@ -51,44 +50,6 @@ function Header() {
   };
   const backToProductsMenu = () => setMobileMenu("products");
 
-  // Estado para expandir submenús en mobile
-  const [expandedParentId, setExpandedParentId] = useState(null);
-
-  // Ref para el timeout de cierre del menú (evitar cierres abruptos)
-  const dropdownTimeout = useRef(null);
-
-  const [mobileMenu, setMobileMenu] = useState("main"); // "main", "products", "subcategories"
-  const [selectedParent, setSelectedParent] = useState(null);
-
-  const openProductsMenu = () => setMobileMenu("products");
-  const backToMainMenu = () => setMobileMenu("main");
-  const openSubcategoriesMenu = (category) => {
-    setSelectedParent(category);
-    setMobileMenu("subcategories");
-  };
-  const backToProductsMenu = () => setMobileMenu("products");
-
-  // Función para verificar si el usuario tiene permisos de administrador
-  const hasAdminAccess = () => {
-    if (!isAuthenticated || !user) return false;
-    return user.role === "admin" || user.role === "vendedor";
-  };
-
-  // Ref para el timeout de cierre del menú (evitar cierres abruptos)
-  const dropdownTimeout = useRef(null);
-
-  const [mobileMenu, setMobileMenu] = useState("main"); // "main", "products", "subcategories"
-  const [selectedParent, setSelectedParent] = useState(null);
-
-  const openProductsMenu = () => setMobileMenu("products");
-  const backToMainMenu = () => setMobileMenu("main");
-  const openSubcategoriesMenu = (category) => {
-    setSelectedParent(category);
-    setMobileMenu("subcategories");
-  };
-  const backToProductsMenu = () => setMobileMenu("products");
-
-
   // Función para verificar si el usuario tiene permisos de administrador
   const hasAdminAccess = () => {
     if (!isAuthenticated || !user) return false;
@@ -123,18 +84,17 @@ function Header() {
   };
 
   // --- Funciones para menú desplegable ---
-  // --- Funciones para menú desplegable ---
   const handleDropdownEnter = () => {
-    if (dropdownTimeout.current.current) clearTimeout(dropdownTimeout.current.current);
+    if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
     setState((prev) => ({ ...prev, dropdownOpen: true }));
   };
   const handleDropdownLeave = () => {
-    dropdownTimeout.current.current = setTimeout(() => {
+    dropdownTimeout.current = setTimeout(() => {
       setState((prev) => ({
         ...prev,
         dropdownOpen: false,
         hoveredParentId: null,
-     , hoveredParentId: null }));
+      }));
     }, 180); // 180ms delay
   };
 
@@ -200,12 +160,8 @@ function Header() {
                 />
               </Link>
 
-
-
               {dropdownOpen && (
                 <div
-                 
-                 
                   className="absolute top-full left-0 mt-1 w-48 bg-white shadow-lg rounded-lg z-10 flex"
                   onMouseEnter={handleDropdownEnter}
                   onMouseLeave={handleDropdownLeave}
@@ -258,7 +214,6 @@ function Header() {
               )}
             </div>
 
-
             <Link
               to="/contact"
               className="text-black font-medium hover:text-gray-600"
@@ -270,7 +225,6 @@ function Header() {
 
         {/* Iconos e Iniciar Sesión */}
         <div className="flex items-center space-x-6">
-          {hasAdminAccess() && (
           {hasAdminAccess() && (
             <Button
               variant="success"

@@ -7,7 +7,6 @@ import {
   ChevronDown,
   Shield,
   ChevronRight,
-  ChevronRight,
 } from "lucide-react";
 import { getCategories } from "../../api/categories.api";
 import { Link, useNavigate } from "react-router-dom";

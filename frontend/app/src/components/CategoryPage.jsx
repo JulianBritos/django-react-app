@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import ScrollableNavBar from "../components/ScrollableNavVar";
-import { Button } from "./ui/Button";
 import { ProductCard } from "./ProductCards";
 import { useCart } from "../hooks/useCart";
 import SearchAndFilterBar from "../components/ui/SearchAndFilterBar";
+import FilterPanel from "./ui/FilterPanel";
 
 function CategoryPage() {
   const { categoryName } = useParams();
@@ -12,14 +12,13 @@ function CategoryPage() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  // Estados para búsqueda y filtros
+  // Estados
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(categoryName || "allproducts");
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState([]);
 
   useEffect(() => {
-    // Filtrado inicial
     filtrarProductos(searchTerm, selectedCategory);
   }, [products, selectedCategory, searchTerm]);
 
@@ -57,42 +56,76 @@ function CategoryPage() {
       />
 
       <div className="min-h-screen bg-gray-50 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">
+        {/* Contenedor título + barra */}
+        <div className="relative mb-6 max-[480px]:flex max-[480px]:flex-col max-[480px]:items-stretch max-[480px]:gap-4">
+          
+          {/* Barra de búsqueda y filtros */}
+          <div className="absolute left-1/2 top-0 transform -translate-x-1/2 max-[480px]:relative max-[480px]:order-1 max-[480px]:w-full max-[480px]:mb-2">
+            <div className="w-full">
+              <SearchAndFilterBar
+                searchTerm={searchTerm}
+                onSearchChange={handleSearchChange}
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategorySelect={handleCategoryClick}
+                isFilterMenuOpen={isFilterMenuOpen}
+                toggleFilterMenu={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+              />
+            </div>
+          </div>
+
+          {/* Título */}
+          <h1 className="text-3xl font-bold text-gray-800 max-[480px]:order-2">
             {selectedCategory === "allproducts"
               ? "Nuestros Productos"
               : categories.find((c) => c.name === selectedCategory)?.label || selectedCategory}
           </h1>
-
-          {/* Barra de búsqueda y filtros */}
-          <SearchAndFilterBar
-            searchTerm={searchTerm}
-            onSearchChange={handleSearchChange}
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onCategorySelect={handleCategoryClick}
-            isFilterMenuOpen={isFilterMenuOpen}
-            toggleFilterMenu={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
-          />
         </div>
 
-        {/* Grilla de productos */}
-        {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                addToCart={addToCart}
+        {/* Layout con panel de filtros y productos */}
+        <div className="flex gap-6">
+          {isFilterMenuOpen && (
+            <div className="w-64 relative">
+              <FilterPanel
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategorySelect={handleCategoryClick}
+                onClose={() => setIsFilterMenuOpen(false)}
               />
-            ))}
+            </div>
+          )}
+
+          {/* Grilla de productos */}
+          <div className="flex-1">
+            {filteredProducts.length > 0 ? (
+              <div
+                className="
+                  grid 
+                  grid-cols-1 
+                  max-[480px]:grid-cols-2   /* 👈 Dos columnas en ≤ 480px */
+                  sm:grid-cols-2 
+                  md:grid-cols-3 
+                  lg:grid-cols-4 
+                  gap-6
+                "
+              >
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    addToCart={addToCart}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center">No se encontraron productos.</p>
+            )}
           </div>
-        ) : (
-          <p className="text-gray-500 text-center">No se encontraron productos.</p>
-        )}
+        </div>
       </div>
     </div>
   );
 }
 
 export default CategoryPage;
+

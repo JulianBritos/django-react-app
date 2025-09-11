@@ -56,7 +56,7 @@ const ScrollableNavbar = ({ categories }) => {
         variant="ghost"
         size="icon"
         onClick={() => scroll("left")}
-        className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full p-2"
+        className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full p-2 ml-2"
       >
         <ChevronLeft className="w-6 h-6 text-gray-600" />
       </Button>
@@ -75,22 +75,24 @@ const ScrollableNavbar = ({ categories }) => {
           msOverflowStyle: "none",
         }}
       >
-        {categories.map((category, index) => (
-          <button
-            key={index}
-            className="flex-shrink-0 px-4 py-2 text-gray-800 hover:text-gray-600 transition whitespace-nowrap"
-            onClick={() => handleCategoryClick(category)}
-          >
-            {category.name}
-          </button>
-        ))}
+        {categories
+          .filter((category) => category.parent_id === null)
+          .map((category, index) => (
+            <button
+              key={index}
+              className="flex-shrink-0 px-4 py-2 text-gray-800 hover:text-gray-600 transition whitespace-nowrap"
+              onClick={() => handleCategoryClick(category)}
+            >
+              {category.name}
+            </button>
+          ))}
       </div>
 
       <Button
         variant="ghost"
         size="icon"
         onClick={() => scroll("right")}
-        className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full p-2"
+        className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full p-2 mr-2"
       >
         <ChevronRight className="w-6 h-6 text-gray-600" />
       </Button>

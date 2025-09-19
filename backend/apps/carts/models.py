@@ -37,6 +37,13 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Campos calculados
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    shipping_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
     class Meta:
         indexes = [
             models.Index(fields=['user']),
@@ -57,7 +64,18 @@ class Cart(models.Model):
                 self.expires_at = timezone.now() + timedelta(days=30)
             else:
                 # Carritos de sesión expiran en 7 días
-                self.expires_at = timezone.now() + timedelta(days=7)
+                self.expires_at = timezone.now() + timedelta(days=1)
+        
+        # Calcular totales antes de guardar
+        if self.pk:  # Solo si ya existe
+            from .services import CartCalculationService
+            totals = CartCalculationService.calculate_cart_totals(self)
+            self.subtotal = totals['subtotal']
+            self.tax_amount = totals['tax_amount']
+            self.shipping_cost = totals['shipping_cost']
+            self.discount_amount = totals['discount_amount']
+            self.total_amount = totals['total_amount']
+        
         super().save(*args, **kwargs)
 
     @property
@@ -76,15 +94,7 @@ class Cart(models.Model):
                     price = item.product_attribute.selling_price or item.product_attribute.offer_price
                     if price:
                         total += price * item.quantity
-                else:
-                    # Usar precio base del producto, con validación
-                    price = item.product.initial_buying_price
-                    if price is not None:
-                        total += price * item.quantity
-                    else:
-                        # Si no hay precio, usar 0
-                        logger.warning(f"Producto {item.product.name} sin precio base")
-                        total += 0
+                
             except Exception as e:
                 logger.error(f"Error calculando precio para item {item.id}: {e}")
                 total += 0
@@ -364,3 +374,51 @@ class CartAbandonmentTracking(models.Model):
     def days_since_abandonment(self):
         """Días desde el último abandono"""
         return (timezone.now() - self.last_activity_at).days
+
+
+class StockReservation(models.Model):
+    """Modelo para reservas temporales de stock durante checkout"""
+    
+    STATUS_CHOICES = [
+        ('active', 'Activa'),
+        ('consumed', 'Consumida'),
+        ('expired', 'Expirada'),
+        ('cancelled', 'Cancelada'),
+    ]
+    
+    # Relaciones
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='stock_reservations')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product_attribute = models.ForeignKey(
+        ProductAttribute, 
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    
+    # Información de la reserva
+    quantity = models.PositiveIntegerField()
+    reserved_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['cart', 'status']),
+            models.Index(fields=['expires_at']),
+        ]
+    
+    def __str__(self):
+        return f"Reserva {self.id} - {self.product.name} x{self.quantity}"
+    
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            from django.utils import timezone
+            from datetime import timedelta
+            self.expires_at = timezone.now() + timedelta(minutes=15)  # 15 min de reserva
+        super().save(*args, **kwargs)
+    
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return timezone.now() > self.expires_at

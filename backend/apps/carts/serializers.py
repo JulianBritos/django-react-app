@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from .models import Cart, CartItem, Wishlist, WishlistItem, SavedForLater, RecentlyViewed
 from apps.products.models import Product, ProductAttribute
 from apps.products.serializer import ProductSerializer, ProductAttributeSerializer
+from .services import StockValidationService
 
 User = get_user_model()
 
@@ -111,30 +112,22 @@ class CartSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at', 'session_id']
 
     def get_subtotal(self, obj):
-        """
-        Calcular subtotal del carrito con validación
-        """
-        try:
-            return obj.total_amount or 0
-        except Exception as e:
-            # logger.error(f"Error calculando subtotal: {e}") # Assuming logger is available
-            return 0
-
+        """Calcular subtotal actualizado"""
+        from .services import CartCalculationService
+        totals = CartCalculationService.calculate_cart_totals(obj)
+        return totals['subtotal']
+    
     def get_shipping_cost(self, obj):
-        """
-        Calcular costo de envío (lógica básica por ahora)
-        """
-        if obj.total_amount > 0:
-            return 4.99  # Costo fijo por ahora
-        return 0
-
+        """Calcular costo de envío actualizado"""
+        from .services import CartCalculationService
+        totals = CartCalculationService.calculate_cart_totals(obj)
+        return totals['shipping_cost']
+    
     def get_total(self, obj):
-        """
-        Calcular total incluyendo envío
-        """
-        subtotal = obj.total_amount
-        shipping = self.get_shipping_cost(obj)
-        return subtotal + shipping
+        """Calcular total actualizado"""
+        from .services import CartCalculationService
+        totals = CartCalculationService.calculate_cart_totals(obj)
+        return totals['total_amount']
 
 
 class CartItemCreateUpdateSerializer(serializers.ModelSerializer):
@@ -178,11 +171,19 @@ class CartItemCreateUpdateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """
-        Validaciones cruzadas
+        Validaciones cruzadas con validación de stock
         """
         product_id = data.get('product_id')
         product_attribute_id = data.get('product_attribute_id')
         quantity = data.get('quantity', 1)
+
+        # Validar stock disponible
+        stock_validation = StockValidationService.validate_stock_availability(
+            product_id, product_attribute_id, quantity
+        )
+        
+        if not stock_validation['available']:
+            raise serializers.ValidationError(stock_validation['message'])
 
         # Validar que si se proporciona un atributo, pertenece al producto
         if product_attribute_id:
@@ -191,12 +192,6 @@ class CartItemCreateUpdateSerializer(serializers.ModelSerializer):
                 if attr.product.id != product_id:
                     raise serializers.ValidationError(
                         "El atributo no pertenece al producto seleccionado"
-                    )
-                
-                # Validar stock disponible
-                if attr.stock < quantity:
-                    raise serializers.ValidationError(
-                        f"Solo hay {attr.stock} unidades disponibles"
                     )
             except ProductAttribute.DoesNotExist:
                 raise serializers.ValidationError("La variante del producto no existe")

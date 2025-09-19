@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from decimal import Decimal
 
 from .models import Order, OrderItem, OrderStatusHistory
 from .serializers import (
@@ -14,8 +15,14 @@ from .serializers import (
 )
 from apps.carts.models import Cart
 from apps.payments.models import Payment, PaymentMethod
+from apps.products.models import Product, ProductAttribute
+from django.db import transaction
+from django.core.exceptions import ValidationError
+import logging
 
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -73,49 +80,65 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def checkout(self, request):
         """
-        Proceso completo de checkout
+        Proceso completo de checkout con reserva de stock
         """
         serializer = CheckoutSerializer(data=request.data, context={'request': request})
         
         if serializer.is_valid():
-            # Obtener carrito
-            cart = Cart.objects.get(id=serializer.validated_data['cart_id'])
+            cart_id = serializer.validated_data['cart_id']
             
-            # Crear orden
-            order_data = {
-                'cart_id': cart.id,
-                'guest_email': serializer.validated_data.get('guest_email'),
-                'guest_phone': serializer.validated_data.get('guest_phone'),
-                'guest_name': serializer.validated_data.get('guest_name'),
-                'notes': serializer.validated_data.get('notes', '')
-            }
-            
-            order_serializer = OrderCreateSerializer(
-                data=order_data, 
-                context={'request': request}
-            )
-            
-            if order_serializer.is_valid():
-                order = order_serializer.save()
+            try:
+                cart = Cart.objects.get(id=cart_id)
                 
-                # TODO: Crear dirección de envío
-                # TODO: Procesar pago
+                # Crear reservas de stock para todos los items
+                reservations_created = []
+                for cart_item in cart.items.all():
+                    reservation = StockReservationService.create_reservation(
+                        cart=cart,
+                        product_id=cart_item.product.id,
+                        product_attribute_id=cart_item.product_attribute.id if cart_item.product_attribute else None,
+                        quantity=cart_item.quantity
+                    )
+                    reservations_created.append(reservation)
                 
-                # Respuesta con la orden creada
-                response_serializer = OrderSerializer(order)
-                response_data = {
-                    'message': 'Orden creada exitosamente',
-                    'order': response_serializer.data
+                # Crear orden
+                order_data = {
+                    'cart_id': cart.id,
+                    'guest_email': serializer.validated_data.get('guest_email'),
+                    'guest_phone': serializer.validated_data.get('guest_phone'),
+                    'guest_name': serializer.validated_data.get('guest_name'),
+                    'notes': serializer.validated_data.get('notes', '')
                 }
                 
-                # Vaciar carrito después de crear la orden (pero antes de enviar la respuesta)
-                cart.items.all().delete()
-                cart.status = 'converted'
-                cart.save()
+                order_serializer = OrderCreateSerializer(
+                    data=order_data, 
+                    context={'request': request}
+                )
                 
-                return Response(response_data, status=status.HTTP_201_CREATED)
-            
-            return Response(order_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                if order_serializer.is_valid():
+                    order = order_serializer.save()
+                    
+                    # Consumir reservas de stock
+                    StockReservationService.consume_reservations(cart)
+                    
+                    # Vaciar carrito
+                    cart.items.all().delete()
+                    cart.status = 'converted'
+                    cart.save()
+                    
+                    return Response({
+                        'message': 'Orden creada exitosamente',
+                        'order': OrderSerializer(order).data
+                    }, status=status.HTTP_201_CREATED)
+                else:
+                    # Si falla la creación de orden, cancelar reservas
+                    StockReservationService.cancel_reservations(cart)
+                    return Response(order_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    
+            except Cart.DoesNotExist:
+                return Response({'error': 'Carrito no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+            except ValidationError as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -276,6 +299,47 @@ class OrderViewSet(viewsets.ModelViewSet):
                 'error': 'Error interno',
                 'detail': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['post'])
+    def validate_checkout(self, request):
+        """
+        Validar disponibilidad antes del checkout
+        """
+        cart_id = request.data.get('cart_id')
+        shipping_address = request.data.get('shipping_address', {})
+        
+        if not cart_id:
+            return Response({
+                'error': 'cart_id es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            cart = Cart.objects.get(id=cart_id)
+            
+            # Validar disponibilidad de productos
+            availability_validation = OrderValidationService.validate_order_availability(cart)
+            
+            # Validar dirección de envío
+            address_validation = OrderValidationService.validate_shipping_address(shipping_address)
+            
+            # Combinar validaciones
+            all_errors = availability_validation['errors'] + address_validation['errors']
+            all_warnings = availability_validation['warnings']
+            
+            return Response({
+                'valid': len(all_errors) == 0,
+                'errors': all_errors,
+                'warnings': all_warnings,
+                'cart_summary': {
+                    'total_items': cart.total_items,
+                    'total_amount': cart.total_amount
+                }
+            })
+            
+        except Cart.DoesNotExist:
+            return Response({
+                'error': 'Carrito no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
 
 
 class OrderItemViewSet(viewsets.ReadOnlyModelViewSet):

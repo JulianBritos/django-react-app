@@ -5,13 +5,15 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-
+from decimal import Decimal
+from .services import StockValidationService, CartCalculationService, StockReservationService
 from .models import Cart, CartItem, Wishlist, WishlistItem, RecentlyViewed
 from .serializers import (
     CartSerializer, CartItemSerializer, CartItemCreateUpdateSerializer,
     WishlistSerializer, WishlistItemSerializer, RecentlyViewedSerializer
 )
 from apps.products.models import Product, ProductAttribute
+from .services import StockValidationService, CartCalculationService, StockReservationService
 
 User = get_user_model()
 
@@ -231,6 +233,30 @@ class CartViewSet(viewsets.ModelViewSet):
             'count': cart.total_items,
             'amount': cart.total_amount
         })
+
+    @action(detail=False, methods=['post'])
+    def validate_stock(self, request):
+        """
+        Endpoint para validar stock antes de agregar al carrito
+        """
+        product_id = request.data.get('product_id')
+        product_attribute_id = request.data.get('product_attribute_id')
+        quantity = request.data.get('quantity', 1)
+        
+        if not product_id:
+            return Response({
+                'error': 'product_id es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            validation = StockValidationService.validate_stock_availability(
+                product_id, product_attribute_id, quantity
+            )
+            return Response(validation)
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'])
     def test(self, request):

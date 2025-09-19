@@ -12,7 +12,7 @@ export default defineConfig({
   },
   server: {
     host: "0.0.0.0", // Permite accesos desde fuera del contenedor
-    port: 5173, // Puedes cambiarlo si deseas
+    port: 3000, // Puedes cambiarlo si deseas
     watch: {
       usePolling: true,
     },

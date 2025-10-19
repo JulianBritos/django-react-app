@@ -201,6 +201,64 @@ const ProductForm = ({ product, onSave, onCancel }) => {
         ? await updateProduct(product.id, productData)
         : await createProduct(productData);
 
+      // Si hay combinaciones, crear ProductAttribute y ProductAttributeOptionLink
+      if (combinations.length > 0) {
+        for (const combination of combinations) {
+          // Validar que la combinación tenga precio y stock
+          if (!combination.price || combination.price <= 0) {
+            toast.error(
+              `La combinación "${combination.attributes
+                .map((attr) => attr.optionName)
+                .join(" | ")}" debe tener un precio válido`
+            );
+            setIsLoading(false);
+            return;
+          }
+          if (combination.stock === "" || combination.stock < 0) {
+            toast.error(
+              `La combinación "${combination.attributes
+                .map((attr) => attr.optionName)
+                .join(" | ")}" debe tener stock válido`
+            );
+            setIsLoading(false);
+            return;
+          }
+
+          // Crear ProductAttribute
+          const productAttributeData = new FormData();
+          productAttributeData.append("product", savedProduct.id);
+          productAttributeData.append("selling_price", combination.price);
+          productAttributeData.append("stock", combination.stock);
+          if (combination.sku) {
+            productAttributeData.append("sku", combination.sku);
+          }
+
+          // Agregar imágenes específicas de esta combinación
+          combination.images.forEach((imageIndex) => {
+            if (formData.images[imageIndex]) {
+              productAttributeData.append(
+                "uploaded_images",
+                formData.images[imageIndex]
+              );
+            }
+          });
+
+          const productAttribute = await createProductAttribute(
+            productAttributeData
+          );
+
+          // Crear ProductAttributeOptionLink para cada atributo en la combinación
+          for (const attribute of combination.attributes) {
+            const linkData = {
+              product_attribute: productAttribute.id,
+              attribute: attribute.attributeId,
+              attributeoption: attribute.optionId,
+            };
+            await createProductAttributeLink(linkData);
+          }
+        }
+      }
+
       toast.success("Producto guardado exitosamente.");
       onSave(savedProduct);
 

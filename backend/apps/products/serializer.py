@@ -45,7 +45,12 @@ class ProductSerializer(serializers.ModelSerializer):
         return product
 
 class ProductAttributeSerializer(serializers.ModelSerializer):
-    uploaded_images = ProductImagesSerializer(many=True, read_only=True)
+    uploaded_images = serializers.ListField(
+        child=serializers.ImageField(),
+        write_only=True,
+        required=False
+    )
+    images = ProductImagesSerializer(many=True, read_only=True, source='uploaded_images')
     attribute = serializers.IntegerField(write_only=True, required=False)
     attributeoption = serializers.IntegerField(write_only=True, required=False)
     attributes = serializers.SerializerMethodField()

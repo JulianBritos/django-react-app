@@ -15,6 +15,8 @@ import FormHeader from "./FormHeader";
 //import FormMessages from "./FormMessages";
 import NameField from "./NameField";
 import CategoryField from "./CategoryField";
+import BrandField from "./BrandField";
+import TaxField from "./TaxField";
 //import PriceField from "./PriceField";
 import ImageField from "./ImageField";
 import AttributeManager from "./AttributeManager";
@@ -38,6 +40,8 @@ const ProductForm = ({ product, onSave, onCancel }) => {
     category: product?.category || "",
     images: product?.uploaded_images || [],
     status: product?.status || "",
+    brand: product?.brand || "",
+    tax: product?.tax || "",
   });
 
   const [attributes, setAttributes] = useState([]);
@@ -166,6 +170,14 @@ const ProductForm = ({ product, onSave, onCancel }) => {
     if (!formData.category) newErrors.category = "Seleccione una categoría";
     if (formData.price === "" || Number(formData.price) < 0)
       newErrors.price = "Ingrese un precio válido";
+    if (formData.brand && formData.brand.trim().length < 2)
+      newErrors.brand = "La marca debe tener al menos 2 caracteres";
+    if (
+      formData.tax === "" ||
+      Number(formData.tax) < 0 ||
+      Number(formData.tax) > 100
+    )
+      newErrors.tax = "Ingrese un impuesto válido";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -192,7 +204,8 @@ const ProductForm = ({ product, onSave, onCancel }) => {
       productData.append("description", formData.description);
       productData.append("price", formData.price);
       productData.append("category_id", formData.category);
-
+      productData.append("brand", formData.brand);
+      productData.append("tax", formData.tax);
       formData.images.forEach((img) => {
         productData.append("uploaded_images", img);
       });
@@ -330,6 +343,11 @@ const ProductForm = ({ product, onSave, onCancel }) => {
           onChange={handleChange}
           error={errors.name}
         />
+        <BrandField
+          value={formData.brand}
+          onChange={handleChange}
+          error={errors.brand}
+        />
         <DescriptionField
           description={formData.description}
           onChange={handleDescriptionChange}
@@ -345,7 +363,11 @@ const ProductForm = ({ product, onSave, onCancel }) => {
           categories={categories}
           error={errors.category}
         />
-
+        <TaxField
+          value={formData.tax}
+          onChange={handleChange}
+          error={errors.tax}
+        />
         <AttributeManager
           attributes={attributes}
           productAttributes={productAttributes}

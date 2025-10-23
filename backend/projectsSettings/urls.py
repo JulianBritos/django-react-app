@@ -30,11 +30,6 @@ urlpatterns = [
     path('apps/products/', include('apps.products.urls')),
     path('accounts/', include('allauth.socialaccount.urls')),
     path('apps/payments/', include('apps.payments.urls')),
-    
-    # Nuevas APIs para e-commerce
-    path('apps/carts/', include('apps.carts.urls')),
-    path('apps/orders/', include('apps.orders.urls')),
-    
     # Restringir acceso a Swagger solo a usuarios autenticados y staff
     path('swagger/', login_required(user_passes_test(is_staff_user)(schema_view.with_ui('swagger', cache_timeout=0))), name='schema-swagger-ui'),
     path('dj_rest_auth/', include('dj_rest_auth.urls')),

@@ -13,6 +13,7 @@
     "@tailwindcss/line-clamp": "^0.4.4",
     "axios": "^1.8.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.23.12",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.477.0",
     "maplibre-gl": "^5.6.1",

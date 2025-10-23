@@ -138,10 +138,8 @@ class GuestUserMiddleware(MiddlewareMixin):
     """
     
     def process_request(self, request):
-        # Aplicar a rutas de e-commerce incluyendo carrito
-        if not (request.path.startswith('/apps/products/') or 
-                request.path.startswith('/apps/payments/') or
-                request.path.startswith('/apps/carts/')):  # Agregar carrito
+        # Solo aplicar a rutas de e-commerce
+        if not (request.path.startswith('/apps/products/') or request.path.startswith('/apps/payments/')):
             return None
             
         # Si el usuario no está autenticado, crear un identificador de sesión

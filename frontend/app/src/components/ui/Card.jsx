@@ -609,9 +609,6 @@ const ProductCardCompact = ({
           )}
         </div>
 
-        {/* Stock */}
-        
-
         {/* Botón de acción */}
         {stock > 0 ? (
           <button
@@ -1098,6 +1095,295 @@ const ProductCardHorizontal = ({
   );
 };
 
+// Tarjeta optimizada para mobile (idéntica a ProductCardFull, lista para personalizar)
+const ProductCardMobile = ({ product, addToCart, className = "", ...props }) => {
+  // Extraer información de la primera variante del producto
+  const firstVariant = product.product_attributes?.[0];
+  const productImage =
+    firstVariant?.uploaded_images?.[0]?.image ||
+    product.image ||
+    "/placeholder.png";
+  const sellingPrice = firstVariant?.selling_price || product.price || 0;
+  const offerPrice = firstVariant?.offer_price;
+  const stock = firstVariant?.stock || 0;
+
+  // Calcular descuento si hay oferta
+  const hasDiscount = offerPrice && offerPrice < sellingPrice;
+
+  // Determinar el precio a mostrar
+  const displayPrice = hasDiscount ? offerPrice : sellingPrice;
+
+  // Determinar badges
+  const badges = getProductBadges(product, firstVariant);
+
+  // Verificar si el producto tiene variantes
+  const hasVariants =
+    product.product_attributes && product.product_attributes.length > 1;
+
+  // Url del producto para compartir (mobile)
+  const productUrl = `${window.location.origin}/product/${product.id}`;
+
+  // Manejar compartir (Web Share API) con fallback a copiar enlace (mobile)
+  async function handleShare(e) {
+    e?.preventDefault();
+    e?.stopPropagation();
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: product.name,
+          text: product.name,
+          url: productUrl,
+        });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(productUrl);
+        alert("Enlace copiado al portapapeles");
+      } else {
+        window.open(productUrl, "_blank");
+      }
+    } catch (err) {
+      console.error("Share failed:", err);
+    }
+  }
+
+  return (
+    <Card
+      variant="elevated"
+      hover="lift"
+      className={clsx("group relative overflow-hidden", className)}
+      {...props}
+    >
+      {/* Badges */}
+      <ProductBadges badges={badges} className="absolute top-3 left-3 z-10" />
+
+      {/* Botón de favoritos */}
+      <button
+        className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors shadow-sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          /* manejar favorito aquí */
+        }}
+        aria-label="Favorito"
+      >
+        <svg
+          className="w-4 h-4 text-gray-600 hover:text-red-500 transition-colors"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+          />
+        </svg>
+      </button>
+
+      {/* Botón de compartir (mobile, debajo del favorito) */}
+      <button
+        className="absolute top-12 right-3 z-10 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors shadow-sm"
+        onClick={handleShare}
+        aria-label="Compartir producto"
+      >
+        <svg
+          className="w-5 h-5 text-gray-700"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="18" cy="5" r="3" />
+          <circle cx="6" cy="12" r="3" />
+          <circle cx="18" cy="19" r="3" />
+          <path d="M8.5 12.5L15 8.5" />
+          <path d="M8.5 12.5L15 16.5" />
+        </svg>
+      </button>
+
+      {/* Imagen del producto */}
+      <div className="relative aspect-square overflow-hidden bg-gray-50">
+        <ProductImage
+          src={productImage}
+          alt={product.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+
+        {/* Overlay con botón de ver detalles */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+          <a
+            href={`/product/${product.id}`}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors">
+              <svg
+                className="w-4 h-4 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            </button>
+          </a>
+        </div>
+      </div>
+
+      {/* Información del producto */}
+      <div className="p-1">
+        {/* Categoría */}
+        {product.category && (
+          <div className="mb-1">
+            <span className="text-xs text-gray-500 hover:text-primary-600 transition-colors">
+              {product.category.name}
+            </span>
+          </div>
+        )}
+
+        {/* Nombre del producto */}
+        <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 hover:text-primary-600 transition-colors mb-1">
+          {product.name}
+        </h3>
+
+        {/* Marca */}
+        {product.brand && (
+          <p className="text-xs text-gray-600 mb-1">
+            Marca: <span className="font-medium">{product.brand}</span>
+          </p>
+        )}
+
+        {/* Calificación */}
+        <div className="items-center gap-1 mb-1">
+          <div className="flex">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <svg
+                key={star}
+                className="w-3 h-3 fill-yellow-400 text-yellow-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            ))}
+          </div>
+          <span className="text-xs text-gray-500">(4.5)</span>
+          <span className="text-xs text-gray-400">•</span>
+        </div>
+
+        {/* Precios */}
+        <div className="mb-1">
+          {hasDiscount ? (
+            <div className="flex items-center gap-2">
+              <span className="text-base font-bold text-gray-900">
+                ${displayPrice.toFixed(2)}
+              </span>
+              <span className="text-xs text-gray-500 line-through">
+                ${sellingPrice.toFixed(2)}
+              </span>
+            </div>
+          ) : (
+            <span className="text-base font-bold text-gray-900">
+              ${displayPrice.toFixed(2)}
+            </span>
+          )}
+        </div>
+
+        {/* Variantes */}
+        {hasVariants && (
+          <div className="mb-1">
+            <span className="text-xs text-blue-600 font-medium">
+              {product.product_attributes.length} variantes disponibles
+            </span>
+          </div>
+        )}
+
+        {/* Envío y garantía */}
+        <div className="items-center gap-4 text-xs text-gray-600 mb-1">
+          <div className="flex items-center gap-1">
+            <svg
+              className="w-3 h-3 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+              />
+            </svg>
+            <span className="text-green-600 font-medium">Envío gratis</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <svg
+              className="w-3 h-3 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
+            <span className="text-blue-600">Garantía 30 días</span>
+          </div>
+        </div>
+
+        {/* Botón de acción */}
+        {stock > 0 ? (
+          <button
+            className="w-full bg-primary-500 text-white py-2 px-3 rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm flex items-center justify-center gap-2"
+            onClick={(e) => {
+              e.preventDefault();
+              addToCart(product);
+            }}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"
+              />
+            </svg>
+            Agregar al carrito
+          </button>
+        ) : (
+          <button
+            className="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded-lg font-medium text-sm"
+            disabled
+          >
+            Agotado
+          </button>
+        )}
+      </div>
+    </Card>
+  );
+};
+
 // Exportar todos los componentes
 export {
   Card,
@@ -1109,6 +1395,7 @@ export {
   ProductCardHorizontal,
   ProductCardHero,
   ProductCardMinimal,
+  ProductCardMobile, // <-- exporta tu nueva tarjeta
 };
 export default Card;
 

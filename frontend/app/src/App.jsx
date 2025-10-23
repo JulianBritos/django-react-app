@@ -62,6 +62,7 @@ function App() {
             <Route path="/owner" element={<OwnerSection />} />
             <Route path="/products" element={<ProductsSection />}>
               <Route path=":categoryName" element={<CategoryPage />} />
+              <Route path=":categoryName/:subCategoryName" element={<CategoryPage />} />
             </Route>
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<LoginPage />} />

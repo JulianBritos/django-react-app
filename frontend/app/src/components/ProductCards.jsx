@@ -5,6 +5,7 @@ export {
   ProductCardHorizontal,
   ProductCardHero,
   ProductCardMinimal,
+  ProductCardMobile, // <-- AGREGA ESTA LÍNEA
 } from "./ui/Card";
 
 // También exportar como default el ProductCard principal

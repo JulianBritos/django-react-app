@@ -1,8 +1,24 @@
-import React, { useState } from 'react';
+import React from "react";
 import { FiX } from "react-icons/fi";
 
-function FilterPanel({ categories, selectedCategory, onCategorySelect, onClose }) {
+function FilterPanel({
+  categories,
+  selectedCategory,
+  onCategorySelect,
+  onClose,
+  selectedFilters,
+  setSelectedFilters,
+  onClearFilters,
+  isMobile = false, // <-- added prop to detect mobile usage
+}) {
   const exampleFilters = [
+    "En stock",
+    "En oferta",
+    "Envío gratis",
+    "Novedades",
+    "Más vendidos",
+    "Precio bajo a alto",
+    "Precio alto a bajo",
     "En stock",
     "En oferta",
     "Envío gratis",
@@ -12,41 +28,24 @@ function FilterPanel({ categories, selectedCategory, onCategorySelect, onClose }
     "Precio alto a bajo"
   ];
 
-  // Estado para almacenar los filtros seleccionados
-  const [selectedFilters, setSelectedFilters] = useState([]);
-
-  // Maneja cambios de los checkboxes
+  // Toggle individual
   const handleCheckboxChange = (filter) => {
     setSelectedFilters((prev) =>
       prev.includes(filter)
-        ? prev.filter((f) => f !== filter) // Si estaba seleccionado, lo quita
-        : [...prev, filter]                // Si no estaba, lo agrega
+        ? prev.filter((f) => f !== filter)
+        : [...prev, filter]
     );
-  };
-
-  // Limpiar filtros: desmarcar todos
-  const handleClearFilters = () => {
-    setSelectedFilters([]); // Deja vacío el array → desmarca todo
-  };
-
-  // Aplicar filtros: en el futuro agregaremos la lógica real
-  const handleApplyFilters = () => {
-    console.log("Filtros aplicados:", selectedFilters);
-    // Luego agregaremos la lógica real para filtrar productos
   };
 
   return (
     <aside
-      className="
-        bg-white rounded-lg shadow p-4
-        sticky top-4
-        min-w-[16rem]
-        z-30
-        max-h-[90vh]
-        overflow-y-auto
-      "
+      className={
+        // keep relative for the close button positioning; apply sticky + self-start + max-height only on escritorio
+        `bg-white rounded-lg shadow p-4 relative min-w-[16rem] z-30 ${
+          isMobile ? "" : "sticky top-4 self-start max-h-[calc(100vh-4rem)] overflow-auto"
+        }`
+      }
     >
-      {/* Botón cerrar */}
       <button
         className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
         onClick={onClose}
@@ -54,9 +53,9 @@ function FilterPanel({ categories, selectedCategory, onCategorySelect, onClose }
       >
         <FiX size={20} />
       </button>
+
       <div className="font-bold mb-4">Filtros</div>
 
-      {/* Lista de filtros */}
       <div className="flex flex-col gap-3 mb-4">
         {exampleFilters.map((filter) => (
           <label key={filter} className="flex items-center gap-2 cursor-pointer">
@@ -71,17 +70,19 @@ function FilterPanel({ categories, selectedCategory, onCategorySelect, onClose }
         ))}
       </div>
 
-      {/* Botones de acción */}
       <div className="flex gap-2 mt-2">
         <button
           className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
-          onClick={handleApplyFilters}
+          onClick={() => {
+            console.log("Filtros aplicados:", selectedFilters);
+            if (onClose) onClose(); // Cierra el panel
+          }}
         >
           Aplicar Filtros
         </button>
         <button
           className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition"
-          onClick={handleClearFilters}
+          onClick={onClearFilters}
         >
           Limpiar Filtros
         </button>
@@ -91,3 +92,4 @@ function FilterPanel({ categories, selectedCategory, onCategorySelect, onClose }
 }
 
 export default FilterPanel;
+

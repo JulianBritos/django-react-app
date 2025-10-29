@@ -13,7 +13,7 @@ from .serializers import (
     WishlistSerializer, WishlistItemSerializer, RecentlyViewedSerializer
 )
 from apps.products.models import Product, ProductAttribute
-from .services import StockValidationService, CartCalculationService, StockReservationService
+
 
 User = get_user_model()
 

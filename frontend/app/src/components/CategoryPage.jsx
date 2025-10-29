@@ -5,7 +5,6 @@ import { ProductCard, ProductCardMobile } from "./ProductCards";
 import { useCart } from "../hooks/useCart";
 import SearchAndFilterBar from "../components/ui/SearchAndFilterBar";
 import FilterPanel from "./ui/FilterPanel";
-import SearchAndFilterBar from "../components/ui/SearchAndFilterBar";
 
 function CategoryPage() {
   const { categoryName, subCategoryName } = useParams();
@@ -14,8 +13,12 @@ function CategoryPage() {
   const { addToCart } = useCart();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(categoryName || "allproducts");
-  const [selectedSubCategory, setSelectedSubCategory] = useState(subCategoryName || null);
+  const [selectedCategory, setSelectedCategory] = useState(
+    categoryName || "allproducts"
+  );
+  const [selectedSubCategory, setSelectedSubCategory] = useState(
+    subCategoryName || null
+  );
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState([]);
@@ -29,7 +32,13 @@ function CategoryPage() {
 
   useEffect(() => {
     filtrarProductos();
-  }, [products, selectedCategory, selectedSubCategory, searchTerm, selectedFilters]);
+  }, [
+    products,
+    selectedCategory,
+    selectedSubCategory,
+    searchTerm,
+    selectedFilters,
+  ]);
 
   useEffect(() => {
     setSelectedCategory(categoryName || "allproducts");
@@ -81,14 +90,12 @@ function CategoryPage() {
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
   const handleClearFilters = () => setSelectedFilters([]);
   const handleCloseMobileModal = () => {
-    filtrarProductos(); 
+    filtrarProductos();
     setIsFilterMenuOpen(false);
   };
 
   // Breadcrumb
-  const breadcrumbs = [
-    { label: "Nuestros Productos", clickable: true },
-  ];
+  const breadcrumbs = [{ label: "Nuestros Productos", clickable: true }];
   if (selectedCategory && selectedCategory !== "allproducts") {
     breadcrumbs.push({ label: selectedCategory, clickable: true });
   }
@@ -129,7 +136,9 @@ function CategoryPage() {
                   {crumb.label}
                 </button>
               ) : (
-                <span className="text-3xl font-bold text-gray-800">{crumb.label}</span>
+                <span className="text-3xl font-bold text-gray-800">
+                  {crumb.label}
+                </span>
               )}
               {index < breadcrumbs.length - 1 && (
                 <span className="mx-1 text-3xl font-bold">/</span>
@@ -216,7 +225,9 @@ function CategoryPage() {
                 )}
               </div>
             ) : (
-              <p className="text-gray-500 text-center">No se encontraron productos.</p>
+              <p className="text-gray-500 text-center">
+                No se encontraron productos.
+              </p>
             )}
           </div>
         </div>
@@ -226,4 +237,3 @@ function CategoryPage() {
 }
 
 export default CategoryPage;
-

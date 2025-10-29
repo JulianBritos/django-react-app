@@ -10,12 +10,14 @@ import {
   formatCartForFrontend,
 } from "../api/carts.api";
 import toast from "react-hot-toast";
+import { useAuth } from "./AuthContext";
 
 // Creamos el contexto
 const CartContext = createContext();
 
 // Proveedor
 export const CartProvider = ({ children }) => {
+  const { isAuthenticated } = useAuth();
   const [cart, setCart] = useState({
     id: null,
     items: [],
@@ -49,6 +51,18 @@ export const CartProvider = ({ children }) => {
         });
       }
     } catch (err) {
+      // Si es 401 (no autenticado), simplemente dejar el carrito vacío
+      if (err.response?.status === 401) {
+        setCart({
+          id: null,
+          items: [],
+          subtotal: 0,
+          shipping: 0,
+          total: 0,
+          itemsCount: 0,
+        });
+        return; // Salir temprano sin mostrar error
+      }
       console.error("Error al cargar carrito:", err);
       setError("Error al cargar el carrito");
       // En caso de error, mantener carrito vacío
@@ -67,8 +81,11 @@ export const CartProvider = ({ children }) => {
 
   // Cargar carrito al montar el componente
   useEffect(() => {
-    loadCart();
-  }, [loadCart]);
+    if (isAuthenticated) {
+      // Solo cargar si está autenticado
+      loadCart();
+    }
+  }, [loadCart, isAuthenticated]); // Agregar isAuthenticated a las dependencias
 
   // Agregar producto al carrito
   const addToCart = async (

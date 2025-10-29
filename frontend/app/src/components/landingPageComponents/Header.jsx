@@ -8,16 +8,6 @@ import {
   Shield,
   ChevronRight,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import {
-  Menu,
-  X,
-  ShoppingCart,
-  User,
-  ChevronDown,
-  Shield,
-  ChevronRight,
-} from "lucide-react";
 import { getCategories } from "../../api/categories.api";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";

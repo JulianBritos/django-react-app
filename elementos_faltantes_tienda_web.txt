@@ -3,160 +3,160 @@ ELEMENTOS FALTANTES PARA UNA TIENDA WEB FUNCIONAL
 
 2. GESTIÓN DEL CARRITO
 ----------------------
-- Persistencia del carrito en base de datos
-- Sincronización con backend
-- Validación de stock al agregar productos
-- Cálculo de totales (impuestos, descuentos, envío)
-- Códigos de descuento funcionales
-- Gestión de cantidades dinámica
+✅ - Persistencia del carrito en base de datos
+✅ - Sincronización con backend
+✅ - Validación de stock al agregar productos
+✅ - Cálculo de totales (impuestos, descuentos, envío)
+❌ - Códigos de descuento funcionales (modelo existe pero lógica de aplicación tiene TODO)
+✅ - Gestión de cantidades dinámica
 
 3. SISTEMA DE PAGOS
 -------------------
-- Integración completa con MercadoPago
-- Webhooks de pago para confirmaciones
-- Múltiples métodos de pago
-- Validación de transacciones
-- Sistema de reembolsos
-- Manejo de pagos fallidos
+✅ - Integración completa con MercadoPago
+✅ - Webhooks de pago para confirmaciones
+⚠️ - Múltiples métodos de pago (modelo PaymentMethod existe, solo MercadoPago implementado)
+⚠️ - Validación de transacciones (básica implementada)
+✅ - Sistema de reembolsos (PaymentRefund model implementado)
+⚠️ - Manejo de pagos fallidos (status 'failed' existe pero lógica incompleta)
 
 4. GESTIÓN DE ENVÍOS
 --------------------
-- Cálculo de costos de envío
-- Integración con servicios de envío
-- Seguimiento de pedidos (tracking)
-- Múltiples direcciones de envío
-- Validación de códigos postales
-- Estimación de tiempos de entrega
+✅ - Cálculo de costos de envío (ShippingMethod.calculate_shipping_cost implementado)
+❌ - Integración con servicios de envío (modelos existen pero sin integración real)
+✅ - Seguimiento de pedidos (tracking) (TrackingEvent model implementado)
+✅ - Múltiples direcciones de envío (Address model con soporte completo)
+⚠️ - Validación de códigos postales (modelo existe pero sin validación funcional)
+✅ - Estimación de tiempos de entrega (estimated_days en ShippingMethod)
 
 5. INVENTARIO Y STOCK
 ---------------------
-- Alertas de stock bajo funcionales
-- Reservas de stock durante checkout
-- Historial de movimientos de inventario
-- Sincronización automática de stock
-- Gestión de productos agotados
-- Backorders (pedidos pendientes)
+⚠️ - Alertas de stock bajo funcionales (campo stock_alert existe pero sin lógica de activación)
+✅ - Reservas de stock durante checkout (StockReservation model implementado)
+❌ - Historial de movimientos de inventario (no implementado)
+❌ - Sincronización automática de stock (no implementado)
+❌ - Gestión de productos agotados (no implementado)
+❌ - Backorders (pedidos pendientes) (no implementado)
 
 6. BÚSQUEDA Y FILTROS
 ---------------------
-- Búsqueda avanzada (nombre, descripción, SKU)
-- Filtros por precio (rango)
-- Filtros por marca
-- Ordenamiento (precio, popularidad, fecha)
-- Búsqueda por categorías
-- Filtros combinados
+⚠️ - Búsqueda avanzada (nombre, descripción, SKU) (solo búsqueda por nombre implementada en frontend)
+❌ - Filtros por precio (rango) (no implementado)
+❌ - Filtros por marca (campo brand existe pero sin filtro)
+❌ - Ordenamiento (precio, popularidad, fecha) (no implementado)
+✅ - Búsqueda por categorías (implementada en frontend)
+⚠️ - Filtros combinados (parcial - solo "En stock" y "En oferta")
 
 7. NOTIFICACIONES Y EMAILS
 --------------------------
-- Confirmación de pedidos por email
-- Notificaciones de cambio de estado
-- Emails de marketing automatizados
-- Notificaciones push
-- Plantillas de email personalizadas
-- Notificaciones de stock bajo
+⚠️ - Confirmación de pedidos por email (plantillas y modelos existen pero lógica de envío no verificada)
+⚠️ - Notificaciones de cambio de estado (NotificationTemplate existe pero sin activación automática)
+❌ - Emails de marketing automatizados (no implementado)
+❌ - Notificaciones push (modelo existe pero no implementado)
+✅ - Plantillas de email personalizadas (implementadas en templates/account/email/)
+⚠️ - Notificaciones de stock bajo (modelo existe pero sin lógica de activación)
 
 8. GESTIÓN DE CLIENTES
 ----------------------
-- Historial completo de compras
-- Wishlist/Favoritos
-- Sistema de reseñas y calificaciones
-- Programa de fidelización
-- Gestión de direcciones múltiples
-- Perfil de cliente completo
+✅ - Historial completo de compras (Order model con relación user implementada)
+✅ - Wishlist/Favoritos (Wishlist y WishlistItem models implementados)
+❌ - Sistema de reseñas y calificaciones (no implementado)
+❌ - Programa de fidelización (no implementado)
+✅ - Gestión de direcciones múltiples (Address model con soporte completo)
+✅ - Perfil de cliente completo (CustomUserModel con campos adicionales)
 
 9. REPORTES Y ANALÍTICAS
 ------------------------
-- Dashboard de ventas detallado
-- Reportes de inventario
-- Análisis de productos más vendidos
-- Métricas de conversión
-- Reportes de clientes
-- Estadísticas de marketing
+❌ - Dashboard de ventas detallado (app analytics existe pero sin implementación)
+❌ - Reportes de inventario (no implementado)
+❌ - Análisis de productos más vendidos (no implementado)
+❌ - Métricas de conversión (no implementado)
+❌ - Reportes de clientes (no implementado)
+❌ - Estadísticas de marketing (no implementado)
 
 10. SEGURIDAD
 -------------
-- Validación robusta de datos
-- Protección CSRF verificada
-- Rate limiting para APIs
-- Logs de auditoría
-- Backup automático
-- Encriptación de datos sensibles
+⚠️ - Validación robusta de datos (validaciones básicas en serializers, puede mejorarse)
+✅ - Protección CSRF verificada (CSRF middleware activo en settings)
+❌ - Rate limiting para APIs (no implementado)
+⚠️ - Logs de auditoría (APILoggingMiddleware existe pero logs básicos)
+❌ - Backup automático (no implementado)
+❌ - Encriptación de datos sensibles (no implementado específicamente)
 
 11. FUNCIONALIDADES ADMINISTRATIVAS
 ----------------------------------
-- Gestión completa de cupones
-- Sistema de promociones
-- Gestión avanzada de usuarios
-- Configuración de la tienda
-- Gestión de contenido (CMS)
-- Panel de control completo
+⚠️ - Gestión completa de cupones (Coupon model existe pero lógica de aplicación incompleta)
+⚠️ - Sistema de promociones (Promotion model existe pero sin implementación funcional)
+✅ - Gestión avanzada de usuarios (CustomUserModel con roles y permisos)
+❌ - Configuración de la tienda (no implementado)
+❌ - Gestión de contenido (CMS) (no implementado)
+⚠️ - Panel de control completo (admin básico de Django, sin dashboard personalizado)
 
 12. EXPERIENCIA DE USUARIO
 --------------------------
-- Responsive design completo
-- Accesibilidad (WCAG)
-- Optimización de rendimiento
-- PWA (Progressive Web App)
-- Modo offline
-- Animaciones y transiciones
+⚠️ - Responsive design completo (Tailwind usado pero no verificado completamente)
+❌ - Accesibilidad (WCAG) (no verificado/implementado)
+❌ - Optimización de rendimiento (no implementado específicamente)
+❌ - PWA (Progressive Web App) (no implementado)
+❌ - Modo offline (no implementado)
+⚠️ - Animaciones y transiciones (depende de implementación frontend, no verificado)
 
 13. INTERNACIONALIZACIÓN
 -----------------------
-- Múltiples idiomas
-- Múltiples monedas
-- Formatos de fecha/hora regionales
-- Impuestos por región
-- Configuración de zona horaria
+❌ - Múltiples idiomas (LANGUAGE_CODE='en-us' en settings, no implementado)
+⚠️ - Múltiples monedas (campo currency en Cart/Order pero solo ARS usado)
+❌ - Formatos de fecha/hora regionales (no implementado)
+❌ - Impuestos por región (tax_amount calculado pero tasa fija 21%)
+❌ - Configuración de zona horaria (TIME_ZONE='UTC' en settings)
 
 14. INTEGRACIONES
 -----------------
-- Google Analytics
-- Facebook Pixel
-- Redes sociales (login, sharing)
-- APIs de terceros
-- Herramientas de marketing
-- CRM integration
+❌ - Google Analytics (no implementado)
+❌ - Facebook Pixel (no implementado)
+⚠️ - Redes sociales (login, sharing) (allauth con Google configurado pero no verificado)
+❌ - APIs de terceros (solo MercadoPago implementado)
+❌ - Herramientas de marketing (no implementado)
+❌ - CRM integration (no implementado)
 
 15. FUNCIONALIDADES ESPECÍFICAS DE E-COMMERCE
 ---------------------------------------------
-- Productos relacionados
-- Cross-selling/Up-selling
-- Productos vistos recientemente
-- Comparador de productos
-- Chat en vivo
-- FAQ dinámico
+❌ - Productos relacionados (no implementado)
+❌ - Cross-selling/Up-selling (no implementado)
+✅ - Productos vistos recientemente (RecentlyViewed model implementado)
+❌ - Comparador de productos (no implementado)
+❌ - Chat en vivo (no implementado)
+❌ - FAQ dinámico (no implementado)
 
 16. DESPLIEGUE Y PRODUCCIÓN
 ---------------------------
-- Variables de entorno de producción
-- SSL/HTTPS configurado
-- CDN para imágenes
-- Monitoreo y logs
-- Escalabilidad
-- CI/CD pipeline
+⚠️ - Variables de entorno de producción (environ usado pero DEBUG=True, requiere revisión)
+❌ - SSL/HTTPS configurado (no verificado, configuraciones HSTS en settings pero sin SSL)
+❌ - CDN para imágenes (MEDIA_URL configurado pero no CDN)
+⚠️ - Monitoreo y logs (LOGGING configurado básicamente)
+❌ - Escalabilidad (no verificado/planificado)
+❌ - CI/CD pipeline (no implementado)
 
 PRIORIDADES DE IMPLEMENTACIÓN
 =============================
 
 ALTA PRIORIDAD (Crítico para funcionamiento básico):
 ---------------------------------------------------
-1. Persistencia del carrito en base de datos
-2. Validación de stock en tiempo real
-3. Integración completa de pagos con webhooks
-4. Sistema de envíos básico
-5. Notificaciones de pedidos por email
-6. Autenticación y autorización robusta
-7. Validación de datos en formularios
+✅ 1. Persistencia del carrito en base de datos
+✅ 2. Validación de stock en tiempo real
+✅ 3. Integración completa de pagos con webhooks
+⚠️ 4. Sistema de envíos básico (cálculo implementado, falta integración real)
+⚠️ 5. Notificaciones de pedidos por email (plantillas existen, activación automática no verificada)
+✅ 6. Autenticación y autorización robusta (JWT + roles implementados)
+⚠️ 7. Validación de datos en formularios (validaciones básicas, puede mejorarse)
 
 MEDIA PRIORIDAD (Mejora la experiencia):
 ----------------------------------------
-1. Búsqueda y filtros avanzados
-2. Sistema de reseñas y calificaciones
-3. Dashboard administrativo completo
-4. Gestión de cupones funcional
-5. Reportes básicos de ventas
-6. Gestión de inventario avanzada
-7. Múltiples métodos de pago
+⚠️ 1. Búsqueda y filtros avanzados (búsqueda básica existe, faltan filtros avanzados)
+❌ 2. Sistema de reseñas y calificaciones
+⚠️ 3. Dashboard administrativo completo (admin básico, falta dashboard personalizado)
+⚠️ 4. Gestión de cupones funcional (modelo existe, falta lógica de aplicación)
+❌ 5. Reportes básicos de ventas
+❌ 6. Gestión de inventario avanzada
+⚠️ 7. Múltiples métodos de pago (modelo existe, solo MercadoPago funcional)
 
 BAJA PRIORIDAD (Funcionalidades avanzadas):
 -------------------------------------------
@@ -173,10 +173,14 @@ NOTAS IMPORTANTES
 
 - El proyecto tiene una base sólida con arquitectura bien estructurada
 - La estructura de modelos está bien diseñada
-- Falta principalmente la implementación de lógica de negocio
-- Las APIs necesitan protección y validación
-- El frontend necesita más funcionalidades interactivas
+- Muchos modelos existen pero falta implementación completa de lógica de negocio
+- Las APIs tienen protección CSRF básica pero falta rate limiting
+- El frontend tiene funcionalidades básicas pero faltan filtros avanzados
 - Se requiere testing completo antes de producción
+- Los webhooks de pago están implementados pero requieren verificación
+- La mayoría de funcionalidades tienen modelos creados pero falta la lógica de aplicación
+- Sistema de reservas de stock implementado pero puede mejorarse
+- Plantillas de email personalizadas implementadas pero falta activación automática
 
 ESTADO ACTUAL
 =============
@@ -190,14 +194,62 @@ ESTADO ACTUAL
 - Sistema de categorías
 - Gestión de variantes de productos
 - Sistema de roles y permisos (admin, cliente, vendedor)
+- Persistencia del carrito en base de datos
+- Validación de stock en tiempo real
+- Cálculo de totales del carrito (impuestos, envío)
+- Webhooks de pago (MercadoPago)
+- Modelo de reembolsos
+- Seguimiento de envíos (tracking)
+- Múltiples direcciones
+- Wishlist/Favoritos
+- Productos vistos recientemente
+- Reservas de stock
+- Plantillas de email personalizadas
+- Gestión de direcciones múltiples
+
+⚠️ PARCIALMENTE IMPLEMENTADO:
+- Códigos de descuento (modelo existe, lógica de aplicación incompleta)
+- Múltiples métodos de pago (modelo existe, solo MercadoPago funcional)
+- Validación de transacciones (básica)
+- Manejo de pagos fallidos (status existe, lógica incompleta)
+- Integración con servicios de envío (modelos sin integración real)
+- Alertas de stock bajo (campo existe, sin lógica de activación)
+- Búsqueda avanzada (solo por nombre)
+- Notificaciones de email (plantillas existen, lógica de envío no verificada)
+- Logs de auditoría (básico)
+- Filtros (parciales)
 
 ❌ FALTANTE:
-- Lógica de negocio completa
-- Validaciones robustas
-- Integración de sistemas
-- Funcionalidades de e-commerce
-- Seguridad avanzada
-- Experiencia de usuario completa
+- Lógica completa de aplicación de cupones
+- Integración real con servicios de envío
+- Historial de movimientos de inventario
+- Sincronización automática de stock
+- Gestión de productos agotados
+- Backorders
+- Filtros por precio y marca
+- Ordenamiento de productos
+- Sistema de reseñas y calificaciones
+- Programa de fidelización
+- Dashboard y reportes de analíticas
+- Emails de marketing automatizados
+- Notificaciones push
+- Rate limiting para APIs
+- Backup automático
+- Encriptación de datos sensibles
+- Configuración de tienda
+- CMS
+- Accesibilidad WCAG
+- PWA y modo offline
+- Internacionalización completa
+- Integraciones de marketing (Analytics, Pixel)
+- Productos relacionados
+- Cross-selling/Up-selling
+- Comparador de productos
+- Chat en vivo
+- FAQ dinámico
+- SSL/HTTPS configurado
+- CDN para imágenes
+- CI/CD pipeline
 
 RECOMENDACIONES
 ===============

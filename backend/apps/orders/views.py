@@ -17,6 +17,7 @@ from apps.carts.models import Cart
 from apps.carts.services import StockReservationService
 from apps.payments.models import Payment, PaymentMethod
 from apps.products.models import Product, ProductAttribute
+from .services import OrderValidationService
 from django.db import transaction
 from django.core.exceptions import ValidationError
 import logging

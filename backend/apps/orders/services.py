@@ -212,3 +212,106 @@ class StockReservationService:
         # Por ahora, no hay nada que hacer ya que no tenemos el modelo StockReservation
         # TODO: Implementar cuando tengas el modelo
         pass
+
+
+class OrderValidationService:
+    """Servicio para validación de órdenes antes del checkout"""
+    
+    @staticmethod
+    def validate_order_availability(cart):
+        """
+        Validar disponibilidad de stock para todos los items del carrito
+        
+        Returns:
+            dict: {
+                'errors': list of error messages,
+                'warnings': list of warning messages
+            }
+        """
+        from apps.carts.services import StockValidationService
+        
+        errors = []
+        warnings = []
+        
+        if not cart.items.exists():
+            errors.append('El carrito está vacío')
+            return {'errors': errors, 'warnings': warnings}
+        
+        for cart_item in cart.items.all():
+            try:
+                product_id = cart_item.product.id
+                product_attribute_id = cart_item.product_attribute.id if cart_item.product_attribute else None
+                quantity = cart_item.quantity
+                
+                stock_validation = StockValidationService.validate_stock_availability(
+                    product_id=product_id,
+                    product_attribute_id=product_attribute_id,
+                    quantity=quantity
+                )
+                
+                if not stock_validation['available']:
+                    product_name = cart_item.product.name
+                    errors.append(
+                        f'{product_name}: {stock_validation.get("message", "Stock insuficiente")}'
+                    )
+                elif stock_validation.get('available_stock', 0) <= quantity + 2:
+                    # Advertencia si quedan pocas unidades
+                    product_name = cart_item.product.name
+                    warnings.append(
+                        f'{product_name}: Solo quedan {stock_validation["available_stock"]} unidades disponibles'
+                    )
+                    
+            except Exception as e:
+                logger.error(f"Error validando disponibilidad para item {cart_item.id}: {str(e)}")
+                errors.append(f'Error al validar disponibilidad del producto: {str(e)}')
+        
+        return {'errors': errors, 'warnings': warnings}
+    
+    @staticmethod
+    def validate_shipping_address(shipping_address):
+        """
+        Validar estructura y campos requeridos de la dirección de envío
+        
+        Args:
+            shipping_address: dict con los datos de la dirección
+            
+        Returns:
+            dict: {
+                'errors': list of error messages
+            }
+        """
+        errors = []
+        
+        if not shipping_address:
+            # La dirección es opcional en algunos casos, pero si se proporciona debe ser válida
+            return {'errors': errors}
+        
+        if not isinstance(shipping_address, dict):
+            errors.append('La dirección de envío debe ser un objeto válido')
+            return {'errors': errors}
+        
+        # Campos requeridos
+        required_fields = {
+            'first_name': 'Nombre',
+            'last_name': 'Apellido',
+            'address_line_1': 'Dirección',
+            'city': 'Ciudad',
+            'postal_code': 'Código postal'
+        }
+        
+        for field, label in required_fields.items():
+            if not shipping_address.get(field):
+                errors.append(f'El campo {label} es requerido en la dirección de envío')
+        
+        # Validaciones adicionales
+        if shipping_address.get('postal_code'):
+            postal_code = str(shipping_address['postal_code']).strip()
+            if len(postal_code) < 4:
+                errors.append('El código postal debe tener al menos 4 caracteres')
+        
+        if shipping_address.get('phone'):
+            phone = str(shipping_address['phone']).strip()
+            if len(phone) < 8:
+                errors.append('El teléfono debe tener al menos 8 caracteres')
+        
+        return {'errors': errors}

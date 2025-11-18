@@ -35,7 +35,8 @@ def set_guest_user(request):
     """
     Configura un usuario guest en el request
     """
-    request.user = None
+    from django.contrib.auth.models import AnonymousUser
+    request.user = AnonymousUser()  # AnonymousUser ya tiene is_authenticated = False por defecto
     request.user_role = 'guest'
     request.user_permissions = GUEST_PERMISSIONS.copy()
 

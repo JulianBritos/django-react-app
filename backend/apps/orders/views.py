@@ -14,6 +14,7 @@ from .serializers import (
     OrderStatusHistorySerializer
 )
 from apps.carts.models import Cart
+from apps.carts.services import StockReservationService
 from apps.payments.models import Payment, PaymentMethod
 from apps.products.models import Product, ProductAttribute
 from django.db import transaction
@@ -84,15 +85,23 @@ class OrderViewSet(viewsets.ModelViewSet):
         """
         serializer = CheckoutSerializer(data=request.data, context={'request': request})
         
-        if serializer.is_valid():
-            cart_id = serializer.validated_data['cart_id']
+        if not serializer.is_valid():
+            logger.error(f"CheckoutSerializer validation errors: {serializer.errors}")
+            logger.error(f"Request data: {request.data}")
+            return Response({
+                'error': 'Error en los datos del checkout',
+                'details': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        cart_id = serializer.validated_data['cart_id']
+        
+        try:
+            cart = Cart.objects.get(id=cart_id)
             
-            try:
-                cart = Cart.objects.get(id=cart_id)
-                
-                # Crear reservas de stock para todos los items
-                reservations_created = []
-                for cart_item in cart.items.all():
+            # Crear reservas de stock para todos los items
+            reservations_created = []
+            for cart_item in cart.items.all():
+                try:
                     reservation = StockReservationService.create_reservation(
                         cart=cart,
                         product_id=cart_item.product.id,
@@ -100,47 +109,72 @@ class OrderViewSet(viewsets.ModelViewSet):
                         quantity=cart_item.quantity
                     )
                     reservations_created.append(reservation)
-                
-                # Crear orden
-                order_data = {
-                    'cart_id': cart.id,
-                    'guest_email': serializer.validated_data.get('guest_email'),
-                    'guest_phone': serializer.validated_data.get('guest_phone'),
-                    'guest_name': serializer.validated_data.get('guest_name'),
-                    'notes': serializer.validated_data.get('notes', '')
-                }
-                
-                order_serializer = OrderCreateSerializer(
-                    data=order_data, 
-                    context={'request': request}
-                )
-                
-                if order_serializer.is_valid():
-                    order = order_serializer.save()
-                    
-                    # Consumir reservas de stock
-                    StockReservationService.consume_reservations(cart)
-                    
-                    # Vaciar carrito
-                    cart.items.all().delete()
-                    cart.status = 'converted'
-                    cart.save()
-                    
-                    return Response({
-                        'message': 'Orden creada exitosamente',
-                        'order': OrderSerializer(order).data
-                    }, status=status.HTTP_201_CREATED)
-                else:
-                    # Si falla la creación de orden, cancelar reservas
+                except ValidationError as e:
+                    # Si falla la reserva de stock, cancelar todas las reservas creadas
+                    logger.error(f"Error al reservar stock para item {cart_item.id}: {str(e)}")
                     StockReservationService.cancel_reservations(cart)
-                    return Response(order_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({
+                        'error': f'Error al reservar stock: {str(e)}'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Crear orden
+            order_data = {
+                'cart_id': cart.id,
+                'guest_email': serializer.validated_data.get('guest_email'),
+                'guest_phone': serializer.validated_data.get('guest_phone'),
+                'guest_name': serializer.validated_data.get('guest_name'),
+                'notes': serializer.validated_data.get('notes', '')
+            }
+            
+            order_serializer = OrderCreateSerializer(
+                data=order_data, 
+                context={'request': request}
+            )
+            
+            if not order_serializer.is_valid():
+                # Si falla la creación de orden, cancelar reservas
+                logger.error(f"OrderCreateSerializer validation errors: {order_serializer.errors}")
+                StockReservationService.cancel_reservations(cart)
+                return Response({
+                    'error': 'Error al crear la orden',
+                    'details': order_serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            order = order_serializer.save()
+            
+            # Consumir reservas de stock
+            StockReservationService.consume_reservations(cart)
+            
+            # Vaciar carrito
+            cart.items.all().delete()
+            cart.status = 'converted'
+            cart.save()
+            
+            return Response({
+                'message': 'Orden creada exitosamente',
+                'order': OrderSerializer(order).data
+            }, status=status.HTTP_201_CREATED)
                     
-            except Cart.DoesNotExist:
-                return Response({'error': 'Carrito no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-            except ValidationError as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Cart.DoesNotExist:
+            return Response({
+                'error': 'Carrito no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except ValidationError as e:
+            logger.error(f"ValidationError en checkout: {str(e)}")
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error inesperado en checkout: {str(e)}", exc_info=True)
+            # Intentar cancelar reservas si hay alguna
+            try:
+                cart = Cart.objects.get(id=cart_id)
+                StockReservationService.cancel_reservations(cart)
+            except:
+                pass
+            return Response({
+                'error': 'Error al procesar el checkout. Por favor intenta de nuevo.'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['patch'])
     def update_status(self, request, pk=None):

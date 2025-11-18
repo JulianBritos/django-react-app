@@ -6,7 +6,9 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from decimal import Decimal
-from .services import StockValidationService, CartCalculationService, StockReservationService
+from django.core.exceptions import ValidationError
+import logging
+from .services import StockValidationService, CartCalculationService, StockReservationService, CouponService
 from .models import Cart, CartItem, Wishlist, WishlistItem, RecentlyViewed
 from .serializers import (
     CartSerializer, CartItemSerializer, CartItemCreateUpdateSerializer,
@@ -16,6 +18,7 @@ from apps.products.models import Product, ProductAttribute
 
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class CartViewSet(viewsets.ModelViewSet):
@@ -30,10 +33,18 @@ class CartViewSet(viewsets.ModelViewSet):
         """
         Filtrar carritos por usuario o sesión
         """
-        if self.request.user.is_authenticated:
-            return Cart.objects.filter(user=self.request.user)
+        # Verificar si el usuario está autenticado
+        user = getattr(self.request, 'user', None)
+        
+        if user and hasattr(user, 'is_authenticated') and user.is_authenticated and not user.is_anonymous:
+            return Cart.objects.filter(user=user)
         else:
-            session_id = self.request.session.session_key
+            # Para usuarios guest, usar session_id
+            session_id = getattr(self.request.session, 'session_key', None)
+            if not session_id and hasattr(self.request, 'session'):
+                self.request.session.create()
+                session_id = self.request.session.session_key
+            
             if session_id:
                 return Cart.objects.filter(session_id=session_id, user__isnull=True)
             return Cart.objects.none()
@@ -42,18 +53,28 @@ class CartViewSet(viewsets.ModelViewSet):
         """
         Obtener o crear carrito para el usuario/sesión actual
         """
-        if self.request.user.is_authenticated:
+        # Verificar si el usuario está autenticado
+        user = getattr(self.request, 'user', None)
+        
+        if user and hasattr(user, 'is_authenticated') and user.is_authenticated and not user.is_anonymous:
             cart, created = Cart.objects.get_or_create(
-                user=self.request.user,
+                user=user,
                 status='active',
                 defaults={'currency': 'ARS'}
             )
         else:
-            # Asegurar que existe session_key
-            if not self.request.session.session_key:
-                self.request.session.create()
+            # Para usuarios guest, asegurar que existe session_key
+            if not hasattr(self.request, 'session'):
+                # Si no hay sesión, crear una
+                from django.contrib.sessions.middleware import SessionMiddleware
+                middleware = SessionMiddleware(lambda x: None)
+                middleware.process_request(self.request)
             
-            session_id = self.request.session.session_key
+            session_id = getattr(self.request.session, 'session_key', None)
+            if not session_id:
+                self.request.session.create()
+                session_id = self.request.session.session_key
+            
             cart, created = Cart.objects.get_or_create(
                 session_id=session_id,
                 user__isnull=True,
@@ -80,65 +101,87 @@ class CartViewSet(viewsets.ModelViewSet):
         """
         Agregar item al carrito
         """
-        cart, _ = self.get_or_create_cart()
-        
-        # Validar datos del item
-        item_serializer = CartItemCreateUpdateSerializer(data=request.data)
-        if item_serializer.is_valid():
-            product_id = item_serializer.validated_data['product_id']
-            product_attribute_id = item_serializer.validated_data.get('product_attribute_id')
-            quantity = item_serializer.validated_data.get('quantity', 1)
+        try:
+            cart, _ = self.get_or_create_cart()
             
-            # Buscar si ya existe el item en el carrito
-            existing_item = cart.items.filter(
-                product_id=product_id,
-                product_attribute_id=product_attribute_id
-            ).first()
-            
-            if existing_item:
-                # Actualizar cantidad del item existente
-                existing_item.quantity += quantity
-                existing_item.save()
-                item_data = CartItemSerializer(existing_item).data
-                message = "Cantidad actualizada en el carrito"
-            else:
-                # Crear nuevo item
-                product = Product.objects.get(id=product_id)
-                product_attribute = None
+            # Validar datos del item
+            item_serializer = CartItemCreateUpdateSerializer(data=request.data)
+            if item_serializer.is_valid():
+                product_id = item_serializer.validated_data['product_id']
+                product_attribute_id = item_serializer.validated_data.get('product_attribute_id')
+                quantity = item_serializer.validated_data.get('quantity', 1)
                 
-                if product_attribute_id:
-                    product_attribute = ProductAttribute.objects.get(id=product_attribute_id)
-                    unit_price = product_attribute.selling_price or product_attribute.offer_price
+                # Buscar si ya existe el item en el carrito
+                existing_item = cart.items.filter(
+                    product_id=product_id,
+                    product_attribute_id=product_attribute_id
+                ).first()
+                
+                if existing_item:
+                    # Actualizar cantidad del item existente
+                    existing_item.quantity += quantity
+                    existing_item.save()
+                    item_data = CartItemSerializer(existing_item).data
+                    message = "Cantidad actualizada en el carrito"
                 else:
-                    # Usar el precio del primer atributo disponible
-                    first_attr = product.product_attributes.filter(stock__gt=0).first()
-                    if first_attr:
-                        unit_price = first_attr.selling_price or first_attr.offer_price
+                    # Crear nuevo item
+                    try:
+                        product = Product.objects.get(id=product_id)
+                    except Product.DoesNotExist:
+                        return Response({
+                            'error': 'El producto no existe'
+                        }, status=status.HTTP_404_NOT_FOUND)
+                    
+                    product_attribute = None
+                    
+                    if product_attribute_id:
+                        try:
+                            product_attribute = ProductAttribute.objects.get(id=product_attribute_id)
+                            unit_price = product_attribute.selling_price or product_attribute.offer_price
+                        except ProductAttribute.DoesNotExist:
+                            return Response({
+                                'error': 'La variante del producto no existe'
+                            }, status=status.HTTP_404_NOT_FOUND)
                     else:
-                        unit_price = 0
+                        # Usar el precio del primer atributo disponible
+                        first_attr = product.product_attributes.filter(stock__gt=0).first()
+                        if first_attr:
+                            unit_price = first_attr.selling_price or first_attr.offer_price
+                        else:
+                            unit_price = 0
+                    
+                    cart_item = CartItem.objects.create(
+                        cart=cart,
+                        product=product,
+                        product_attribute=product_attribute,
+                        quantity=quantity,
+                        unit_price=unit_price,
+                        selected_attributes=item_serializer.validated_data.get('selected_attributes'),
+                        notes=item_serializer.validated_data.get('notes', '')
+                    )
+                    
+                    item_data = CartItemSerializer(cart_item).data
+                    message = "Producto agregado al carrito"
                 
-                cart_item = CartItem.objects.create(
-                    cart=cart,
-                    product=product,
-                    product_attribute=product_attribute,
-                    quantity=quantity,
-                    unit_price=unit_price,
-                    selected_attributes=item_serializer.validated_data.get('selected_attributes'),
-                    notes=item_serializer.validated_data.get('notes', '')
-                )
-                
-                item_data = CartItemSerializer(cart_item).data
-                message = "Producto agregado al carrito"
+                # Devolver carrito actualizado
+                cart_serializer = CartSerializer(cart)
+                return Response({
+                    'message': message,
+                    'item': item_data,
+                    'cart': cart_serializer.data
+                }, status=status.HTTP_201_CREATED)
             
-            # Devolver carrito actualizado
-            cart_serializer = CartSerializer(cart)
             return Response({
-                'message': message,
-                'item': item_data,
-                'cart': cart_serializer.data
-            }, status=status.HTTP_201_CREATED)
-        
-        return Response(item_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                'error': 'Datos inválidos',
+                'details': item_serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            logger.error(f"Error al agregar item al carrito: {str(e)}", exc_info=True)
+            return Response({
+                'error': 'Error al agregar producto al carrito',
+                'detail': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['patch'])
     def update_item(self, request):
@@ -258,6 +301,101 @@ class CartViewSet(viewsets.ModelViewSet):
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=['post'])
+    def apply_coupon(self, request):
+        """
+        Aplicar un cupón de descuento al carrito
+        """
+        coupon_code = request.data.get('coupon_code')
+        
+        if not coupon_code:
+            return Response({
+                'error': 'Se requiere el código del cupón'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        cart, _ = self.get_or_create_cart()
+        
+        try:
+            result = CouponService.apply_coupon_to_cart(cart, coupon_code)
+            return Response(result, status=status.HTTP_200_OK)
+        except ValidationError as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error aplicando cupón: {str(e)}")
+            return Response({
+                'error': 'Error al aplicar el cupón'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=False, methods=['post'])
+    def remove_coupon(self, request):
+        """
+        Remover cupón del carrito
+        """
+        cart, _ = self.get_or_create_cart()
+        
+        try:
+            result = CouponService.remove_coupon_from_cart(cart)
+            return Response(result, status=status.HTTP_200_OK)
+        except ValidationError as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error removiendo cupón: {str(e)}")
+            return Response({
+                'error': 'Error al remover el cupón'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=False, methods=['post'])
+    def validate_coupon(self, request):
+        """
+        Validar un cupón sin aplicarlo
+        """
+        coupon_code = request.data.get('coupon_code')
+        
+        if not coupon_code:
+            return Response({
+                'error': 'Se requiere el código del cupón'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        cart, _ = self.get_or_create_cart()
+        
+        validation = CouponService.validate_coupon(
+            coupon_code, 
+            user=request.user if request.user.is_authenticated else None,
+            cart=cart
+        )
+        
+        if validation['valid']:
+            coupon = validation['coupon']
+            # Calcular el descuento que se aplicaría
+            totals = CartCalculationService.calculate_cart_totals(cart)
+            discount = CouponService.calculate_discount(
+                coupon, 
+                totals['subtotal'], 
+                totals['shipping_cost']
+            )
+            
+            return Response({
+                'valid': True,
+                'coupon': {
+                    'code': coupon.code,
+                    'name': coupon.name,
+                    'description': coupon.description,
+                    'discount_type': coupon.discount_type,
+                    'discount_value': str(coupon.discount_value),
+                },
+                'estimated_discount': str(discount),
+                'message': validation['message']
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'valid': False,
+                'message': validation['message']
+            }, status=status.HTTP_400_BAD_REQUEST)
+    
     @action(detail=False, methods=['get'])
     def test(self, request):
         """

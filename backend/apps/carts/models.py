@@ -37,6 +37,16 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Cupón aplicado
+    coupon = models.ForeignKey(
+        'promotions.Coupon',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='carts',
+        help_text="Cupón de descuento aplicado al carrito"
+    )
+    
     # Campos calculados
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)

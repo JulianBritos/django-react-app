@@ -51,8 +51,9 @@ export const CartProvider = ({ children }) => {
         });
       }
     } catch (err) {
-      // Si es 401 (no autenticado), simplemente dejar el carrito vacío
-      if (err.response?.status === 401) {
+      // Si es 401 (no autenticado) o 403, simplemente dejar el carrito vacío
+      // Esto es normal para usuarios guest, no es un error
+      if (err.response?.status === 401 || err.response?.status === 403) {
         setCart({
           id: null,
           items: [],
@@ -61,8 +62,10 @@ export const CartProvider = ({ children }) => {
           total: 0,
           itemsCount: 0,
         });
+        setError(null); // No es un error, es un usuario guest
         return; // Salir temprano sin mostrar error
       }
+      // Solo mostrar errores para otros códigos de estado
       console.error("Error al cargar carrito:", err);
       setError("Error al cargar el carrito");
       // En caso de error, mantener carrito vacío
@@ -79,13 +82,10 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Cargar carrito al montar el componente
+  // Cargar carrito al montar el componente (funciona para usuarios autenticados y guest)
   useEffect(() => {
-    if (isAuthenticated) {
-      // Solo cargar si está autenticado
-      loadCart();
-    }
-  }, [loadCart, isAuthenticated]); // Agregar isAuthenticated a las dependencias
+    loadCart();
+  }, [loadCart]); // Cargar siempre, sin importar si está autenticado
 
   // Agregar producto al carrito
   const addToCart = async (

@@ -137,9 +137,15 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop('items_data', [])
         shipping_address = validated_data.pop('shipping_address', {})
         
+        # Determinar el usuario (puede ser None para guest checkout)
+        user = None
+        if request and hasattr(request, 'user'):
+            if hasattr(request.user, 'is_authenticated') and request.user.is_authenticated:
+                user = request.user
+        
         # Crear la orden con los datos restantes
         order = Order.objects.create(
-            user=request.user if request.user.is_authenticated else None,
+            user=user,
             **validated_data
         )
         
@@ -314,15 +320,15 @@ class CheckoutSerializer(serializers.Serializer):
     cart_id = serializers.IntegerField()
     
     # Información del cliente (para guest checkout)
-    guest_email = serializers.EmailField(required=False)
-    guest_phone = serializers.CharField(max_length=20, required=False)
-    guest_name = serializers.CharField(max_length=255, required=False)
+    guest_email = serializers.EmailField(required=False, allow_blank=True)
+    guest_phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    guest_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
     
-    # Información de envío
-    shipping_address = serializers.DictField()
+    # Información de envío (opcional, puede venir vacío)
+    shipping_address = serializers.DictField(required=False, allow_null=True)
     
-    # Método de pago
-    payment_method = serializers.CharField(max_length=50)
+    # Método de pago (opcional por ahora)
+    payment_method = serializers.CharField(max_length=50, required=False, allow_blank=True)
     
     # Notas adicionales
     notes = serializers.CharField(required=False, allow_blank=True)
@@ -341,12 +347,15 @@ class CheckoutSerializer(serializers.Serializer):
 
     def validate_shipping_address(self, value):
         """
-        Validar campos requeridos en la dirección
+        Validar campos requeridos en la dirección (solo si se proporciona)
         """
+        if value is None:
+            return value
+        
         required_fields = ['first_name', 'last_name', 'address_line_1', 'city', 'postal_code']
         for field in required_fields:
             if not value.get(field):
-                raise serializers.ValidationError(f"El campo {field} es requerido")
+                raise serializers.ValidationError(f"El campo {field} es requerido en shipping_address")
         return value
 
     def validate(self, data):
@@ -355,11 +364,22 @@ class CheckoutSerializer(serializers.Serializer):
         """
         request = self.context.get('request')
         
+        # Determinar si el usuario está autenticado
+        is_authenticated = False
+        if request and hasattr(request, 'user'):
+            if hasattr(request.user, 'is_authenticated'):
+                is_authenticated = request.user.is_authenticated
+            elif not hasattr(request.user, 'is_anonymous') or not request.user.is_anonymous:
+                # Si no tiene is_authenticated, asumir que está autenticado si no es AnonymousUser
+                from django.contrib.auth.models import AnonymousUser
+                is_authenticated = not isinstance(request.user, AnonymousUser)
+        
         # Si no está autenticado, requiere datos de guest
-        if not request or not request.user.is_authenticated:
-            if not data.get('guest_email'):
-                raise serializers.ValidationError(
-                    "Se requiere guest_email para checkout sin cuenta"
-                )
+        if not is_authenticated:
+            guest_email = data.get('guest_email')
+            if not guest_email or (isinstance(guest_email, str) and not guest_email.strip()):
+                raise serializers.ValidationError({
+                    'guest_email': "Se requiere guest_email para checkout sin cuenta"
+                })
         
         return data

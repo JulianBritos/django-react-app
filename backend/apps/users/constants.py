@@ -16,9 +16,14 @@ PUBLIC_PATHS = [
 
 # Rutas que requieren autenticación pero permiten usuarios anónimos (guest checkout)
 GUEST_ALLOWED_PATHS = [
+    '/api/carts/',  # Gestión de carrito (permite guest checkout)
+    '/apps/carts/',  # Rutas alternativas de carrito
+    '/apps/carts/api/',  # Rutas de carrito con prefijo api
+    '/apps/orders/',  # Crear órdenes (permite guest checkout)
     '/apps/payments/create_preference/',  # Crear preferencia de pago (guest checkout)
     '/apps/payments/webhook-mercadopago/',  # Webhook de MercadoPago
     '/apps/payments/payment_notification/',  # Notificaciones de pago
+    '/apps/shipping/',  # Información de envío (permite guest checkout)
 ]
 
 # Rutas que requieren permisos de administrador

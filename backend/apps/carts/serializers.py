@@ -101,13 +101,16 @@ class CartSerializer(serializers.ModelSerializer):
     subtotal = serializers.SerializerMethodField()
     shipping_cost = serializers.SerializerMethodField()
     total = serializers.SerializerMethodField()
+    discount_amount = serializers.SerializerMethodField()
+    coupon = serializers.SerializerMethodField()
 
     class Meta:
         model = Cart
         fields = [
             'id', 'user', 'session_id', 'status', 'currency', 'expires_at',
             'created_at', 'updated_at', 'items', 'total_items', 'total_amount',
-            'is_expired', 'subtotal', 'shipping_cost', 'total'
+            'is_expired', 'subtotal', 'shipping_cost', 'total', 'discount_amount',
+            'coupon'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'session_id']
 
@@ -128,6 +131,24 @@ class CartSerializer(serializers.ModelSerializer):
         from .services import CartCalculationService
         totals = CartCalculationService.calculate_cart_totals(obj)
         return totals['total_amount']
+    
+    def get_discount_amount(self, obj):
+        """Obtener descuento aplicado"""
+        from .services import CartCalculationService
+        totals = CartCalculationService.calculate_cart_totals(obj)
+        return totals['discount_amount']
+    
+    def get_coupon(self, obj):
+        """Obtener información del cupón aplicado"""
+        if obj.coupon:
+            return {
+                'code': obj.coupon.code,
+                'name': obj.coupon.name,
+                'description': obj.coupon.description,
+                'discount_type': obj.coupon.discount_type,
+                'discount_value': str(obj.coupon.discount_value),
+            }
+        return None
 
 
 class CartItemCreateUpdateSerializer(serializers.ModelSerializer):

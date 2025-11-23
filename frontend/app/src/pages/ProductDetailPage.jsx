@@ -2,15 +2,32 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getProductById } from "../api/products.api";
 import { useCart } from "../hooks/useCart";
+import { useAuth } from "../context/AuthContext";
+import { getUserFromToken } from "../api/api";
 import ProductInfoCard from "../components/ProductInfoCard";
 import CarouselOfImages from "../components/CarouselOfImages";
+import ReviewList from "../components/reviews/ReviewList";
+import ReviewForm from "../components/reviews/ReviewForm";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
+  const { isAuthenticated } = useAuth();
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [productImages, setProductImages] = useState([]);
   const [availableVariants, setAvailableVariants] = useState([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+  useEffect(() => {
+    // Obtener ID del usuario actual si está autenticado
+    if (isAuthenticated) {
+      const user = getUserFromToken();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -129,8 +146,14 @@ const ProductDetailPage = () => {
     );
   }
 
+  const handleReviewSubmitted = () => {
+    setShowReviewForm(false);
+    // La lista de reseñas se actualizará automáticamente
+  };
+
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 space-y-6">
+      {/* Información del producto */}
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="grid grid-cols-1 grid-rows-1 md:grid-cols-3 gap-8">
           <div className="rounded-lg p-4 col-span-1 md:col-span-2">
@@ -149,6 +172,35 @@ const ProductDetailPage = () => {
             />
           </div>
         </div>
+      </div>
+
+      {/* Sección de reseñas */}
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Reseñas</h2>
+          {isAuthenticated && !showReviewForm && (
+            <button
+              onClick={() => setShowReviewForm(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Escribir reseña
+            </button>
+          )}
+        </div>
+
+        {/* Formulario de reseña */}
+        {showReviewForm && (
+          <div className="mb-6">
+            <ReviewForm
+              productId={id}
+              onReviewSubmitted={handleReviewSubmitted}
+              onCancel={() => setShowReviewForm(false)}
+            />
+          </div>
+        )}
+
+        {/* Lista de reseñas */}
+        <ReviewList productId={id} currentUserId={currentUserId} />
       </div>
     </div>
   );

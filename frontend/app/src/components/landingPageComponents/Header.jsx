@@ -62,9 +62,13 @@ function Header() {
     const loadCategories = async () => {
       try {
         const data = await getCategories();
-        setState((prevState) => ({ ...prevState, categories: data }));
+        // Asegurarse de que data sea un array
+        const categoriesArray = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
+        setState((prevState) => ({ ...prevState, categories: categoriesArray }));
       } catch (error) {
         console.error("Error loading categories", error);
+        // En caso de error, asegurar que categories sea un array vacío
+        setState((prevState) => ({ ...prevState, categories: [] }));
       }
     };
     loadCategories();
@@ -117,9 +121,10 @@ function Header() {
     hoveredParentId,
   } = state;
 
-  // Filtrar categorías padres y subcategorías
-  const parentCategories = categories.filter((cat) => !cat.parent_id);
-  const subCategories = categories.filter((cat) => cat.parent_id);
+  // Filtrar categorías padres y subcategorías - asegurar que categories sea un array
+  const safeCategories = Array.isArray(categories) ? categories : [];
+  const parentCategories = safeCategories.filter((cat) => !cat.parent_id);
+  const subCategories = safeCategories.filter((cat) => cat.parent_id);
 
   // Agrupar subcategorías por parent_id para acceso rápido
   const subCategoriesByParent = subCategories.reduce((acc, subCat) => {
@@ -377,7 +382,7 @@ function Header() {
                   variant="primary"
                   size="default"
                   as={Link}
-                  to="/owner"
+                  to="/owner2"
                   className="bg-thirdary-600 hover:bg-thirdary-700"
                   onClick={() => {
                     toggleState("menuOpen");

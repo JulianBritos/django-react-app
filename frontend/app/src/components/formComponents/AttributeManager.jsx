@@ -7,12 +7,13 @@ import {
 import { Button } from "../ui/Button";
 
 const AttributeManager = ({
-  attributes,
-  productAttributes,
+  attributes = [],
+  productAttributes = [],
   setProductAttributes,
   selectedAttribute,
   setSelectedAttribute,
-  attributeOptions,
+  attributeOptions = [],
+  onAttributeCreated,
 }) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -20,6 +21,11 @@ const AttributeManager = ({
   const [newAttributeName, setNewAttributeName] = useState("");
   const [newOptionNames, setNewOptionNames] = useState([""]);
   const [selectedAttributeName, setSelectedAttributeName] = useState("");
+
+  // Asegurarse de que attributes y attributeOptions sean arrays
+  const safeAttributes = Array.isArray(attributes) ? attributes : [];
+  const safeAttributeOptions = Array.isArray(attributeOptions) ? attributeOptions : [];
+  const safeProductAttributes = Array.isArray(productAttributes) ? productAttributes : [];
 
   const handleAddClick = () => {
     setShowSidebar(true);
@@ -35,7 +41,7 @@ const AttributeManager = ({
 
   const handleAttributeSelect = (attributeId) => {
     // Convertir el attributeId a número ya que viene como string del select
-    const attr = attributes.find((a) => a.id === parseInt(attributeId, 10));
+    const attr = safeAttributes.find((a) => a.id === parseInt(attributeId, 10));
     if (attr) {
       setSelectedAttribute(attributeId);
       setSelectedOptions([]);
@@ -62,13 +68,14 @@ const AttributeManager = ({
       };
 
       setProductAttributes((prev) => {
+        const safePrev = Array.isArray(prev) ? prev : [];
         // Check if attribute already exists
-        const existingIndex = prev.findIndex(
+        const existingIndex = safePrev.findIndex(
           (pa) => pa.attribute === selectedAttribute
         );
         if (existingIndex >= 0) {
           // Update existing attribute's options
-          const updated = [...prev];
+          const updated = [...safePrev];
           updated[existingIndex] = {
             ...updated[existingIndex],
             options: [...selectedOptions],
@@ -76,7 +83,7 @@ const AttributeManager = ({
           return updated;
         } else {
           // Add new attribute
-          return [...prev, newAttribute];
+          return [...safePrev, newAttribute];
         }
       });
 
@@ -87,23 +94,26 @@ const AttributeManager = ({
   };
 
   const removeAttribute = (index) => {
-    setProductAttributes((prev) => prev.filter((_, i) => i !== index));
+    setProductAttributes((prev) => {
+      const safePrev = Array.isArray(prev) ? prev : [];
+      return safePrev.filter((_, i) => i !== index);
+    });
   };
 
   const handleRemoveOption = (attributeId, optionId) => {
-    setProductAttributes(
-      (prev) =>
-        prev
-          .map((pa) =>
-            pa.attribute === attributeId
-              ? {
-                  ...pa,
-                  options: pa.options.filter((opt) => opt.id !== optionId),
-                }
-              : pa
-          )
-          .filter((pa) => pa.options.length > 0) // elimina atributos sin opciones
-    );
+    setProductAttributes((prev) => {
+      const safePrev = Array.isArray(prev) ? prev : [];
+      return safePrev
+        .map((pa) =>
+          pa.attribute === attributeId
+            ? {
+                ...pa,
+                options: (Array.isArray(pa.options) ? pa.options : []).filter((opt) => opt.id !== optionId),
+              }
+            : pa
+        )
+        .filter((pa) => (Array.isArray(pa.options) ? pa.options : []).length > 0); // elimina atributos sin opciones
+    });
   };
 
   return (
@@ -118,8 +128,8 @@ const AttributeManager = ({
 
         {/* Lista de atributos seleccionados */}
         <div className="space-y-4">
-          {productAttributes.map((pa, index) => {
-            const attr = attributes.find((a) => a.id === pa.attribute);
+          {safeProductAttributes.map((pa, index) => {
+            const attr = safeAttributes.find((a) => a.id === pa.attribute);
             return (
               <div
                 key={index}
@@ -128,7 +138,7 @@ const AttributeManager = ({
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <h4 className="text-lg font-medium text-gray-900">
-                      {attributes.find(
+                      {safeAttributes.find(
                         (a) => a.id === parseInt(pa.attribute, 10)
                       )?.name || "Atributo sin nombre"}
                     </h4>
@@ -226,7 +236,7 @@ const AttributeManager = ({
                     className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   >
                     <option value="">Seleccione un atributo</option>
-                    {attributes.map((attr) => (
+                    {safeAttributes.map((attr) => (
                       <option key={attr.id} value={attr.id}>
                         {attr.name}
                       </option>
@@ -238,7 +248,7 @@ const AttributeManager = ({
                   <div className="p-3 border rounded-lg bg-gray-50">
                     <div className="flex justify-between items-center">
                       <span className="font-medium text-gray-900">
-                        {attributes.find(
+                        {safeAttributes.find(
                           (a) => a.id === parseInt(selectedAttribute, 10)
                         )?.name || selectedAttributeName}
                       </span>
@@ -343,6 +353,11 @@ const AttributeManager = ({
                             setCreatingNewAttribute(false);
                             setNewAttributeName("");
                             setNewOptionNames([""]);
+                            
+                            // Notificar al componente padre para actualizar la lista de atributos
+                            if (onAttributeCreated) {
+                              onAttributeCreated(newAttr, createdOptions);
+                            }
                           } catch (error) {
                             console.error(
                               "Error al crear atributo y opción:",
@@ -360,13 +375,13 @@ const AttributeManager = ({
               </div>
 
               {/* Selección de opciones */}
-              {selectedAttribute && attributeOptions.length > 0 && (
+              {selectedAttribute && safeAttributeOptions.length > 0 && (
                 <div className="space-y-4 mt-6">
                   <label className="block text-sm font-medium text-gray-700">
                     Opciones disponibles
                   </label>
                   <div className="space-y-2">
-                    {attributeOptions.map((option) => (
+                    {safeAttributeOptions.map((option) => (
                       <label
                         key={option.id}
                         className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200"

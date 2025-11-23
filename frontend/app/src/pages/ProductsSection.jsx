@@ -13,13 +13,27 @@ const ProductsSection = () => {
   }, []);
 
   const loadProducts = async () => {
-    const data = await getProducts();
-    setProducts(data);
+    try {
+      const data = await getProducts();
+      // Asegurarse de que data sea un array
+      const productsArray = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
+      setProducts(productsArray);
+    } catch (error) {
+      console.error("Error loading products", error);
+      setProducts([]);
+    }
   };
 
   const loadCategories = async () => {
-    const data = await getCategories();
-    setCategories(data);
+    try {
+      const data = await getCategories();
+      // Asegurarse de que data sea un array
+      const categoriesArray = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
+      setCategories(categoriesArray);
+    } catch (error) {
+      console.error("Error loading categories", error);
+      setCategories([]);
+    }
   };
 
   return (

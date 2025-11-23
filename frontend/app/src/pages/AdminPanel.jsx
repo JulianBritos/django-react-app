@@ -57,7 +57,7 @@ const AdminPanel = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Panel de Administración</h1>
         <div className="flex space-x-4">
-          <Button variant="primary" as={Link} to="/owner">
+          <Button variant="primary" as={Link} to="/owner2">
             Gestionar Productos
           </Button>
           <Button variant="outline" as={Link} to="/categories">
@@ -98,7 +98,7 @@ const AdminPanel = () => {
           <Button
             variant="outline"
             as={Link}
-            to="/owner"
+            to="/owner2"
             className="h-20 flex flex-col items-center justify-center"
           >
             <span className="text-lg">➕</span>

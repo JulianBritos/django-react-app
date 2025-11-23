@@ -4,7 +4,7 @@ import { ProductCardHero } from "../ProductCards";
 
 const BREAKPOINT = 480;
 
-const BestProducts = ({ products }) => {
+const BestProducts = ({ products = [] }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= BREAKPOINT);
   const [current, setCurrent] = useState(0);
   const carouselRef = useRef(null);
@@ -17,7 +17,9 @@ const BestProducts = ({ products }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const featured = products.slice(0, 3);
+  // Asegurarse de que products sea un array
+  const safeProducts = Array.isArray(products) ? products : [];
+  const featured = safeProducts.slice(0, 3);
 
   // Actualiza el punto activo al scrollear manualmente
   useEffect(() => {

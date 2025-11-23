@@ -31,6 +31,8 @@ urlpatterns = [
     path('apps/carts/', include('apps.carts.urls')),  # Rutas de carrito
     path('apps/orders/', include('apps.orders.urls')),  # Rutas de órdenes
     path('apps/shipping/', include('apps.shipping.urls')),  # Rutas de envío
+    path('apps/promotions/', include('apps.promotions.urls')),  # Rutas de promociones
+    path('apps/analytics/', include('apps.analytics.urls')),  # Rutas de analíticas
     path('accounts/', include('allauth.socialaccount.urls')),
     path('apps/payments/', include('apps.payments.urls')),
     # Restringir acceso a Swagger solo a usuarios autenticados y staff

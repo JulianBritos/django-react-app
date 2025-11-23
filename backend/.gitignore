@@ -157,3 +157,16 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp 
+
+#migrations 
+./migrations
+backend/apps/payments/migrations
+backend/apps/orders/migrations
+backend/apps/analytics/migrations
+backend/apps/carts/migrations
+backend/apps/importer/migrations
+backend/apps/notifications/migrations
+backend/apps/products/migrations
+backend/apps/promotions/migrations
+backend/apps/shipping/migrations
+backend/apps/users/migrations

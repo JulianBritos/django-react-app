@@ -17,7 +17,6 @@ import ChangePasswordPage from "./pages/ChangePasswordPage";
 import ResetPassword from "./pages/ResetPassword";
 import ResetPasswordConfirm from "./pages/ResetPasswordConfirm";
 import EmailVerificationPage from "./pages/EmailVerificationPage";
-import OwnerSection from "./pages/OwnerSection";
 import { Provider } from "react-redux";
 import Store from "./Store";
 import { Toaster } from "react-hot-toast";
@@ -26,6 +25,8 @@ import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmation from "./components/orderConfirmationComponenets/OrderConfirmation";
 import PaymentMethodsPage from "./pages/PaymentMethodsPage";
 import ContactPage from "./pages/ContactPage";
+import AnalyticsDashboard from "./pages/AnalyticsDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -61,8 +62,15 @@ function App() {
             <Route path="/paymentMethods" element={<PaymentMethodsPage />} />
             <Route path="*" element={<NotFoundPage />} />
             <Route path="/adminDashboard" element={<UserManagementPage />} />
+            <Route
+              path="/analytics"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AnalyticsDashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/profile" element={<UserProfilePage />} />
-            <Route path="/owner" element={<OwnerSection />} />
             <Route path="/products" element={<ProductsSection />}>
               <Route path=":categoryName" element={<CategoryPage />} />
               <Route path=":categoryName/:subCategoryName" element={<CategoryPage />} />

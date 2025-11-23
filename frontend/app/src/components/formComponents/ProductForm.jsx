@@ -41,7 +41,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
     images: product?.uploaded_images || [],
     status: product?.status || "",
     brand: product?.brand || "",
-    tax: product?.tax || "",
+    tax: product?.tax || "0",
   });
 
   const [attributes, setAttributes] = useState([]);
@@ -101,10 +101,15 @@ const ProductForm = ({ product, onSave, onCancel }) => {
           getCategories(),
           getAttributes(),
         ]);
-        setCategories(cats);
-        setAttributes(attrs);
+        // Asegurarse de que sean arrays
+        const categoriesArray = Array.isArray(cats) ? cats : (Array.isArray(cats?.results) ? cats.results : []);
+        const attributesArray = Array.isArray(attrs) ? attrs : (Array.isArray(attrs?.results) ? attrs.results : []);
+        setCategories(categoriesArray);
+        setAttributes(attributesArray);
       } catch (err) {
         toast.error("Error al cargar datos iniciales");
+        setCategories([]);
+        setAttributes([]);
       }
     };
     fetchData();
@@ -128,19 +133,23 @@ const ProductForm = ({ product, onSave, onCancel }) => {
         const options = await getAttributeOptionsByAttributeId(
           selectedAttribute
         );
-        setAttributeOptions(options);
+        // Asegurarse de que options sea un array
+        const optionsArray = Array.isArray(options) ? options : (Array.isArray(options?.results) ? options.results : []);
+        setAttributeOptions(optionsArray);
 
         // También actualizar el atributo en la lista general, si necesitás
-        setAttributes((prev) =>
-          prev.map((attr) =>
+        setAttributes((prev) => {
+          const safePrev = Array.isArray(prev) ? prev : [];
+          return safePrev.map((attr) =>
             attr.id === selectedAttribute
-              ? { ...attr, attributeoption_set: options }
+              ? { ...attr, attributeoption_set: optionsArray }
               : attr
-          )
-        );
+          );
+        });
         setCheckedOptions({});
       } catch (error) {
         toast.error("Error al cargar las opciones del atributo.");
+        setAttributeOptions([]);
       }
     };
 
@@ -174,10 +183,14 @@ const ProductForm = ({ product, onSave, onCancel }) => {
       newErrors.brand = "La marca debe tener al menos 2 caracteres";
     if (
       formData.tax === "" ||
+      formData.tax === null ||
+      formData.tax === undefined ||
+      isNaN(Number(formData.tax)) ||
       Number(formData.tax) < 0 ||
       Number(formData.tax) > 100
-    )
-      newErrors.tax = "Ingrese un impuesto válido";
+    ) {
+      newErrors.tax = "Ingrese un impuesto válido (0-100)";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -378,6 +391,23 @@ const ProductForm = ({ product, onSave, onCancel }) => {
           attributeOptions={attributeOptions}
           checkedOptions={checkedOptions}
           handleOptionChange={handleOptionChange}
+          onAttributeCreated={async (newAttr, createdOptions) => {
+            // Recargar la lista de atributos para incluir el nuevo
+            try {
+              const attrs = await getAttributes();
+              const attributesArray = Array.isArray(attrs) ? attrs : (Array.isArray(attrs?.results) ? attrs.results : []);
+              setAttributes(attributesArray);
+              
+              // Recargar las opciones del atributo seleccionado
+              if (newAttr.id) {
+                const options = await getAttributeOptionsByAttributeId(newAttr.id);
+                const optionsArray = Array.isArray(options) ? options : (Array.isArray(options?.results) ? options.results : []);
+                setAttributeOptions(optionsArray);
+              }
+            } catch (error) {
+              console.error("Error al recargar atributos:", error);
+            }
+          }}
         />
       </div>
 

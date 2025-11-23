@@ -8,9 +8,13 @@ import FilterPanel from "./ui/FilterPanel";
 
 function CategoryPage() {
   const { categoryName, subCategoryName } = useParams();
-  const { products, categories } = useOutletContext();
+  const { products: productsFromContext, categories: categoriesFromContext } = useOutletContext();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  
+  // Asegurarse de que products y categories sean arrays
+  const products = Array.isArray(productsFromContext) ? productsFromContext : [];
+  const categories = Array.isArray(categoriesFromContext) ? categoriesFromContext : [];
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(

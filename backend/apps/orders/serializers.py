@@ -173,6 +173,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         """
         Crear items de la orden desde el carrito
         """
+        from apps.products.services import InventoryService
+        
         for cart_item in cart.items.all():
             # Obtener el precio unitario del carrito o calcularlo
             unit_price = cart_item.unit_price
@@ -189,7 +191,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 # Convertir FloatField a Decimal
                 unit_price = Decimal(str(unit_price))
             
-            OrderItem.objects.create(
+            order_item = OrderItem.objects.create(
                 order=order,
                 product=cart_item.product,
                 product_attribute=cart_item.product_attribute,
@@ -199,6 +201,21 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 quantity=cart_item.quantity,
                 product_attributes_snapshot=cart_item.selected_attributes
             )
+            
+            # Registrar movimiento de stock (venta)
+            if cart_item.product_attribute:
+                try:
+                    InventoryService.record_sale(
+                        product=cart_item.product,
+                        product_attribute=cart_item.product_attribute,
+                        quantity=cart_item.quantity,
+                        order=order
+                    )
+                except Exception as e:
+                    # Log error pero no fallar la creación de la orden
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Error al registrar movimiento de stock: {str(e)}")
 
     def _create_items_from_data(self, order, items_data):
         """

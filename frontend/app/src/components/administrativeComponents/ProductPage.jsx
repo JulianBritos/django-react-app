@@ -37,9 +37,16 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
     try {
       setIsLoading(true);
       const data = await getProducts();
-      setProducts(data);
+      // Asegurarse de que data sea un array
+      const productsArray = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.results)
+        ? data.results
+        : [];
+      setProducts(productsArray);
     } catch (error) {
       console.error("Error al cargar productos:", error);
+      setProducts([]);
     } finally {
       setIsLoading(false);
     }
@@ -51,20 +58,30 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
         `${import.meta.env.VITE_BASE_URL}/apps/products/categories/`
       );
       const data = await response.json();
-      setCategories(data);
+      // Asegurarse de que data sea un array
+      const categoriesArray = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.results)
+        ? data.results
+        : [];
+      setCategories(categoriesArray);
     } catch (error) {
       console.error("Error al cargar categorías:", error);
+      setCategories([]);
     }
   };
 
   const handleSaveProduct = (savedProduct) => {
     try {
+      const currentProducts = Array.isArray(products) ? products : [];
       if (editingProduct) {
         setProducts(
-          products.map((p) => (p.id === savedProduct.id ? savedProduct : p))
+          currentProducts.map((p) =>
+            p.id === savedProduct.id ? savedProduct : p
+          )
         );
       } else {
-        setProducts([...products, savedProduct]);
+        setProducts([...currentProducts, savedProduct]);
       }
       setEditingProduct(null);
 
@@ -86,7 +103,8 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
     ) {
       try {
         await deleteProduct(id);
-        setProducts(products.filter((product) => product.id !== id));
+        const currentProducts = Array.isArray(products) ? products : [];
+        setProducts(currentProducts.filter((product) => product.id !== id));
       } catch (error) {
         console.error("Error al eliminar producto:", error);
         alert("Error al eliminar el producto.");
@@ -94,10 +112,14 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
     }
   };
 
-  const filteredProducts = products.filter((product) => {
+  // Asegurarse de que products y categories sean arrays antes de usar métodos de array
+  const safeProducts = Array.isArray(products) ? products : [];
+  const safeCategories = Array.isArray(categories) ? categories : [];
+
+  const filteredProducts = safeProducts.filter((product) => {
     const matchesSearch =
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       selectedCategory === "all" ||
       (product.category && product.category.name === selectedCategory);
@@ -227,24 +249,24 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
         </Button>
       </div>
 
-            {/* Estadísticas */}
+      {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-6 mb-6">
         <StatCard
           title="Total de Productos"
-          value={products.length}
+          value={safeProducts.length}
           icon={<Package size={24} className="text-blue-500" />}
         />
 
         <StatCard
           title="Productos Activos"
-          value={products.filter((p) => p.status === "ACTIVE").length}
+          value={safeProducts.filter((p) => p.status === "ACTIVE").length}
           icon={<PackageOpen size={24} className="text-green-500" />}
         />
 
         <StatCard
           title="Con Stock"
           value={
-            products.filter(
+            safeProducts.filter(
               (p) =>
                 p.product_attributes &&
                 p.product_attributes.some((attr) => attr.stock > 0)
@@ -256,7 +278,7 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
         <StatCard
           title="Sin Stock"
           value={
-            products.filter(
+            safeProducts.filter(
               (p) =>
                 !p.product_attributes ||
                 p.product_attributes.every((attr) => attr.stock === 0)
@@ -268,7 +290,7 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
         <StatCard
           title="Con Variantes"
           value={
-            products.filter(
+            safeProducts.filter(
               (p) =>
                 p.product_attributes &&
                 p.product_attributes.length > 0 &&
@@ -308,7 +330,7 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
               className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none bg-white"
             >
               <option value="all">Todas las categorías</option>
-              {categories.map((category) => (
+              {safeCategories.map((category) => (
                 <option key={category.id} value={category.name}>
                   {category.name}
                 </option>
@@ -356,7 +378,7 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
             <Package size={48} className="mx-auto mb-4 text-gray-300" />
             <p className="text-lg">No hay productos encontrados</p>
             <p className="text-sm">
-              {products.length === 0
+              {safeProducts.length === 0
                 ? "Comienza creando tu primer producto"
                 : "Intenta ajustar los filtros de búsqueda"}
             </p>
@@ -677,8 +699,6 @@ const ProductPage = ({ onAddProduct, onEditProduct }) => {
           </div>
         )}
       </ContentCard>
-
-
     </div>
   );
 };

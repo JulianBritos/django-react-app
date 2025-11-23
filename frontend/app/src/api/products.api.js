@@ -99,3 +99,23 @@ export const createProductAttributeLink = async (attributeLinkData) => {
   );
   return response.data;
 };
+
+/**
+ * Búsqueda avanzada de productos con filtros
+ */
+export const searchProducts = async (params = {}) => {
+  const queryParams = new URLSearchParams();
+  
+  if (params.search) queryParams.append('search', params.search);
+  if (params.category) queryParams.append('category', params.category);
+  if (params.minPrice) queryParams.append('min_price', params.minPrice);
+  if (params.maxPrice) queryParams.append('max_price', params.maxPrice);
+  if (params.inStock !== undefined) queryParams.append('in_stock', params.inStock);
+  if (params.onSale !== undefined) queryParams.append('on_sale', params.onSale);
+  if (params.ordering) queryParams.append('ordering', params.ordering);
+  if (params.page) queryParams.append('page', params.page);
+  if (params.pageSize) queryParams.append('page_size', params.pageSize);
+  
+  const response = await axios.get(`${API_URL}products/?${queryParams.toString()}`);
+  return response.data;
+};

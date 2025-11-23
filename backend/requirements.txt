@@ -17,3 +17,4 @@ cryptography
 Pillow
 pandas
 celery
+django-import-export

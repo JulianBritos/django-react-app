@@ -34,9 +34,12 @@ const CategoriesManagementPage = () => {
     try {
       setIsLoading(true);
       const data = await getCategories();
-      setCategories(data);
+      // Asegurarse de que data sea un array
+      const categoriesArray = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
+      setCategories(categoriesArray);
     } catch (error) {
       console.error("Error al cargar categorías:", error);
+      setCategories([]);
     } finally {
       setIsLoading(false);
     }
@@ -44,19 +47,20 @@ const CategoriesManagementPage = () => {
 
   const handleSaveCategory = async (categoryData) => {
     try {
+      const currentCategories = Array.isArray(categories) ? categories : [];
       if (editingCategory) {
         const updatedCategory = await updateCategory(
           editingCategory.id,
           categoryData
         );
         setCategories(
-          categories.map((cat) =>
+          currentCategories.map((cat) =>
             cat.id === updatedCategory.id ? updatedCategory : cat
           )
         );
       } else {
         const newCategory = await createCategory(categoryData);
-        setCategories([...categories, newCategory]);
+        setCategories([...currentCategories, newCategory]);
       }
       setShowCategoryForm(false);
       setEditingCategory(null);
@@ -74,7 +78,8 @@ const CategoriesManagementPage = () => {
     ) {
       try {
         await deleteCategory(id);
-        setCategories(categories.filter((cat) => cat.id !== id));
+        const currentCategories = Array.isArray(categories) ? categories : [];
+        setCategories(currentCategories.filter((cat) => cat.id !== id));
       } catch (error) {
         console.error("Error al eliminar categoría:", error);
         alert(
@@ -96,8 +101,16 @@ const CategoriesManagementPage = () => {
     });
   };
 
+  // Asegurarse de que categories sea un array antes de usar métodos de array
+  const safeCategories = Array.isArray(categories) ? categories : [];
+
   const getChildCategories = (parentId) => {
-    return categories.filter((cat) => cat.parent_id === parentId);
+    return safeCategories.filter((cat) => {
+      // Manejar tanto parent_id como objeto como número
+      const catParentId = cat.parent_id?.id || cat.parent_id;
+      const compareParentId = parentId?.id || parentId;
+      return catParentId === compareParentId;
+    });
   };
 
   const renderCategoryTree = (parentId = null, level = 0) => {
@@ -211,7 +224,7 @@ const CategoriesManagementPage = () => {
       {showCategoryForm && (
         <CategoryForm
           category={editingCategory}
-          categories={categories}
+          categories={safeCategories}
           onSave={handleSaveCategory}
           onCancel={() => {
             setShowCategoryForm(false);
@@ -225,7 +238,7 @@ const CategoriesManagementPage = () => {
           Estructura de Categorías
         </h2>
 
-        {categories.length === 0 ? (
+        {safeCategories.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <Folder size={48} className="mx-auto mb-4 text-gray-300" />
             <p className="text-lg">No hay categorías creadas</p>
@@ -240,19 +253,19 @@ const CategoriesManagementPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
         <StatCard
           title="Total de Categorías"
-          value={categories.length}
+          value={safeCategories.length}
           icon={<Folder size={24} className="text-blue-500" />}
         />
 
         <StatCard
           title="Categorías Principales"
-          value={categories.filter((cat) => !cat.parent_id).length}
+          value={safeCategories.filter((cat) => !cat.parent_id).length}
           icon={<FolderOpen size={24} className="text-green-500" />}
         />
 
         <StatCard
           title="Subcategorías"
-          value={categories.filter((cat) => cat.parent_id).length}
+          value={safeCategories.filter((cat) => cat.parent_id).length}
           icon={<Folder size={24} className="text-purple-500" />}
         />
       </div>

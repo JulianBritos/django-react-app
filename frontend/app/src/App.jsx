@@ -90,7 +90,14 @@ function App() {
             />
           </Route>
           <Route path="/admin" element={<AdminPanel />} />
-          <Route path="/owner2" element={<OwnerSection2 />} />
+          <Route
+            path="/owner2"
+            element={
+              <ProtectedRoute>
+                <OwnerSection2 />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
     </Provider>

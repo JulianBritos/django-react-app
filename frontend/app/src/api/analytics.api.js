@@ -21,9 +21,13 @@ axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
-      window.location.href = "/login";
+      const hadAuth = !!error.config?.headers?.Authorization;
+      if (hadAuth) {
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
+        window.location.href = "/login";
+      }
+      // Si no llevaba Authorization, no redirigir automáticamente
     }
     return Promise.reject(error);
   }

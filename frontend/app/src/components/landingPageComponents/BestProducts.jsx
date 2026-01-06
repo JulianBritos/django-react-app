@@ -57,7 +57,7 @@ const BestProducts = ({ products = [] }) => {
                 variant="outline"
                 size="default"
                 as="a"
-                href="/products"
+                href="/products/bestproducts"
                 className="mt-4"
               >
                 Ver más

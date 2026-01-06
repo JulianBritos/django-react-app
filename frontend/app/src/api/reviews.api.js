@@ -21,9 +21,13 @@ axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
-      window.location.href = "/login";
+      const hadAuth = !!error.config?.headers?.Authorization;
+      if (hadAuth) {
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
+        window.location.href = "/login";
+      }
+      // Para peticiones públicas de reviews, dejar que el caller maneje el 401
     }
     return Promise.reject(error);
   }

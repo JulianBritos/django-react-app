@@ -22,10 +22,15 @@ axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expirado o inválido
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
-      window.location.href = "/login";
+      // Solo redirigir si la petición llevaba Authorization (petición autenticada)
+      const hadAuth = !!error.config?.headers?.Authorization;
+      if (hadAuth) {
+        // Token expirado o inválido
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
+        window.location.href = "/login";
+      }
+      // Si no llevaba Authorization (petición pública), dejar que el caller maneje el 401
     }
     return Promise.reject(error);
   }
